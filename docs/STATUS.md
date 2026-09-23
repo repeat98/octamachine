@@ -19,13 +19,21 @@ Evidence: [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.m
 
 ## Active work and current handoff
 
-[WP-00 — Planning, status, and agent handoff](work_packets/WP-00-planning-and-status.md) is `in_review` on `work/expanded-port-plan`. Its record holds the latest prompt checklist and verification results; review/merge remains pending.
+[WP-00 — Planning, status, and agent handoff](work_packets/WP-00-planning-and-status.md) is done: [PR #2](https://github.com/repeat98/octamachine/pull/2) merged as `d8f8a76` on 2026-09-23. Its acceptance and delivery are reconciled in the packet record.
 
 - [x] Expand the roadmap into 34 packets with outputs, prerequisites, and acceptance criteria.
 - [x] Define gates, checkpoints, fidelity/evidence rules, and the hardware feasibility decision.
 - [x] Add reusable handoff/status templates and require a checklist after every work prompt.
 - [x] Pass document validation: 42 Markdown files, 240 local links/anchors, 34 packet IDs, acyclic dependencies, truthful initial states; `make check` and whitespace checks pass.
-- [ ] Accept/merge WP-00 and reconcile its status on the next work prompt.
+- [x] Accept/merge WP-00 and reconcile its status.
+
+[WP-34 — Contributor documentation](work_packets/WP-34-contributor-documentation.md) is `in_review` on `work/readme-and-contributor-guide`.
+
+- [x] Rewrite the README around the goal, current evidence, emulator roles, and contribution entry points.
+- [x] Add a single getting-started guide and improve contributor, fixture, and compatibility guidance.
+- [x] Document the verified main protection requirements and reconcile WP-00 acceptance.
+- [x] Validate 51 Markdown files, 301 local links/anchors, 35 packet records, all 10 upstream links, and 15 shell examples; `make check` passes. Detailed results are in WP-34.
+- [ ] Maintainer review/merge, then reconcile WP-34 acceptance.
 
 No technical execution packet has been completed by writing this plan.
 

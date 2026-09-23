@@ -1,11 +1,12 @@
 # WP-00 — Planning, status, and agent handoff
 
-- Status: `in_review`
+- Status: `done`
 - Owner: Codex (current prompt)
 - Branch: work/expanded-port-plan
 - Updated: 2026-09-23
 - Depends on: none
 - Gate: G0
+- Accepted delivery: [PR #2](https://github.com/repeat98/octamachine/pull/2), merged as `d8f8a762034aad190bff8a95b04252c98bd59f75` on 2026-09-23; work commit `9965ccf`.
 
 ## Result
 
@@ -33,12 +34,12 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: Expanded plan, 34 packet briefs, status overview, handoff templates, and contributor/PR workflow; document and scaffold checks passed.
-- Remaining: Maintainer review/merge, then reconcile this packet's accepted delivery. Technical execution remains in WP-01 onward.
-- Next action: Review this branch for ingestion; after acceptance, record the merge and dispatch WP-01 source provenance (WP-02 and WP-03 are also ready).
-- Waiting on: No packet dependency. Confirm required inputs when claiming the packet.
+- Remaining: No WP-00 acceptance work. Technical execution remains in WP-01 onward; contributor-documentation improvements are tracked in WP-34.
+- Next action: Dispatch WP-01 source provenance (WP-02 and WP-03 are also ready).
+- Waiting on: None.
 - Blockers: none recorded.
 - Evidence: Existing docs/history through `0e8e42b`; the expanded plan, packet records, templates, and verification results below.
-- Delivery: Enclosing commit on `work/expanded-port-plan`; the final prompt reply supplies its hash and push/PR outcome. Reconcile acceptance on the next work prompt.
+- Delivery: Commit `9965ccf`, accepted in PR #2 and merge `d8f8a76`; no firmware gate was cleared by this documentation merge.
 
 ## Prompt history
 
@@ -67,3 +68,10 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: None for documentation delivery; technical unknowns are listed in project status.
 - Next action: Review/merge WP-00, reconcile its accepted revision, then begin WP-01 using the handoff template.
 - Delivery: Enclosing commit on `work/expanded-port-plan`; final reply reports the concrete commit and PR. Review/merge remains pending.
+
+### 2026-09-23 / reconciliation during WP-34
+
+- [x] Verified PR #2 is merged via `gh pr view 2 --repo repeat98/octamachine --json state,mergedAt,mergeCommit,url` and fetched `origin/main` at `d8f8a76`.
+- [x] Recorded accepted delivery and marked WP-00 done; retained the original prompt history above.
+- [ ] Technical baseline work remains in WP-01–05; G0 stays open.
+- Next action: Follow the WP-34 prompt record for the current documentation request, or dispatch WP-01 for the next technical result.

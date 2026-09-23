@@ -104,6 +104,8 @@ Each result names its origin: MD reference emulator, unmodified OT emulator, por
 
 Linked files contain scope, starting sources, deliverables, acceptance checklists, and next action. Dependencies require accepted evidence; source reading and tool preparation may happen earlier. Status lives in the packet files to avoid a conflicting second table here.
 
+WP-00–33 define the port roadmap. Maintenance packets track supporting repository work and do not add technical prerequisites to that roadmap.
+
 | Packet | Result area | Depends on | Gate |
 | --- | --- | --- | --- |
 | [WP-00](work_packets/WP-00-planning-and-status.md) | Planning, status, and agent handoff | — | G0 |
@@ -140,6 +142,7 @@ Linked files contain scope, starting sources, deliverables, acceptance checklist
 | [WP-31](work_packets/WP-31-hardware-parity.md) | Compare hardware sound, timing, state, and endurance | WP-30 | G5 |
 | [WP-32](work_packets/WP-32-release-and-handoff.md) | Prepare a reproducible contributor release | WP-28, WP-29, WP-31 | G6 |
 | [WP-33](work_packets/WP-33-additional-variants.md) | Extend to another firmware or hardware variant | WP-32 | Optional |
+| [WP-34](work_packets/WP-34-contributor-documentation.md) | Improve README, setup, and contributor documentation | WP-00 | Maintenance |
 
 ### Dispatch order and splitting
 
