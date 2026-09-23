@@ -1,0 +1,9 @@
+{"wait_text":"PTCH","timeout_ms":600000}
+{"wait_gone":"L0ADING FILE5","timeout_ms":60000}
+{"wait_guest_ms":16000}
+{"mark":"before-play"}
+{"tap":"PLAY","until_lamp":1,"lit":1,"settle_ms":120,"verify_ms":5000,"timeout_ms":120000}
+{"mark":"playback-step-lamp-lit"}
+{"wait_guest_ms":1000}
+{"tap":"STOP"}
+{"mark":"stopped"}
