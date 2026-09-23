@@ -35,8 +35,10 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Next action: Classify the first reference MMIO transactions against both source maps and the Octatrack board model.
 - Waiting on: The dependency packets listed above; preparation is allowed, acceptance requires their evidence.
 - Blockers: none recorded.
-- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result.
+- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result. Prior evidence from the octamad Machinedrum excursion: the firmware's SRAM interrupt handlers access `0x600004`, which supports Gearmulator's `0x500000/0x600000` HI08 map; the SRAM structures located so far end near `0x01001af4`, which is consistent with 8 KiB but is not an access census; the reference model clocks each MD DSP at 101.6064 MHz (sections "DSP identities", "ColdFire side") ([WP-35 report](../reports/WP-35-octamad-md-import.md)). It is Gearmulator-only, predates the WP-03 contract, and checks no item here.
 
 ## Prompt history
 
 No work prompt has executed this packet. Append a dated entry after every work prompt using the [packet template](../templates/WORK_PACKET.md#prompt-history).
+
+2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.

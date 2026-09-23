@@ -89,14 +89,16 @@ WP-03 is accepted. WP-04 has completed its runtime criteria and is pending PR ch
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
+[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) is in review on `work/wp-35-octamad-md-import`. It is maintenance and adds no prerequisite. It brings Gearmulator-only prior evidence and tools for WP-06–10, WP-14–17, WP-25 and WP-26 (the [report](reports/WP-35-octamad-md-import.md), `scripts/md_reference/`), linked from each of those packets. No acceptance item or gate changes on its strength.
+
 ## Cross-cutting unknowns and blockers
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
 | Source reproduction and MD reference startup | WP-01 records recursive revisions and clean builds; WP-04 records full repeated startup traces, checkpoints, and WP-03 cold/cached manifest comparisons in Gearmulator only | Reconcile WP-04 merge, then WP-05 establishes the independent Octatrack baseline |
 | Exact target profile | WP-02 documents octemu's Octatrack MKII/MCF54455 profile and expected OS 1.40C; the extracted local OS section's source archive and physical board/carrier identity are unavailable | WP-05 verifies/reacquires the pinned firmware input; physical profile remains provisional and the hardware gate stays closed |
-| Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references | WP-07 resolves with traces/primary sources |
-| Target execution strategy | CPU/DSP similarity alone does not establish a port | WP-06–10 assess and choose a realizable mechanism |
+| Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references; [WP-35](reports/WP-35-octamad-md-import.md) adds static firmware evidence for the HI08 map | WP-07 resolves with traces/primary sources |
+| Target execution strategy | CPU/DSP similarity alone does not establish a port. [WP-35](reports/WP-35-octamad-md-import.md): both MD DSP programs execute from external RAM, which the DSP56721 lacks. Voice-DSP relocation is demonstrated in the reference, and the E12 samples cannot be DSP-resident | WP-06–10 assess and choose a realizable mechanism, starting from the WP-35 ledger candidates |
 | Distribution | WP-01 records source notices and octemu's stated combined-QEMU restriction; no octamachine-wide license is declared | WP-32 follows the recorded notices and any maintainer decision |
 | Physical validation/recovery | No hardware test or recovery proof exists | WP-29–31 after emulator gates and explicit hardware authorization |
 

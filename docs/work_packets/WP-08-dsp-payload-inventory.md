@@ -32,11 +32,13 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: No execution work recorded for this packet.
-- Next action: Follow the CPU's two DSP upload sequences and map each word stream back to the local image.
+- Next action: Reconcile the observed DSP1/DSP2 HI08 upload streams with the load records `md_extract.py` parses (section 2: 18,823 words; section 1: 250,123 words, headers included).
 - Waiting on: The dependency packets listed above; preparation is allowed, acceptance requires their evidence.
 - Blockers: none recorded.
-- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result.
+- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result. Prior evidence from the octamad Machinedrum excursion: the update container, its five sections, the DSP load-image format and per-space load maps. Section 1 is the voice DSP (Gearmulator DSP2, producer, HI08 `0x600000`) and section 2 the mixer (DSP1, `0x500000`). `scripts/md_reference/md_extract.py` is a candidate for this packet's extraction tool ([WP-35 report](../reports/WP-35-octamad-md-import.md)). It is Gearmulator-only, predates the WP-03 contract, and checks no item here.
 
 ## Prompt history
 
 No work prompt has executed this packet. Append a dated entry after every work prompt using the [packet template](../templates/WORK_PACKET.md#prompt-history).
+
+2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.
