@@ -1,0 +1,230 @@
+{
+  "capture": {
+    "dropped_events": 0,
+    "expected_records": 1,
+    "format": "jsonl-v1",
+    "raw_trace_values_retained_locally": true,
+    "record_selection_policy": "One terminal replay comparison summary; no per-sample output, DSP payload values, or PC trace is included.",
+    "recorded_records": 1,
+    "status": "complete",
+    "stop_reason": "checkpoint_reached",
+    "trace_file": "WP-35-c10-replay-v1.events.jsonl",
+    "trace_limit": null
+  },
+  "checkpoint": {
+    "checkpoint_id": "wp35-c10-all-blocks-bit-identical-v1",
+    "timeout": {
+      "unit": "seconds",
+      "value": 300
+    },
+    "trigger": "md_replay completes every block from the private c10 capture, reports zero differing blocks, and exits with status 0."
+  },
+  "comparison": {
+    "declared_at_utc": "2026-09-23T20:27:56Z",
+    "fields": [
+      {
+        "mode": "exact",
+        "path": "kind"
+      },
+      {
+        "mode": "exact",
+        "path": "label"
+      },
+      {
+        "mode": "exact",
+        "path": "time"
+      },
+      {
+        "mode": "exact",
+        "path": "machine_id"
+      },
+      {
+        "mode": "exact",
+        "path": "samples_per_block"
+      },
+      {
+        "mode": "exact",
+        "path": "blocks_identical"
+      },
+      {
+        "mode": "exact",
+        "path": "blocks_differing"
+      },
+      {
+        "mode": "exact",
+        "path": "exit_code"
+      },
+      {
+        "mode": "exact",
+        "path": "result"
+      }
+    ],
+    "plan_id": "wp35-c10-replay-equality-v1"
+  },
+  "run": {
+    "build": {
+      "command": [
+        "cmake",
+        "--build",
+        "<build-dir>",
+        "--target",
+        "md_profile",
+        "md_replay",
+        "md_dis",
+        "-j8"
+      ],
+      "toolchain": {
+        "BUILD_TESTING": "ON",
+        "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64",
+        "CMAKE_PROJECT_gearmulator_INCLUDE": "scripts/md_reference/md_profile.cmake",
+        "DSP56K_FORCE_INTERPRETER": "OFF",
+        "build_type": "Release",
+        "cmake": "4.0.1",
+        "compiler": "Apple Clang 21.0.0",
+        "configure_command": [
+          "cmake",
+          "-S",
+          "<gearmulator-copy>",
+          "-B",
+          "<build-dir>",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DDSP56K_FORCE_INTERPRETER=OFF",
+          "-Dgearmulator_BUILD_JUCEPLUGIN=OFF",
+          "-Dgearmulator_BUILD_JUCEPLUGIN_CLAP=OFF",
+          "-Dgearmulator_SYNTH_OSIRUS=OFF",
+          "-Dgearmulator_SYNTH_OSTIRUS=OFF",
+          "-Dgearmulator_SYNTH_VAVRA=OFF",
+          "-Dgearmulator_SYNTH_XENIA=OFF",
+          "-Dgearmulator_SYNTH_NODALRED2X=OFF",
+          "-Dgearmulator_SYNTH_JE8086=OFF",
+          "-DCMAKE_PROJECT_gearmulator_INCLUDE=$REPO/scripts/md_reference/md_profile.cmake"
+        ],
+        "gearmulator_BUILD_JUCEPLUGIN": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "OFF",
+        "gearmulator_SYNTH_ELEKTRON": "ON",
+        "gearmulator_SYNTH_JE8086": "OFF",
+        "gearmulator_SYNTH_NODALRED2X": "OFF",
+        "gearmulator_SYNTH_OSIRUS": "OFF",
+        "gearmulator_SYNTH_OSTIRUS": "OFF",
+        "gearmulator_SYNTH_VAVRA": "OFF",
+        "gearmulator_SYNTH_XENIA": "OFF",
+        "generator": "Unix Makefiles",
+        "host": "macOS 26.6.2 arm64"
+      }
+    },
+    "clock_domains": {
+      "c10_sample_blocks": {
+        "frequency_hz": null,
+        "origin": "One-based output-block ordinal in the private c10 capture; the terminal summary is emitted after the last compared block.",
+        "unit": "32-sample block ordinals"
+      }
+    },
+    "firmware": {
+      "profile_id": "machinedrum-sps1uw-os1.63",
+      "public_fingerprints": {
+        "crc32": "3d552c99",
+        "gearmulator_fnv64": "33b7c1a9e29f43fd",
+        "sha1": "a872a2f3527063673d6ea6d3080c4c62ef0cadc1",
+        "size_bytes": "8388608"
+      },
+      "revision": "Machinedrum SPS-1UW OS 1.63"
+    },
+    "initial_state": {
+      "description": "md_replay loaded the private c10 snapshot produced by md_profile capture=0x10; no new firmware boot occurred in the standalone replay.",
+      "kind": "restored_state"
+    },
+    "origin": "reference_emulator",
+    "purpose": "Replay the voice-DSP capture for MD machine 0x10 in the standalone md_replay tool. This redacted WP-03 trace contains only the terminal block-equality summary; the c10 snapshot and raw logs remain local.",
+    "run_id": "wp35-c10-replay-2026-09-23",
+    "scenario_id": "md-os163-c10-voice-replay-v1",
+    "source_state": [
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "octamachine",
+        "revision": "fb2c29d07f6d0468944fa5d80c960fb7e387e6ec"
+      },
+      {
+        "dirty": false,
+        "patches": [
+          {
+            "id": "0001-opt-in-md-bus-trace.patch",
+            "sha256": "d24558fd0556e21c37eff3a7670d1a076f756224a30bd30fa5ac14f923f50d09"
+          },
+          {
+            "id": "0002-md-baseline-checkpoints.patch",
+            "sha256": "0c6521bf6c6adc78a6c1c0a696b8e9848829890d99a4bf65995bb0f35b93780e"
+          },
+          {
+            "id": "md-reference/gearmulator-md-hosttrace.patch",
+            "sha256": "e2460e0b0acbcb6b27828b1bab1b70f52ff172030198aa33d21fda4e51619faf"
+          }
+        ],
+        "repository": "gearmulator-md-mm",
+        "revision": "8cea0524a75435122c20b669ca114c9ac6509ba2"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/3rdparty/RmlUi",
+        "revision": "97bb5921595a0528bd67d61f328885ac19643623"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/3rdparty/freetype",
+        "revision": "828916527ce4f69af722bce46ce54d289001a0bd"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/3rdparty/freetype/subprojects/dlg",
+        "revision": "72dfcc858c040c54a6a0b88fcb7e70ee186d3167"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/3rdparty/lunasvg",
+        "revision": "f8aabfb444bb37f69df7290790f57e4a27730a93"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/3rdparty/lunasvg/plutovg",
+        "revision": "5e4712cf873b0c7829a4a6157763e2ad3ac49164"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/cpp-terminal",
+        "revision": "a79a1a1766e0e8f768955d782e1b84ad5a82b843"
+      },
+      {
+        "dirty": false,
+        "patches": [
+          {
+            "id": "md-reference/gearmulator-md-exechook.patch",
+            "sha256": "d96146362e6f66468dbf68dda455f5d073a7b21358089bbe2ad175510a446748"
+          }
+        ],
+        "repository": "gearmulator-md-mm:source/dsp56300",
+        "revision": "1378c43074e6ec22f69f14ed55c21e44c5ccadc1"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/dsp56300/source/asmjit",
+        "revision": "3577608cab0bc509f856ebf6e41b2f9d9f71acc4"
+      },
+      {
+        "dirty": false,
+        "patches": [],
+        "repository": "gearmulator-md-mm:source/mc68k",
+        "revision": "ace95b3d0a5a332db147244762dda65a9f010b9f"
+      }
+    ],
+    "started_at_utc": "2026-09-23T20:52:49Z",
+    "stimuli": []
+  },
+  "schema_version": 1
+}

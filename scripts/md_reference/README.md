@@ -53,6 +53,7 @@ the JIT build or the reference, and the cause was not found.
 
 ```sh
 python3 scripts/md_reference/md_extract.py --disasm
+mkdir -p out/md_profile/cat out/md_profile/cap
 out/md_reference/md_profile base_firmware/elektron_sps1-1uw_os1.63.bin out/md_profile/cat 0x10 0x11 ...
 python3 scripts/md_reference/md_analyze.py out/md_profile/cat
 out/md_reference/md_profile base_firmware/elektron_sps1-1uw_os1.63.bin out/md_profile/cap capture=0x10
@@ -64,5 +65,6 @@ out/md_reference/md_replay out/md_profile/cap/c10 --reloc
 ## Verification
 
 - **Checked in octamachine (WP-35):** `md_extract.py` reproduced every pinned section hash, both load maps and the 135-descriptor, 50-engine catalog. The patch stack applied cleanly on the pinned sources.
-- **Not checked in octamachine:** the C++ builds and the profiler/replay results. They are octamad's results from the same Gearmulator pin and the same code.
-- **No WP-03 manifests:** the tools write none, so their results are prior evidence, not accepted packet evidence. Wrapping them in the WP-03 contract is WP-35's open item.
+- **Reproduced in octamachine (WP-35 follow-up):** `md_profile`, `md_replay`, and `md_dis` built from the pinned Gearmulator copy. One local `capture=0x10` run produced `c10`; two standalone replays each exited 0 with 33,513 identical 32-sample blocks and zero differences. The [WP-03 manifest](../../docs/reports/WP-35-c10-replay-v1.manifest.json) and its redacted [JSONL summary](../../docs/reports/WP-35-c10-replay-v1.events.jsonl) are checked in. The c10 snapshot and raw logs stay under ignored `out/`.
+- **Run behavior:** `md_profile` writes files directly into its requested output directory and does not create that directory. Create it first with `mkdir -p`, as shown above.
+- **Prior evidence:** the other profiles, captures, relocations, and replay results in the WP-35 report remain octamad's measurements from the same Gearmulator pin and code; they were not reproduced in this follow-up.

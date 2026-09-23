@@ -12,7 +12,7 @@ octamad is the user's working copy of [octabam](https://github.com/sambanks/octa
 | Firmware | MD SPS-1UW OS 1.63. The user's update `.syx` has SHA-256 `a58cd61f2efacfb07add0c643162fb4365c30e73831f2021c17b4aa3b42cabd5` (Elektron's public release). The 8 MiB dump matches Gearmulator FNV-64 `33b7c1a9e29f43fd`. |
 | Execution origin | Every runtime number is from the MD reference emulator. Nothing here ran on octemu, on an Octatrack DSP model, or on hardware. |
 | Cycle counts | From the emulator's cycle model, not hardware. |
-| Evidence contract | The runs predate WP-03 and have no version-1 manifests. They are **prior evidence**: good for choosing what to measure and how, not for checking an acceptance item. |
+| Evidence contract | octamad's original runs predate WP-03 and have no version-1 manifests. They remain **prior evidence**. The later WP-35 follow-up reproduces one `c10` standalone replay under a WP-03 manifest; that run is recorded separately below. |
 
 Markers follow octamad's usage:
 
@@ -293,4 +293,13 @@ The tools and build steps are in [`scripts/md_reference/README.md`](../../script
 - `python3 scripts/md_reference/md_extract.py` passes. It verified the `.syx` and all five section SHA-256 pins, printed both load maps and the 135-descriptor, 50-engine catalog, and wrote `out/machinedrum/os163/inventory.json`.
 - The patch stack applies cleanly to clean pinned sources (`mdLib` at `8cea052`, `dsp56kEmu` at `1378c43`), in order: `0001`, the in-review `0002`, `gearmulator-md-hosttrace.patch`, then `gearmulator-md-exechook.patch`.
 - `python3 -m unittest tests.test_md_extract`: 4 synthetic tests pass.
-- Not re-run here: the C++ builds, the profiles, the captures and the replays. Their numbers are octamad's, from the same pin and the same code.
+
+### WP-35 follow-up — rebuild and replay one capture under WP-03
+
+The separate worktree rebuilt `md_profile`, `md_replay`, and `md_dis` in Release mode from the pinned Gearmulator MD/MM tree and recursive revisions. The numbered WP-04 patches and the two WP-35 reference patches were applied to a separate local source copy. Build metadata is recorded in the [WP-03 manifest](WP-35-c10-replay-v1.manifest.json); its event file contains only the terminal comparison summary.
+
+`md_profile` ran the local OS 1.63 image with `capture=0x10`, producing the private `c10` snapshot and raw log. `md_replay` then ran twice against that same capture. Both runs exited 0 and reported 33,513 identical 32-sample blocks and zero differing blocks. The tracked manifest records the second run's UTC start time and the redacted JSONL event reports the aggregate result. The snapshot, raw replay logs, and other firmware-derived data remain local under ignored `out/`.
+
+The first profiler attempt returned exit 1 because its output directory did not exist; `md_profile` does not create it. The documented run now creates output directories before invocation. A first compile also lacked the trace-hook definitions because the added patches had not actually reached the copied source tree; a dry-run with `patch -p1` confirmed and then applied both patches in their respective Gearmulator source roots, after which all three targets built.
+
+`make check` passed after this follow-up: nine reference repositories validated, scripts compiled, and 20 tests passed. The reproduced result is limited to this one machine `0x10` capture in the Gearmulator MD model. It does not repeat the six-capture/all-engine or relocated replay claims above and establishes no Octatrack or hardware behavior.
