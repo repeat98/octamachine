@@ -1,0 +1,403 @@
+diff --git a/source/elektron/md/mdLib/mdmc.cpp b/source/elektron/md/mdLib/mdmc.cpp
+--- a/source/elektron/md/mdLib/mdmc.cpp
++++ b/source/elektron/md/mdLib/mdmc.cpp
+@@ -10,9 +10,13 @@
+ #include <algorithm>
+ #include <array>
+ #include <cstddef>
++#include <cstring>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <limits>
++#include <map>
++#include <tuple>
++#include <string>
+ 
+ // Provide the Musashi memory-access callbacks (m68k_read_memory_*, _pcrelative_*, etc.)
+ // for this microcontroller. Exactly one TU per synth includes this - cf. n2xmc.cpp / xtUc.cpp.
+@@ -72,7 +76,7 @@
+ 			const uint32_t _value, const uint8_t _size, const bool _write)
+ 		{
+ 			static const char* const path = std::getenv("GEARMULATOR_MD_BUS_TRACE");
+-			static FILE* const trace = []
++			static FILE* trace = []
+ 			{
+ 				if(!path || !*path)
+ 					return static_cast<FILE*>(nullptr);
+@@ -83,6 +87,9 @@
+ 			}();
+ 			if(!trace)
+ 				return;
++			const char* const enabled = std::getenv("GEARMULATOR_MD_BUS_TRACE_ENABLED");
++			if(enabled && std::strcmp(enabled, "0") == 0)
++				return;
+ 			static unsigned limit = []
+ 			{
+ 				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_LIMIT");
+@@ -91,21 +98,173 @@
+ 				const auto parsed = std::strtoul(value, nullptr, 10);
+ 				return parsed == 0 ? 100000u : static_cast<unsigned>(parsed);
+ 			}();
+-			static unsigned count = 0;
+-			if(count >= limit)
+-			{
+-				if(count == limit)
++			static const bool deduplicateReads = []
++			{
++				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_DEDUP_READS");
++				return value && std::strcmp(value, "1") == 0;
++			}();
++			static const bool ignoreSimReads = []
++			{
++				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_IGNORE_SIM_READS");
++				return value && std::strcmp(value, "1") == 0;
++			}();
++			static const bool aggregateDspWrites = []
++			{
++				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_AGGREGATE_DSP_WRITES");
++				return value && std::strcmp(value, "1") == 0;
++			}();
++			static const bool aggregateSimPortWrites = []
++			{
++				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_AGGREGATE_SIM_PORT_WRITES");
++				return value && std::strcmp(value, "1") == 0;
++			}();
++			using ReadKey = std::tuple<const Microcontroller*, uint32_t, uint8_t>;
++			struct DspWriteStats
++			{
++				uint64_t count = 0;
++				uint64_t firstCycle = 0;
++				uint64_t lastCycle = 0;
++			};
++			struct SimPortWriteStats
++			{
++				uint64_t dataWrites = 0;
++				uint64_t dataTransitions = 0;
++				uint64_t directionWrites = 0;
++				uint64_t directionTransitions = 0;
++				uint64_t firstCycle = 0;
++				uint64_t lastCycle = 0;
++				uint32_t lastDataValue = 0;
++				uint32_t lastDirectionValue = 0;
++			};
++			static std::map<ReadKey, uint32_t> lastRead;
++			static std::map<const Microcontroller*, unsigned> instanceIds;
++			static std::map<const Microcontroller*, std::string> instanceLabels;
++			static std::map<std::tuple<const Microcontroller*, unsigned>, DspWriteStats> dspWrites;
++			static std::map<const Microcontroller*, SimPortWriteStats> simPortWrites;
++			static unsigned nextInstanceId = 1;
++			static unsigned recorded = 0;
++			static uint64_t observed = 0;
++			static uint64_t suppressed = 0;
++			static uint64_t filteredSimReads = 0;
++			static bool truncated = false;
++			static const bool exitHook = []
++			{
++				std::atexit([]
+ 				{
+-					std::fputs("mdbus trace truncated at configured event limit\n", trace);
+-					std::fflush(trace);
+-					++count;
++					if(trace)
++					{
++						std::fprintf(trace,
++							"mdbus summary recorded=%u observed=%llu repeat_reads_suppressed=%llu sim_reads_filtered=%llu dsp_writes_aggregated=%s sim_port_writes_aggregated=%s instances=%zu status=%s read_filter=%s\n",
++							recorded, static_cast<unsigned long long>(observed),
++							static_cast<unsigned long long>(suppressed),
++							static_cast<unsigned long long>(filteredSimReads),
++							aggregateDspWrites ? "true" : "false",
++							aggregateSimPortWrites ? "true" : "false", instanceIds.size(),
++							truncated ? "truncated" : "complete",
++							deduplicateReads ? "changed_values" : "all");
++						for(const auto& [key, stats] : dspWrites)
++						{
++							const auto* const machine = std::get<0>(key);
++							std::fprintf(trace,
++								"mdbus dsp_write_summary instance=%u label=%s dsp=%u count=%llu first_cycle=%llu last_cycle=%llu\n",
++								instanceIds.at(machine), instanceLabels.at(machine).c_str(),
++								std::get<1>(key), static_cast<unsigned long long>(stats.count),
++								static_cast<unsigned long long>(stats.firstCycle),
++								static_cast<unsigned long long>(stats.lastCycle));
++						}
++						for(const auto& [machine, stats] : simPortWrites)
++							std::fprintf(trace,
++								"mdbus sim_port_write_summary instance=%u label=%s data_writes=%llu data_transitions=%llu direction_writes=%llu direction_transitions=%llu first_cycle=%llu last_cycle=%llu\n",
++								instanceIds.at(machine), instanceLabels.at(machine).c_str(),
++								static_cast<unsigned long long>(stats.dataWrites),
++								static_cast<unsigned long long>(stats.dataTransitions),
++								static_cast<unsigned long long>(stats.directionWrites),
++								static_cast<unsigned long long>(stats.directionTransitions),
++								static_cast<unsigned long long>(stats.firstCycle),
++								static_cast<unsigned long long>(stats.lastCycle));
++						std::fclose(trace);
++						trace = nullptr;
++					}
++				});
++				return true;
++			}();
++			(void)exitHook;
++			auto instance = instanceIds.find(&_uc);
++			if(instance == instanceIds.end())
++			{
++				instance = instanceIds.emplace(&_uc, nextInstanceId++).first;
++				const char* const label = std::getenv("GEARMULATOR_MD_TRACE_INSTANCE_LABEL");
++				instanceLabels.emplace(&_uc, label && *label ? label : "unspecified");
++			}
++			++observed;
++			if(aggregateSimPortWrites && _write
++				&& (_address == memorymap::g_sim.begin + Sim::g_ppdat
++					|| _address == memorymap::g_sim.begin + Sim::g_ppddr))
++			{
++				auto& stats = simPortWrites[&_uc];
++				const auto cycle = _uc.getCycles();
++				if(stats.dataWrites == 0 && stats.directionWrites == 0)
++					stats.firstCycle = cycle;
++				stats.lastCycle = cycle;
++				if(_address == memorymap::g_sim.begin + Sim::g_ppdat)
++				{
++					if(stats.dataWrites && stats.lastDataValue != _value)
++						++stats.dataTransitions;
++					stats.lastDataValue = _value;
++					++stats.dataWrites;
++				}
++				else
++				{
++					if(stats.directionWrites && stats.lastDirectionValue != _value)
++						++stats.directionTransitions;
++					stats.lastDirectionValue = _value;
++					++stats.directionWrites;
+ 				}
+ 				return;
+ 			}
+-			std::fprintf(trace, "mdbus cycle=%llu pc=%08x %c%u addr=%08x value=%08x\n",
++			if(ignoreSimReads && !_write && memorymap::g_sim.contains(_address))
++			{
++				++filteredSimReads;
++				return;
++			}
++			if(aggregateDspWrites && _write)
++			{
++				const unsigned dsp = memorymap::g_dsp1Hdi08.contains(_address) ? 1
++					: memorymap::g_dsp2Hdi08.contains(_address) ? 2 : 0;
++				if(dsp)
++				{
++					auto& stats = dspWrites[std::tuple{&_uc, dsp}];
++					const auto cycle = _uc.getCycles();
++					if(stats.count == 0)
++						stats.firstCycle = cycle;
++					stats.lastCycle = cycle;
++					++stats.count;
++					return;
++				}
++			}
++			if(deduplicateReads && !_write)
++			{
++				const auto key = ReadKey{&_uc, _address, _size};
++				const auto [it, inserted] = lastRead.emplace(key, _value);
++				if(!inserted && it->second == _value)
++				{
++					++suppressed;
++					return;
++				}
++				it->second = _value;
++			}
++			if(recorded >= limit)
++			{
++				if(!truncated)
++					std::fputs("mdbus trace truncated at configured event limit\n", trace);
++				truncated = true;
++				return;
++			}
++			std::fprintf(trace, "mdbus instance=%u label=%s cycle=%llu pc=%08x %c%u addr=%08x value=%08x\n",
++				instance->second, instanceLabels.at(&_uc).c_str(),
+ 				static_cast<unsigned long long>(_uc.getCycles()), _uc.getPC(),
+ 				_write ? 'W' : 'R', static_cast<unsigned>(_size), _address, _value);
+-			++count;
++			++recorded;
+ 		}
+ 	}
+ 
+diff --git a/source/elektron/md/mdLibTest/panelReadinessFirmwareTest.cpp b/source/elektron/md/mdLibTest/panelReadinessFirmwareTest.cpp
+--- a/source/elektron/md/mdLibTest/panelReadinessFirmwareTest.cpp
++++ b/source/elektron/md/mdLibTest/panelReadinessFirmwareTest.cpp
+@@ -20,12 +20,101 @@
+ 			throw std::runtime_error(_message);
+ 	}
+ 
++	void advanceFrames(md::Hardware& _hardware, const uint32_t _frameCount)
++	{
++		constexpr uint32_t blockSize = 128;
++		for(uint32_t frame = 0; frame < _frameCount; frame += blockSize)
++			_hardware.advance(std::min(blockSize, _frameCount - frame));
++	}
++
+ 	void advance(md::Hardware& _hardware, const uint32_t _seconds)
+ 	{
++		advanceFrames(_hardware, md::g_samplerate * _seconds);
++	}
++
++	void printCheckpoint(const char* const _name, const char* const _initialState,
++		md::Hardware& _hardware, const uint32_t _frames)
++	{
++		const auto panel = _hardware.getFrontPanelSnapshot();
++		std::cout << "MDCP schema=1 checkpoint=" << _name
++			<< " initial_state=" << _initialState
++			<< " frames=" << _frames
++			<< " pc_register=" << _hardware.getUC().getPC()
++			<< " sp_register=" << _hardware.getUC().getAReg(7)
++			<< " host_cycles=" << _hardware.hostCurrentCycle()
++			<< " mcu_cycles=" << _hardware.getUC().getCycles()
++			<< " dsp1_cycles=" << _hardware.getDspMixer().dsp().getCycles()
++			<< " dsp2_cycles=" << _hardware.getDspProducer().dsp().getCycles()
++			<< " dsp1_booted=" << _hardware.getDspMixer().booted()
++			<< " dsp2_booted=" << _hardware.getDspProducer().booted()
++			<< " panel_handshake=" << _hardware.getUC().isPanelHandshakeComplete()
++			<< " midi_ready=" << _hardware.isFirmwareMidiReady()
++			<< " panel_bytes=" << panel.getByteCount()
++			<< " panel_tiles=" << panel.getTileWriteCount()
++			<< " panel_lit_pixels=" << panel.countLitPixels()
++			<< " factory_cache_ready=" << _hardware.isFactoryFlashCacheReady()
++			<< " factory_init_expected=" << _hardware.isFactoryFlashInitializationExpected()
++			<< " flash_dirty=" << _hardware.flashDirty() << '\n';
++	}
++
++	int setEnvironmentVariable(const char* const _name, const char* const _value)
++	{
++#ifdef _WIN32
++		return _putenv_s(_name, _value);
++#else
++		return setenv(_name, _value, 1);
++#endif
++	}
++
++	void setTraceCaptureEnabled(const bool _enabled)
++	{
++		if(std::getenv("GEARMULATOR_MD_BUS_TRACE") == nullptr)
++			return;
++		if(setEnvironmentVariable("GEARMULATOR_MD_BUS_TRACE_ENABLED", _enabled ? "1" : "0") != 0)
++			throw std::runtime_error("could not change trace capture state");
++	}
++
++	void setTraceInstanceLabel(const char* const _label)
++	{
++		if(std::getenv("GEARMULATOR_MD_BUS_TRACE") == nullptr)
++			return;
++		if(setEnvironmentVariable("GEARMULATOR_MD_TRACE_INSTANCE_LABEL", _label) != 0)
++			throw std::runtime_error("could not set trace instance label");
++	}
++
++	uint32_t advanceUntilReady(md::Hardware& _hardware, const uint32_t _maximumSeconds,
++		const char* const _dsp1Checkpoint, const char* const _dsp2Checkpoint,
++		const char* const _readyCheckpoint, const char* const _initialState)
++	{
+ 		constexpr uint32_t blockSize = 128;
+-		const uint32_t frameCount = md::g_samplerate * _seconds;
+-		for(uint32_t frame = 0; frame < frameCount; frame += blockSize)
+-			_hardware.advance(std::min(blockSize, frameCount - frame));
++		const uint32_t maximumFrames = md::g_samplerate * _maximumSeconds;
++		uint32_t advancedFrames = 0;
++		bool dsp1Reported = false;
++		bool dsp2Reported = false;
++		while(advancedFrames < maximumFrames)
++		{
++			const auto count = std::min(blockSize, maximumFrames - advancedFrames);
++			_hardware.advance(count);
++			advancedFrames += count;
++			if(!dsp1Reported && _hardware.getDspMixer().booted())
++			{
++				printCheckpoint(_dsp1Checkpoint, _initialState, _hardware, advancedFrames);
++				dsp1Reported = true;
++			}
++			if(!dsp2Reported && _hardware.getDspProducer().booted())
++			{
++				printCheckpoint(_dsp2Checkpoint, _initialState, _hardware, advancedFrames);
++				dsp2Reported = true;
++			}
++			if(_hardware.isFirmwareMidiReady())
++			{
++				printCheckpoint(_readyCheckpoint, _initialState, _hardware, advancedFrames);
++				setTraceCaptureEnabled(false);
++				return advancedFrames;
++			}
++		}
++		throw std::runtime_error(std::string(_readyCheckpoint)
++			+ ": firmware readiness did not arrive within the bounded frame window");
+ 	}
+ 
+ 	void requireBootedPanel(md::Hardware& _hardware, const char* const _phase)
+@@ -62,15 +151,35 @@
+ 
+ 		// A blank UW flash exercises the long first-run initialization whose LCD
+ 		// animation is paced by the firmware's own DSP-HREQ-driven software timer.
++		setTraceInstanceLabel("cold_blank_flash");
++		setTraceCaptureEnabled(true);
+ 		md::Hardware fresh(rom, path, md::MachineModel::Machinedrum);
+ 		require(fresh.isValid(), "fresh machine was invalid");
+ 		require(fresh.isFactoryFlashInitializationExpected(),
+ 			"fresh machine did not enter factory initialization");
+-		advance(fresh, 18);
++		printCheckpoint("cold_reset", "blank_flash", fresh, 0);
++		const auto coldReadyFrames = advanceUntilReady(fresh, 18,
++			"cold_dsp1_booted", "cold_dsp2_booted",
++			"cold_firmware_ready", "blank_flash");
++		advanceFrames(fresh, 18 * md::g_samplerate - coldReadyFrames);
+ 		requireBootedPanel(fresh, "fresh boot");
+ 		require(fresh.flashDirty(), "fresh boot did not initialize UW flash");
+ 		require(fresh.isFactoryFlashCacheReady(),
+ 			"fresh boot did not publish the initialized flash cache");
++		printCheckpoint("cold_initialized", "blank_flash", fresh, 18 * md::g_samplerate);
++		const auto coldHostCycles = fresh.hostCurrentCycle();
++		const auto coldDsp1Cycles = fresh.getDspMixer().dsp().getCycles();
++		const auto coldDsp2Cycles = fresh.getDspProducer().dsp().getCycles();
++		advance(fresh, 1);
++		require(fresh.isFirmwareMidiReady(), "cold idle checkpoint lost firmware readiness");
++		require(fresh.hostCurrentCycle() > coldHostCycles,
++			"cold idle checkpoint scheduler did not advance the host");
++		require(fresh.getDspMixer().dsp().getCycles() > coldDsp1Cycles,
++			"cold idle checkpoint scheduler did not advance DSP1");
++		require(fresh.getDspProducer().dsp().getCycles() > coldDsp2Cycles,
++			"cold idle checkpoint scheduler did not advance DSP2");
++		printCheckpoint("cold_idle_no_stimulus", "blank_flash", fresh,
++			19 * md::g_samplerate);
+ 
+ 		const auto initializedFlash = fresh.copyFlashData();
+ 		const auto factoryCache = fresh.copyFactoryFlashCache();
+@@ -83,14 +192,36 @@
+ 
+ 		// Repeat launch from that exact initialized image. This covers the ordinary
+ 		// startup path as well as the blank-flash path above.
++		setTraceInstanceLabel("cached_factory_flash");
++		setTraceCaptureEnabled(true);
+ 		md::Hardware repeat(rom, path, md::MachineModel::Machinedrum,
+ 			{}, {}, initializedFlash, factoryCache);
+ 		require(repeat.isValid(), "repeat-launch machine was invalid");
+ 		require(!repeat.isFactoryFlashInitializationExpected(),
+ 			"repeat launch unexpectedly entered factory initialization");
+-		advance(repeat, 12);
++		printCheckpoint("cached_reset", "factory_flash_cache", repeat, 0);
++		const auto cachedReadyFrames = advanceUntilReady(repeat, 12,
++			"cached_dsp1_booted", "cached_dsp2_booted",
++			"cached_firmware_ready", "factory_flash_cache");
++		advanceFrames(repeat, 12 * md::g_samplerate - cachedReadyFrames);
+ 		requireBootedPanel(repeat, "repeat boot");
+-
++		printCheckpoint("cached_ready", "factory_flash_cache", repeat,
++			12 * md::g_samplerate);
++		const auto cachedHostCycles = repeat.hostCurrentCycle();
++		const auto cachedDsp1Cycles = repeat.getDspMixer().dsp().getCycles();
++		const auto cachedDsp2Cycles = repeat.getDspProducer().dsp().getCycles();
++		advance(repeat, 1);
++		require(repeat.isFirmwareMidiReady(), "cached idle checkpoint lost firmware readiness");
++		require(repeat.hostCurrentCycle() > cachedHostCycles,
++			"cached idle checkpoint scheduler did not advance the host");
++		require(repeat.getDspMixer().dsp().getCycles() > cachedDsp1Cycles,
++			"cached idle checkpoint scheduler did not advance DSP1");
++		require(repeat.getDspProducer().dsp().getCycles() > cachedDsp2Cycles,
++			"cached idle checkpoint scheduler did not advance DSP2");
++		printCheckpoint("cached_idle_no_stimulus", "factory_flash_cache", repeat,
++			13 * md::g_samplerate);
++
++		setTraceCaptureEnabled(false);
+ 		const auto freshPanel = fresh.getFrontPanelSnapshot();
+ 		const auto repeatPanel = repeat.getFrontPanelSnapshot();
+ 		std::cout << "MD firmware-owned panel readiness passed: fresh bytes="

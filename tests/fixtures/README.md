@@ -2,7 +2,7 @@
 
 This directory holds **reviewed text metadata and independently authored synthetic fixtures**. Full firmware, extracted DSP programs, transformed images, raw traces/audio, card/NVRAM contents, and private samples/projects remain in ignored local directories.
 
-No runtime comparison corpus is established yet. [WP-03](../../docs/work_packets/WP-03-evidence-contract.md) owns the versioned capture/comparison contract; its [version-1 report](../../docs/reports/WP-03-evidence.md) and `wp-03/` fixtures exercise synthetic data only. The checklist below remains guidance for reports beyond the implemented manifest fields.
+No shared runtime comparison corpus is checked in. [WP-03](../../docs/work_packets/WP-03-evidence-contract.md) owns the versioned capture/comparison contract; its [version-1 report](../../docs/reports/WP-03-evidence.md) and `wp-03/` fixtures exercise synthetic data. WP-04 additionally generated four local runtime manifests and redacted JSONL projections, then compared repeated cold and cached runs. Those firmware-derived artifacts remain in a private local output directory and are not part of this fixture corpus. The checklist below remains guidance for reports beyond the implemented manifest fields.
 
 ## Where artifacts belong
 

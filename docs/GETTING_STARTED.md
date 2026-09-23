@@ -73,7 +73,18 @@ make gearmulator-prepare
 
 Follow the build instructions in the pinned Gearmulator checkout for your host. The preparation command applies instrumentation; it does not build or launch the emulator. Inspect any existing local changes before changing dependency revisions.
 
-The trace patch observes SIM, DSP HI08, and unmapped/peripheral accesses. [Boot feasibility](BOOT_FEASIBILITY.md#first-local-tool) describes ROM discovery, trace variables, capture limits, and the next measurement. DSP-upload trace values can contain firmware words, so store raw logs under an ignored path such as `out/md-traces/`.
+The trace patch observes SIM, both DSP HI08 windows, and unmapped/peripheral accesses. After building `mdPanelReadinessFirmwareTest`, run the bounded headless capture with explicit local paths:
+
+```sh
+python3 scripts/capture_md_baseline.py \
+  --driver /path/to/build/source/elektron/md/mdLibTest/mdPanelReadinessFirmwareTest \
+  --firmware /path/to/your-machinedrum-flash.bin \
+  --build-metadata /path/to/build-metadata.json \
+  --output-dir /private/tmp/md-baseline-run-1 \
+  --timeout-seconds 180
+```
+
+`build-metadata.json` records a JSON object with the exact build `command` argv list and a `toolchain` object containing the host, compiler/build tools, and relevant configuration flags; WP-04 has a complete example. The wrapper checks the supported image fingerprint, runs two cold/cached pairs, emits four WP-03 manifests with redacted JSONL projections, and reports incomplete evidence for caps, missing inputs, or timeouts. `summary.json` contains reviewed metadata. Keep every `.trace.txt` and process log local because even the summarized trace may contain firmware-dependent MMIO values. The generated WP-03 JSONL projections omit MMIO values and callback PC samples. For a complete per-access local trace, add `--full-private-trace --trace-limit 12000000`; this local-only mode does not produce WP-03 projection files. See [WP-04](reports/WP-04-md-baseline.md) for the clean build recipe, comparison commands, and measured checkpoints. The standalone application's ROM discovery behavior is described in [boot feasibility](BOOT_FEASIBILITY.md#first-local-tool).
 
 WP-01 records clean `mdLib` build reproduction; WP-04 owns bounded reference boot captures. The `mdLib` build does not prove a working standalone or captured firmware boot.
 

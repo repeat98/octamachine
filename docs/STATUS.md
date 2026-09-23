@@ -4,17 +4,18 @@ Updated: 2026-09-23. Read this before claiming work. The [port plan](PORT_PLAN.m
 
 ## Present state
 
-Scaffolding, feasibility research, and source reproduction. A clean trace-instrumented Gearmulator `mdLib` build is now reproduced. **No Machinedrum boot on octemu or Octatrack hardware has been demonstrated.** No ported DSP audio or flashable candidate is available.
+Source reproduction and first runtime baselines. The pinned Gearmulator Machinedrum model now reaches repeated OS 1.63 firmware-ready, factory-initialized, and no-stimulus idle checkpoints from blank-flash and cached states. **No Machinedrum boot on octemu or Octatrack hardware has been demonstrated.** No ported DSP audio or flashable candidate is available.
 
-### Established before the expanded plan
+### Established evidence
 
 - [x] Reference index, contributor workflow, pinned octemu source, and separate emulator patches are in place.
 - [x] Local firmware and research checkouts are ignored; proprietary inputs stay local.
 - [x] Read-only image audit identifies the supplied 8 MiB MD UW OS 1.63 dump and its static reset vectors.
 - [x] Reproduced the trace-instrumented Gearmulator `mdLib` build from the pinned parent source and relevant recursive dependency commits; see [WP-01 provenance report](reports/WP-01-provenance.md).
-- [ ] Capture an actual Machinedrum reference boot and unmodified Octatrack headless/UI baseline.
+- [x] Capture and repeat the Machinedrum reference boot in Gearmulator, including firmware-ready, factory-initialized, and idle checkpoints; see the [WP-04 baseline report](reports/WP-04-md-baseline.md).
+- [ ] Capture an unmodified Octatrack headless/UI baseline.
 
-Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `e964334`.
+Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [WP-04 baseline report](reports/WP-04-md-baseline.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `2d13237`.
 
 ## Active work and current handoff
 
@@ -34,13 +35,13 @@ Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile
 - [x] Validate 51 Markdown files, 301 local links/anchors, 35 packet records, all 10 upstream links, and 15 shell examples; `make check` passes. Detailed results are in WP-34.
 - [x] Reconcile maintainer merge and mark WP-34 done.
 
-[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is done on `work/wp-01-source-provenance`: [PR #4](https://github.com/repeat98/octamachine/pull/4) merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8` on 2026-09-23. Its source/build criteria and documentation checks pass. G0 remains open pending accepted capture tooling and runtime baselines.
+[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is done on `work/wp-01-source-provenance`: [PR #4](https://github.com/repeat98/octamachine/pull/4) merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8` on 2026-09-23. Its source/build criteria and documentation checks pass; WP-04 now records the first MD runtime baseline. G0 remains open for the independent Octatrack baseline.
 
 - [x] Record local reference and recursive dependency revisions, source modifications, patch hashes, toolchain, prerequisites, and license notices.
 - [x] Apply the bus trace patch to a clean Gearmulator MD/MM worktree and build `mdLib` with pinned dependency contents.
 - [x] Reconcile accepted delivery and mark WP-01 done.
 
-This advances source reproducibility only; no firmware runtime checkpoint has been reached.
+WP-01 itself establishes source reproducibility only; the later runtime evidence is recorded separately under WP-04.
 
 [WP-02 — Target profiles](work_packets/WP-02-target-profiles.md) is done: [PR #6](https://github.com/repeat98/octamachine/pull/6) merged as `e964334ef84790a16a5a500399d8c0f8a0c4e97f` on 2026-09-23. The local Machinedrum SPS-1UW OS 1.63 image matches all recorded reference fingerprints; the selected Octatrack MKII emulator target is provisional because the local OS source archive and physical hardware identity are unavailable. See the [profile report](reports/WP-02-target-profile.md) and [shareable metadata](../tests/fixtures/machinedrum-sps1uw-os1.63.profile.json).
 
@@ -51,13 +52,21 @@ This advances source reproducibility only; no firmware runtime checkpoint has be
 
 No new firmware execution or hardware checkpoint is established by this profile inventory.
 
-[WP-03 — Evidence contract](work_packets/WP-03-evidence-contract.md) is in review on `work/wp-03-evidence-contract`. Versioned run manifests, JSONL capture rules, a first-divergence comparator, and synthetic outcome tests are documented in the [WP-03 report](reports/WP-03-evidence.md). Its checks establish tooling behavior with synthetic events only; firmware baselines remain unproved.
+[WP-03 — Evidence contract](work_packets/WP-03-evidence-contract.md) is done: [PR #7](https://github.com/repeat98/octamachine/pull/7) merged at `2d13237cd9644a8f4574b3dc793f7ac03cd78685`. Versioned run manifests, JSONL capture rules, a first-divergence comparator, and synthetic outcome tests are documented in the [WP-03 report](reports/WP-03-evidence.md). Its checks establish tooling behavior with synthetic events only.
 
 - [x] Define the four initial-state modes, ordered stimulus timing, clock metadata, PC semantics, limits, and stop outcomes.
 - [x] Require matching comparison plans and report the first field/event divergence.
 - [x] Exercise equivalent, divergent, missing, failed, and truncated inputs with synthetic fixtures.
 - [x] Run the synthetic checks through `make check`.
-- [ ] Merge WP-03 after required CI checks pass.
+- [x] Merge WP-03 after required CI checks pass.
+
+[WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md) is in review on `work/wp-04-machinedrum-baseline`. The [baseline report](reports/WP-04-md-baseline.md) records two matching full MMIO runs, bounded cold/cached boot checkpoints, failure handling, and passing WP-03 comparisons of the repeated cold and cached manifests. Raw traces remain private and local.
+
+- [x] Reach named firmware-ready, factory-initialized, and no-stimulus idle checkpoints under finite frame and wall-clock limits.
+- [x] Compare two repeated blank-flash runs and separately labeled cached starts; event order and checkpoint metadata match.
+- [x] Capture reset, SIM, both DSP HI08 boot streams, panel startup, and idle scheduler progress.
+- [x] Prove trace cap, missing-image, and stalled-driver outcomes report failure or incomplete evidence.
+- [ ] Pass required GitHub checks, merge PR, and reconcile the accepted delivery.
 
 ## Gate checklist
 
@@ -73,10 +82,10 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-01 and WP-02 are accepted; WP-03 is delivered for review. After WP-03 merges, WP-04 and WP-05 can collect runtime baselines if their local inputs are verified. The Octatrack distribution archive is not present in current workspace evidence, so WP-05 must resolve that input first.
+WP-03 is accepted. WP-04 has completed its runtime criteria and is pending PR checks/merge. WP-05 can now inspect the local Octatrack inputs, but the pinned source distribution archive is not present in current workspace evidence, so it must verify or reacquire that input before using the extracted OS as a baseline.
 
-1. [WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md): establish a bounded reference boot with the verified local image and Gearmulator profile after WP-03 acceptance.
-2. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): verify/reacquire the pinned OS distribution before a stock headless/UI run.
+1. [WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md): finish PR checks, merge, and reconcile accepted delivery.
+2. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): verify local distribution provenance or reacquire the pinned OS archive before a stock headless/UI run.
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
@@ -84,7 +93,7 @@ Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope a
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
-| Source reproduction | WP-01 is accepted; its report records recursive revisions and a clean trace-patched `mdLib` build, with no firmware execution | WP-03 defines evidence; WP-04 records the first MD runtime trace after the contract merges |
+| Source reproduction and MD reference startup | WP-01 records recursive revisions and clean builds; WP-04 records full repeated startup traces, checkpoints, and WP-03 cold/cached manifest comparisons in Gearmulator only | Reconcile WP-04 merge, then WP-05 establishes the independent Octatrack baseline |
 | Exact target profile | WP-02 documents octemu's Octatrack MKII/MCF54455 profile and expected OS 1.40C; the extracted local OS section's source archive and physical board/carrier identity are unavailable | WP-05 verifies/reacquires the pinned firmware input; physical profile remains provisional and the hardware gate stays closed |
 | Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references | WP-07 resolves with traces/primary sources |
 | Target execution strategy | CPU/DSP similarity alone does not establish a port | WP-06–10 assess and choose a realizable mechanism |
