@@ -1,0 +1,74 @@
+{
+  "profile_id": "machinedrum-sps1uw-os1.63",
+  "evidence_status": "source image identity matched; runtime behavior not measured",
+  "source_firmware": {
+    "product": "Elektron Machinedrum",
+    "model_label": "SPS-1UW",
+    "os_version": "1.63",
+    "image_format": "raw full-flash image (.bin), without an update container",
+    "size_bytes": 8388608,
+    "public_reference_fingerprints": {
+      "mame_crc32": "3d552c99",
+      "mame_sha1": "a872a2f3527063673d6ea6d3080c4c62ef0cadc1",
+      "gearmulator_fnv64": "33b7c1a9e29f43fd"
+    },
+    "local_match": true,
+    "local_hash_policy": "The local firmware SHA-256 is not included; the source image remains a local ignored input."
+  },
+  "reference_emulator": {
+    "name": "Gearmulator MD/MM",
+    "commit": "8cea0524a75435122c20b669ca114c9ac6509ba2",
+    "board_profile": "Pinned source enables the MKII Port A identification loopback.",
+    "model": "Machinedrum SPS-1UW family",
+    "board_revision": "unknown",
+    "plus_drive_presence": "unknown"
+  },
+  "target_emulator": {
+    "name": "octemu",
+    "commit": "87000189418c8ca2026dc047bda220b66802809d",
+    "board": "Octatrack MKII, MCF54455, board descriptor v2",
+    "expected_os_version": "1.40C",
+    "expected_distribution_zip_sha256": "370c55a3dad3996b8e4b46400a205066fdaf185ad4d0255a3a3f835060573ff0",
+    "local_distribution_archive_present": false,
+    "local_extracted_main_section_present": true,
+    "local_extracted_main_section_size_bytes": 1112560,
+    "local_extracted_section_identity_verified": false
+  },
+  "physical_target": {
+    "model_revision": "unknown",
+    "carrier_requirements": "not established",
+    "profile_status": "provisional emulator-only; physical hardware gate closed"
+  },
+  "documented_mkii_uw_baseline": {
+    "tracks": 16,
+    "audio_generating_machines": 46,
+    "md_synth_families": 4,
+    "track_effects_per_track": 5,
+    "stereo_master_effects": 4,
+    "patterns": 128,
+    "steps_per_pattern_max": 64,
+    "songs": 32,
+    "plus_drive_kit_capacity": 8192,
+    "plus_drive_song_capacity": 4096,
+    "parameter_locks_per_step_max": 64,
+    "ram_machines": 4,
+    "sample_memory_mb": 2.5,
+    "rom_sample_slots_per_bank": 48,
+    "plus_drive_rom_slots": 6144,
+    "plus_drive_capacities_are_conditional": true,
+    "evidence": "Elektron Machinedrum User's Manual for OS 1.63, pp. 2-7 and 86-87; documentation only, no runtime behavior measured"
+  },
+  "deferred_variants": {
+    "machinedrum_mki_uw": "32-step patterns, 2 RAM machines, 2.0 MB sample memory, and 32 ROM sample slots per bank; not selected for the working MKII emulator profile.",
+    "plus_drive": "Presence is unknown; snapshot, sample-bank, and expanded storage behavior remain conditional.",
+    "non_uw_machinedrum": "Out of the selected baseline scope.",
+    "other_firmware_revisions": "Out of the selected baseline scope.",
+    "physical_octatrack": "Exact model, board revision, carrier, and recovery requirements remain unidentified."
+  },
+  "provenance": {
+    "machinedrum_manual": "https://www.elektron.se/wp-content/uploads/2024/09/machinedrum_manual_OS1.63.pdf",
+    "mame_driver": "https://github.com/mamedev/mame/blob/d7ffd71ed97831b7f995337d6c5bd1bbb03898af/src/mame/elektron/elektronmono.cpp",
+    "gearmulator_rom_identity": "https://github.com/joelanders/gearmulator-md-mm/blob/8cea0524a75435122c20b669ca114c9ac6509ba2/source/elektron/md/mdLib/mdtypes.h",
+    "octemu_board": "https://github.com/markandrus/octemu/blob/87000189418c8ca2026dc047bda220b66802809d/src/board/ot-board.c"
+  }
+}
