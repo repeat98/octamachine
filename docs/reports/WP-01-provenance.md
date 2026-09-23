@@ -3,7 +3,7 @@
 - Date: 2026-09-23
 - Owner: Codex
 - Branch: `work/wp-01-source-provenance`
-- Status: `in_progress` (delivery pending)
+- Status: `done` ([PR #4](https://github.com/repeat98/octamachine/pull/4), merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8`)
 
 ## Result
 
@@ -132,4 +132,4 @@ The octemu README and LICENSE and each nested project's notices remain the prima
 - The local ignored research trees remain modified; the isolated build left them untouched.
 - `references.json` still uses moving branch refs for auxiliary research repositories. Their observed commits are recorded above; a deliberate manifest pinning policy remains a separate maintenance choice.
 
-Next: review/accept WP-01, then dispatch WP-02 and WP-03. WP-04 and WP-05 still require their source/profile and capture-contract prerequisites.
+WP-01 is accepted in PR #4, merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8`. Next: dispatch WP-02 and WP-03. WP-04 and WP-05 still require their source/profile and capture-contract prerequisites.

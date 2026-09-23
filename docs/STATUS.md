@@ -14,7 +14,7 @@ Scaffolding, feasibility research, and source reproduction. A clean trace-instru
 - [x] Reproduced the trace-instrumented Gearmulator `mdLib` build from the pinned parent source and relevant recursive dependency commits; see [WP-01 provenance report](reports/WP-01-provenance.md).
 - [ ] Capture an actual Machinedrum reference boot and unmodified Octatrack headless/UI baseline.
 
-Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `6cdc258`.
+Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `29471d0`.
 
 ## Active work and current handoff
 
@@ -34,11 +34,11 @@ Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [boot feasibil
 - [x] Validate 51 Markdown files, 301 local links/anchors, 35 packet records, all 10 upstream links, and 15 shell examples; `make check` passes. Detailed results are in WP-34.
 - [x] Reconcile maintainer merge and mark WP-34 done.
 
-[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is `in_progress` on `work/wp-01-source-provenance`. The source/build criteria and documentation checks pass; commit, push, and review submission remain.
+[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is done on `work/wp-01-source-provenance`: [PR #4](https://github.com/repeat98/octamachine/pull/4) merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8` on 2026-09-23. Its source/build criteria and documentation checks pass. G0 remains open pending the target-profile and baseline packets.
 
 - [x] Record local reference and recursive dependency revisions, source modifications, patch hashes, toolchain, prerequisites, and license notices.
 - [x] Apply the bus trace patch to a clean Gearmulator MD/MM worktree and build `mdLib` with pinned dependency contents.
-- [ ] Complete scoped delivery and submit WP-01 for review.
+- [x] Reconcile accepted delivery and mark WP-01 done.
 
 This advances source reproducibility only; no firmware runtime checkpoint has been reached.
 
@@ -56,7 +56,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-01 is being delivered. WP-02 and WP-03 still have no technical packet prerequisite and can start after its review; their first actions establish inputs needed for later work.
+WP-01 is accepted. WP-02 and WP-03 have no technical packet prerequisite and can start now; their first actions establish inputs needed for later work.
 
 1. [WP-02 — Target profiles](work_packets/WP-02-target-profiles.md): establish baseline MD and OT firmware/hardware identities, local input availability, and supported-feature inventory.
 2. [WP-03 — Evidence contract](work_packets/WP-03-evidence-contract.md): define capture fields, checkpoint triggers, reset/stimulus conventions, and comparison rules.
@@ -67,7 +67,7 @@ After those are accepted, dispatch [WP-04](work_packets/WP-04-machinedrum-baseli
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
-| Source reproduction | WP-01 report records recursive revisions; clean trace-patched `mdLib` build passes, with no firmware execution | Review WP-01, then WP-04 records the first MD runtime trace |
+| Source reproduction | WP-01 is accepted; its report records recursive revisions and a clean trace-patched `mdLib` build, with no firmware execution | WP-02/03 establish inputs; WP-04 records the first MD runtime trace after its prerequisites |
 | Exact target profile | Hardware revision and local OT input availability are not established by the current audit | WP-02 inventories inputs; use a clearly provisional emulator profile if needed |
 | Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references | WP-07 resolves with traces/primary sources |
 | Target execution strategy | CPU/DSP similarity alone does not establish a port | WP-06–10 assess and choose a realizable mechanism |
