@@ -1,11 +1,12 @@
 # WP-03 — Define captures, checkpoints, and comparisons
 
-- Status: `in_review`
+- Status: `done`
 - Owner: Codex
 - Branch: `work/wp-03-evidence-contract`
 - Updated: 2026-09-23
 - Depends on: none
 - Gate: G0
+- Accepted delivery: [PR #7](https://github.com/repeat98/octamachine/pull/7), merged at `2d13237cd9644a8f4574b3dc793f7ac03cd78685`
 
 ## Result
 
@@ -32,12 +33,12 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: Defined manifest version 1, JSONL event metadata, completeness and failure outcomes, comparison rules, and the first-divergence report. Added a stdlib validator/comparator plus synthetic fixtures and tests.
-- Remaining: None for WP-03 acceptance. GitHub CI and merge remain delivery steps; the actual firmware baselines are later packets and are not claimed here.
-- Next action: Merge WP-03 after required checks pass, then dispatch WP-04 and WP-05 with verified local inputs.
-- Waiting on: Required GitHub checks and merge conditions for this PR.
-- Blockers: None for this tooling packet. G0 remains open until firmware baseline captures exist.
+- Remaining: None for WP-03.
+- Next action: Continue with WP-05; WP-04 now records the separate Gearmulator MD baseline, and its PR delivery is pending.
+- Waiting on: Nothing for WP-03.
+- Blockers: None for this tooling packet. G0 remains open until the Octatrack baseline is established and both required baselines are accepted.
 - Evidence: [WP-03 evidence report](../reports/WP-03-evidence.md), [comparator](../../scripts/compare_captures.py), and [synthetic tests/fixtures](../../tests/fixtures/wp-03/).
-- Delivery: `work/wp-03-evidence-contract`; PR pending.
+- Delivery: PR #7 merged at `2d13237cd9644a8f4574b3dc793f7ac03cd78685`.
 
 ## Prompt history
 
@@ -65,3 +66,22 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: None for WP-03 acceptance. Required CI and merge conditions remain; G0 still needs real source/target baseline captures.
 - Next action: Push/open the WP-03 PR, wait for required checks, merge when GitHub reports a clean eligible state, then start WP-04 and WP-05.
 - Delivery: Enclosing commit on `work/wp-03-evidence-contract`; PR pending.
+
+### 2026-09-23 / prompt 2 — Reconcile the accepted WP-03 merge
+
+- Request: At the start of WP-04, reconcile the user's report that WP-03 was merged on GitHub.
+- Starting state → ending state: In review → done; WP-03 acceptance had already passed, and PR #7 is merged.
+- Owner / branch: Codex / `work/wp-03-evidence-contract` (merge reconciled on `work/wp-04-machinedrum-baseline`).
+- Completed:
+  - [x] Confirmed local `origin/main` contains merge commit `2d13237cd9644a8f4574b3dc793f7ac03cd78685` titled “Define WP-03 capture comparison contract (#7)”.
+  - [x] Updated accepted delivery, handoff, and lifecycle status to done.
+- Remaining:
+  - [ ] None for WP-03; actual MD and OT baselines remain in WP-04 and WP-05.
+- Changed files: This packet and `docs/STATUS.md`.
+- Verification:
+  - `git log -4 --oneline --decorate` — confirmed PR #7 merge commit is `HEAD` and `origin/main`.
+  - `make check` — passed as part of WP-04 work.
+- Findings: The merge accepts the synthetic capture/comparison tooling only; it does not supply firmware runtime evidence or close G0.
+- Blockers: None for WP-03.
+- Next action: Complete bounded Gearmulator runtime capture under WP-04.
+- Delivery: WP-03 acceptance was merged in PR #7; this reconciliation is included in the enclosing WP-04 branch commit.
