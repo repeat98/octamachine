@@ -75,7 +75,7 @@ Follow the build instructions in the pinned Gearmulator checkout for your host. 
 
 The trace patch observes SIM, DSP HI08, and unmapped/peripheral accesses. [Boot feasibility](BOOT_FEASIBILITY.md#first-local-tool) describes ROM discovery, trace variables, capture limits, and the next measurement. DSP-upload trace values can contain firmware words, so store raw logs under an ignored path such as `out/md-traces/`.
 
-WP-01 owns clean build reproduction; WP-04 owns bounded reference boot captures. The existing mdLib compilation result does not prove a working standalone or captured firmware boot.
+WP-01 records clean `mdLib` build reproduction; WP-04 owns bounded reference boot captures. The `mdLib` build does not prove a working standalone or captured firmware boot.
 
 ## Octatrack emulator
 

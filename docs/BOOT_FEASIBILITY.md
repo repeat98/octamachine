@@ -42,7 +42,7 @@ The optional Gearmulator instrumentation records MCF5206E accesses to SIM, both 
 
 ## Next checkpoint
 
-First establish clean source provenance (WP-01), exact profiles (WP-02), and the capture contract (WP-03). [WP-04](work_packets/WP-04-machinedrum-baseline.md) then uses the same local image in Gearmulator MD/MM to capture cold boot: reset/stack setup, initial MMIO, SIM configuration, both DSP boot streams, and scheduler startup. [WP-05](work_packets/WP-05-octatrack-baseline.md) establishes the unmodified Octatrack emulator baseline independently.
+Clean Gearmulator source/build provenance is recorded in [WP-01](work_packets/WP-01-source-provenance.md). Establish exact profiles (WP-02) and the capture contract (WP-03) before [WP-04](work_packets/WP-04-machinedrum-baseline.md) uses the same local image in Gearmulator MD/MM to capture cold boot: reset/stack setup, initial MMIO, SIM configuration, both DSP boot streams, and scheduler startup. [WP-05](work_packets/WP-05-octatrack-baseline.md) establishes the unmodified Octatrack emulator baseline independently.
 
 Raw DSP-upload traces can contain firmware words. Keep them under an ignored path and publish only reviewed summaries under the [artifact guidance](../tests/fixtures/README.md).
 
