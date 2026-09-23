@@ -1,5 +1,7 @@
 # Boot feasibility: first source audit
 
+This is the initial evidence report, not a current boot-support claim. Use [getting started](GETTING_STARTED.md) for setup and [project status](STATUS.md) for the current queue. The [compatibility matrix](COMPATIBILITY_MATRIX.md) links each unresolved boundary to its owning packet.
+
 ## What the local references establish
 
 At the checked out revisions—Gearmulator MD/MM `8cea0524a75435122c20b669ca114c9ac6509ba2`, MAME `d7ffd71ed97831b7f995337d6c5bd1bbb03898af`, and octemu `87000189418c8ca2026dc047bda220b66802809d`—the references provide a useful starting image profile for Machinedrum UW OS 1.63:
@@ -40,4 +42,8 @@ The optional Gearmulator instrumentation records MCF5206E accesses to SIM, both 
 
 ## Next checkpoint
 
-Use the same local image in Gearmulator MD/MM and record its cold-boot trace: reset PC/SP, first MMIO writes, SIM setup, DSP boot command sequence, and the point where the scheduler starts. Resolve the address/size/clock discrepancies above from that trace and primary hardware documentation. Then replay those checkpoints in an octemu Machinedrum profile. The first code change should make the image reach one additional named checkpoint while leaving the original image bytes untouched, unless a traced incompatibility forces a small patch.
+First establish clean source provenance (WP-01), exact profiles (WP-02), and the capture contract (WP-03). [WP-04](work_packets/WP-04-machinedrum-baseline.md) then uses the same local image in Gearmulator MD/MM to capture cold boot: reset/stack setup, initial MMIO, SIM configuration, both DSP boot streams, and scheduler startup. [WP-05](work_packets/WP-05-octatrack-baseline.md) establishes the unmodified Octatrack emulator baseline independently.
+
+Raw DSP-upload traces can contain firmware words. Keep them under an ignored path and publish only reviewed summaries under the [artifact guidance](../tests/fixtures/README.md).
+
+Resolve the address/size/clock discrepancies in WP-07. The CPU/DSP audits and [WP-10 architecture decision](work_packets/WP-10-architecture-decision.md) must establish a mechanism that can execute on the physical target before target integration. There is no existing octemu Machinedrum boot profile to select. Advance one named checkpoint with evidence and keep every required firmware transformation explicit and reversible.
