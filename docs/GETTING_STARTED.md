@@ -14,7 +14,7 @@ cd octamachine
 make check
 ```
 
-Expected result: reference validation reports 9 repositories, then Python compilation succeeds. This checks the scaffold; it does not build an emulator or execute firmware. The `scaffold` job in [GitHub Actions](../.github/workflows/checks.yml) runs the same command.
+Expected result: reference validation reports 9 repositories, Python compilation succeeds, and the synthetic capture-comparison tests pass. This checks the scaffold and evidence tooling; it does not build an emulator or execute firmware. The `scaffold` job in [GitHub Actions](../.github/workflows/checks.yml) runs the same command.
 
 A normal clone records the octemu submodule pin without downloading its source. For emulator work, `make octemu-prepare` below initializes it. A recursive clone is also supported.
 
