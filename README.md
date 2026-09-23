@@ -26,7 +26,10 @@ These are independent projects with their own licenses. Links are references, no
 ## Layout
 
 ```text
-docs/PORT_PLAN.md       architecture, milestones, and evidence gates
+docs/PORT_PLAN.md       architecture, gates, and work packet dependency index
+docs/STATUS.md          current evidence, active work, and next dispatch queue
+docs/work_packets/     numbered briefs, acceptance checklists, prompt histories
+docs/templates/        reusable work packet and agent handoff templates
 docs/RESEARCH_LOG.md    dated findings and unresolved questions
 references.json         source repositories and local checkout names
 scripts/references.py   list, inspect, and fetch source checkouts
@@ -40,6 +43,8 @@ tests/fixtures/         metadata for user-generated boot and audio captures
 ```
 
 ## Start here
+
+For the current work queue, read [project status](docs/STATUS.md). The expanded [port plan](docs/PORT_PLAN.md) has 34 work packets with prerequisites, deliverables, and acceptance checklists. Use the [agent handoff template](docs/templates/AGENT_HANDOFF.md) to assign one packet. Every work prompt updates its status, completed/remaining checklist, evidence, and next action; [AGENTS.md](AGENTS.md) defines the commit, push, and PR workflow.
 
 Requires Python 3.10+ and Git. This repository has no third-party Python dependencies.
 
