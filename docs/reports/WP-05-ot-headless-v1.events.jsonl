@@ -1,0 +1,8 @@
+{"clock_id":"walk_step","kind":"screen_text_observed","sequence":0,"text":"PTCH","time":0}
+{"clock_id":"walk_step","kind":"loading_text_absent","sequence":1,"text":"L0AD1NG F1LE5","time":1}
+{"clock_id":"guest_audio_blocks","kind":"mark","label":"before-play","sequence":2,"time":56105}
+{"action":"tap","button":"PLAY","clock_id":"walk_step","kind":"panel_input","sequence":3,"time":3}
+{"clock_id":"walk_step","kind":"panel_lamp_condition","lamp_index":1,"observed_by_guest_audio_block":61681,"sequence":4,"state":"lit","time":4}
+{"clock_id":"guest_audio_blocks","kind":"mark","label":"playback-step-lamp-lit","sequence":5,"time":61681}
+{"action":"tap","button":"STOP","clock_id":"walk_step","kind":"panel_input","sequence":6,"time":6}
+{"clock_id":"guest_audio_blocks","kind":"mark","label":"stopped","sequence":7,"time":64888}

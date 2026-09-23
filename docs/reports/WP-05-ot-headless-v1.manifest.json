@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "run": {
+    "run_id": "wp05-octatrack-headless-20260923",
+    "scenario_id": "wp05-octatrack-headless-panel-v1",
+    "purpose": "Stock Octatrack OS boot and scripted panel-response baseline in pinned octemu; observed metadata only.",
+    "origin": "stock_target_emulator",
+    "started_at_utc": "2026-09-23T21:44:08Z",
+    "firmware": {
+      "profile_id": "octatrack-mkii-os-1.40c",
+      "revision": "Octatrack OS 1.40C main image, extracted unchanged from the pinned distribution archive",
+      "public_fingerprints": {
+        "distribution_archive_sha256": "370c55a3dad3996b8e4b46400a205066fdaf185ad4d0255a3a3f835060573ff0",
+        "main_image_section_bytes": "1112560"
+      }
+    },
+    "source_state": [
+      {
+        "repository": "octamachine",
+        "revision": "711ca1114190ebaf4d7c04a834353d3ff6e0ec12",
+        "dirty": true,
+        "patches": [
+          {
+            "id": "tests/walks/wp05-octatrack-panel.jsonl",
+            "sha256": "0795ae58a5d3a05f54646b0c5a6f01f8f7934b8587924c1c644d98d62d9f16ab"
+          },
+          {
+            "id": "tests/walks/wp05-octatrack-panel-ui.jsonl",
+            "sha256": "c9090d2784dc469eaadcb8572f25a665fa0149503e94a0d734f665de29e7b142"
+          }
+        ]
+      },
+      {
+        "repository": "octemu",
+        "revision": "87000189418c8ca2026dc047bda220b66802809d",
+        "dirty": false,
+        "patches": []
+      },
+      {
+        "repository": "octemu/vendor/qemu",
+        "revision": "e8d693e12af9cbb89d724baadfcc08559669e279",
+        "dirty": true,
+        "patches": [
+          {
+            "id": "patches/qemu/0001-coldfire-emac-isa-c.patch",
+            "sha256": "eba703f13402526955ae1f1224499e5a95231f1b34ed6112f5662e373934de22"
+          },
+          {
+            "id": "patches/qemu/0002-mcf-intc-vector-base.patch",
+            "sha256": "33fe0ced145322c37bd1a216f6457ef1ae907010ddda8db472eac2e9ddd08350"
+          },
+          {
+            "id": "patches/qemu/0003-mcf-intc-intfrc-write.patch",
+            "sha256": "003ae8c03e62747e6eff422610a1de546dce2d55b1c6f40221f413b56e662e56"
+          },
+          {
+            "id": "patches/qemu/0004-emac-accext-packing.patch",
+            "sha256": "d94cc5ce50eb9c5f1e9c09e6825a996b4c7a320805b99b1f32e84f5cd1f24ad8"
+          },
+          {
+            "id": "patches/qemu/0005-mcf-intc-intfrc-bypasses-imr.patch",
+            "sha256": "a175bbab0c2f2fd54d17ef264922b208d28fabee1e8ff29238fde8ab9c276774"
+          },
+          {
+            "id": "patches/qemu/0006-emac-sticky-saturation.patch",
+            "sha256": "f0e403f93c2f022eec8d8f028a122ea3cf10625d86745842f98ce219c1753ce0"
+          },
+          {
+            "id": "patches/qemu/0007-emac-fractional-store-sign.patch",
+            "sha256": "2c25deaafc9841c87ac1c0239af11e0043148e5a21508342d58a053e51fe6780"
+          },
+          {
+            "id": "patches/qemu/0008-tcg-skip-notdirty-walk-for-codeless-pages.patch",
+            "sha256": "14c470d49f33fdcda68aea8ad4b0ef8425adf6e130045af6a8efb772c5aeaaca"
+          },
+          {
+            "id": "patches/qemu/0009-emac-mac-with-load-rx-field-and-mask-reset.patch",
+            "sha256": "03a4000c4c788396abce432b8044192b06435e4e8c85bffc0cbf587caf10ce81"
+          },
+          {
+            "id": "patches/qemu/0010-darwin-subms-main-loop-poll.patch",
+            "sha256": "be284955a41d8bdbbec94c26d995d1681d49030cd70eaff2c6a8140e1acb27f3"
+          },
+          {
+            "id": "patches/qemu/0011-register-octatrack-board.patch",
+            "sha256": "feb9dc5eb5c1051fba316392cfed53cf3b9b6f8d67c9a1db607f0f2e084b0cb9"
+          },
+          {
+            "id": "patches/qemu/0012-tcg-guest-insn-budget.patch",
+            "sha256": "89337f749e4e177a49877d801958f98edf47c4f5379ac5da69eb5ad85611cd1d"
+          },
+          {
+            "id": "patches/qemu/0013-emac-mac-with-load-is-not-dual.patch",
+            "sha256": "8c5fb9b6b725f379e436872a1244a4a832fec249ecf30e57bf0f93e4906319f7"
+          }
+        ]
+      },
+      {
+        "repository": "octemu/vendor/dsp56300",
+        "revision": "c051afad31612c2d2c7a81a7ab23e1c5ac9e61af",
+        "dirty": true,
+        "patches": [
+          {
+            "id": "patches/dsp56300/0001-dma-dual-counter-source.patch",
+            "sha256": "b4cedf39388faa98fbc5e27fc0dca22d0085906c99d834f145259a8a369e9b8c"
+          },
+          {
+            "id": "patches/dsp56300/0002-peripherals-run-while-interrupt-masked.patch",
+            "sha256": "5cbc6fe6ace053979d75a6b481137839a4afab20f24e31190059f28f2be6e324"
+          },
+          {
+            "id": "patches/dsp56300/0003-fast-interrupt-needs-processing-mode.patch",
+            "sha256": "952fdf3695bb9ba02b3bf71c30b0332bc6d2d78255fe552c7cabb62bbbe5fdd4"
+          },
+          {
+            "id": "patches/dsp56300/0004-y-peripherals-may-be-anything.patch",
+            "sha256": "e9eeb0c78960e3fa01b65d07027d3b9383a8b7e909770f58a094bac909280e29"
+          },
+          {
+            "id": "patches/dsp56300/0005-mpyri-and-macri.patch",
+            "sha256": "756a61ad51fbc627ab4a12f11389447fe5614a3b8b58f1a736a7c16645fec45d"
+          },
+          {
+            "id": "patches/dsp56300/0006-esai-drop-underrun-log.patch",
+            "sha256": "989610d53757abc54da0ae8e330459b122b796dd0308cd6a43eacc7b915333fe"
+          },
+          {
+            "id": "patches/dsp56300/0007-dma-de-renewal-and-host-pull.patch",
+            "sha256": "4b968bce78cfb73eee79c03d1c5ae3fbe546ffab8ccd3120f4fb476303a825e7"
+          },
+          {
+            "id": "patches/dsp56300/0008-hdi08-notify-on-latch-replace.patch",
+            "sha256": "06ad91889d962067c71cb95240a0764cad3eb0bb9882dc941814adf1ed68b23b"
+          },
+          {
+            "id": "patches/dsp56300/0009-no-pointer-reads-for-dma-regs.patch",
+            "sha256": "e76573f157eb2d246a657c64d3ea3483660dba5b835c3a3b5a531348dca557f8"
+          },
+          {
+            "id": "patches/dsp56300/0010-mpyi-immediate-is-signed.patch",
+            "sha256": "c3855a374820fc7b85a29cbf15175641fb22ad47d6919c86fdf31891494d5bf9"
+          },
+          {
+            "id": "patches/dsp56300/0011-setM-self-copy-keeps-stale-modulo-mask.patch",
+            "sha256": "7619c6a34488d73f0e903f5c3e160dad2a68fd68f5818c16cb30ffb9f21b945a"
+          }
+        ]
+      },
+      {
+        "repository": "octemu/vendor/elektron-firmware-tool",
+        "revision": "a5bce9a6af644386d900924082993a805e812874",
+        "dirty": false,
+        "patches": []
+      }
+    ],
+    "build": {
+      "command": [
+        "make -C vendor/octemu setup",
+        "JOBS=8 make -C vendor/octemu qemu",
+        "make -C vendor/octemu"
+      ],
+      "toolchain": {
+        "host": "macOS 26.6.2 arm64",
+        "cmake": "4.0.1",
+        "meson": "1.10.2",
+        "ninja": "1.13.2",
+        "compiler": "Apple Clang 21.0.0",
+        "qemu_guest": "m68k / CFV4e",
+        "os_build": "official OS 1.40C distribution; no firmware patch or image transform"
+      }
+    },
+    "initial_state": {
+      "kind": "cold_boot",
+      "description": "Fresh emulator reset with independent copies of the same locally generated FX2 CompactFlash project fixture and 1 MiB NVRAM fixture. --read-only discards card writes at exit; DSP state starts from ROM."
+    },
+    "clock_domains": {
+      "walk_step": {
+        "unit": "run-step index (ordinal, not elapsed time)",
+        "origin": "first documented stimulus or observation in this run",
+        "frequency_hz": null
+      },
+      "guest_audio_blocks": {
+        "unit": "16-frame guest audio blocks",
+        "origin": "octemu guest audio pipeline start",
+        "frequency_hz": 2756.25
+      }
+    },
+    "stimuli": [
+      {
+        "sequence": 0,
+        "stimulus_id": "wait-ptch",
+        "kind": "wait_text",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 0
+        },
+        "parameters": {
+          "text": "PTCH",
+          "timeout_ms": 600000
+        }
+      },
+      {
+        "sequence": 1,
+        "stimulus_id": "dismiss-loading",
+        "kind": "wait_gone",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 1
+        },
+        "parameters": {
+          "text": "L0ADING FILE5",
+          "timeout_ms": 60000
+        }
+      },
+      {
+        "sequence": 2,
+        "stimulus_id": "stable-ready-dwell",
+        "kind": "wait_guest_ms",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 2
+        },
+        "parameters": {
+          "milliseconds": 16000
+        }
+      },
+      {
+        "sequence": 3,
+        "stimulus_id": "play",
+        "kind": "panel_tap",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 3
+        },
+        "parameters": {
+          "button": "PLAY",
+          "until_lamp": 1,
+          "lit": 1,
+          "settle_ms": 120,
+          "verify_ms": 5000,
+          "timeout_ms": 120000
+        }
+      },
+      {
+        "sequence": 4,
+        "stimulus_id": "playback-dwell",
+        "kind": "wait_guest_ms",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 4
+        },
+        "parameters": {
+          "milliseconds": 1000
+        }
+      },
+      {
+        "sequence": 5,
+        "stimulus_id": "stop",
+        "kind": "panel_tap",
+        "at": {
+          "clock_id": "walk_step",
+          "value": 5
+        },
+        "parameters": {
+          "button": "STOP"
+        }
+      }
+    ]
+  },
+  "checkpoint": {
+    "checkpoint_id": "wp05-octatrack-headless-ptch-play-stop",
+    "trigger": "PTCH observed, loading text dismissed, PLAY panel action accepted with the scripted lamp condition lit, STOP accepted, and the walk exits successfully.",
+    "timeout": {
+      "value": 240,
+      "unit": "wall-clock seconds"
+    }
+  },
+  "capture": {
+    "status": "complete",
+    "trace_file": "WP-05-ot-headless-v1.events.jsonl",
+    "format": "jsonl-v1",
+    "expected_records": 8,
+    "recorded_records": 8,
+    "trace_limit": null,
+    "dropped_events": 0,
+    "stop_reason": "normal_exit"
+  },
+  "comparison": {
+    "plan_id": "wp05-panel-event-projection-v1",
+    "declared_at_utc": "2026-09-23T21:52:55Z",
+    "fields": [
+      {
+        "path": "kind",
+        "mode": "exact"
+      }
+    ]
+  }
+}

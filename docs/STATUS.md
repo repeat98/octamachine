@@ -1,10 +1,10 @@
 # Project status
 
-Updated: 2026-09-23. Read this before claiming work. The [port plan](PORT_PLAN.md) defines gates and dependencies; each [packet record](PORT_PLAN.md#work-packet-index) owns its detailed status and checklist.
+Updated: 2026-09-24. Read this before claiming work. The [port plan](PORT_PLAN.md) defines gates and dependencies; each [packet record](PORT_PLAN.md#work-packet-index) owns its detailed status and checklist.
 
 ## Present state
 
-Source reproduction and first runtime baselines. The pinned Gearmulator Machinedrum model now reaches repeated OS 1.63 firmware-ready, factory-initialized, and no-stimulus idle checkpoints from blank-flash and cached states. **No Machinedrum boot on octemu or Octatrack hardware has been demonstrated.** No ported DSP audio or flashable candidate is available.
+Source reproduction and emulator baselines. The pinned Gearmulator Machinedrum model reaches repeated OS 1.63 firmware-ready, factory-initialized, and no-stimulus idle checkpoints. The unmodified Octatrack OS 1.40C now reaches the PTCH project screen headless and windowed in octemu, with a scripted PLAY/lamp/STOP response. **No Machinedrum boot on octemu or physical Octatrack has been demonstrated.** No ported DSP audio or flashable candidate is available.
 
 ### Established evidence
 
@@ -13,9 +13,9 @@ Source reproduction and first runtime baselines. The pinned Gearmulator Machined
 - [x] Read-only image audit identifies the supplied 8 MiB MD UW OS 1.63 dump and its static reset vectors.
 - [x] Reproduced the trace-instrumented Gearmulator `mdLib` build from the pinned parent source and relevant recursive dependency commits; see [WP-01 provenance report](reports/WP-01-provenance.md).
 - [x] Capture and repeat the Machinedrum reference boot in Gearmulator, including firmware-ready, factory-initialized, and idle checkpoints; see the [WP-04 baseline report](reports/WP-04-md-baseline.md).
-- [ ] Capture an unmodified Octatrack headless/UI baseline.
+- [x] Capture an unmodified Octatrack OS 1.40C headless/UI baseline in octemu; the source archive pin, boot state, panel response, and host playback artifact are documented in the [WP-05 report](reports/WP-05-ot-baseline.md). PR review/merge is pending.
 
-Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [WP-04 baseline report](reports/WP-04-md-baseline.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `fb2c29d`.
+Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [WP-04 baseline report](reports/WP-04-md-baseline.md), [WP-05 baseline report](reports/WP-05-ot-baseline.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `711ca11`.
 
 ## Active work and current handoff
 
@@ -35,7 +35,7 @@ Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile
 - [x] Validate 51 Markdown files, 301 local links/anchors, 35 packet records, all 10 upstream links, and 15 shell examples; `make check` passes. Detailed results are in WP-34.
 - [x] Reconcile maintainer merge and mark WP-34 done.
 
-[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is done on `work/wp-01-source-provenance`: [PR #4](https://github.com/repeat98/octamachine/pull/4) merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8` on 2026-09-23. Its source/build criteria and documentation checks pass; WP-04 now records the first MD runtime baseline. G0 remains open for the independent Octatrack baseline.
+[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is done on `work/wp-01-source-provenance`: [PR #4](https://github.com/repeat98/octamachine/pull/4) merged as `29471d01c61bbd8e83aa925157ae8fc4e25ddfa8` on 2026-09-23. Its source/build criteria and documentation checks pass; WP-04 and WP-05 now record the independent MD/OT emulator baselines. G0 awaits WP-05 delivery acceptance.
 
 - [x] Record local reference and recursive dependency revisions, source modifications, patch hashes, toolchain, prerequisites, and license notices.
 - [x] Apply the bus trace patch to a clean Gearmulator MD/MM worktree and build `mdLib` with pinned dependency contents.
@@ -43,7 +43,7 @@ Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile
 
 WP-01 itself establishes source reproducibility only; the later runtime evidence is recorded separately under WP-04.
 
-[WP-02 — Target profiles](work_packets/WP-02-target-profiles.md) is done: [PR #6](https://github.com/repeat98/octamachine/pull/6) merged as `e964334ef84790a16a5a500399d8c0f8a0c4e97f` on 2026-09-23. The local Machinedrum SPS-1UW OS 1.63 image matches all recorded reference fingerprints; the selected Octatrack MKII emulator target is provisional because the local OS source archive and physical hardware identity are unavailable. See the [profile report](reports/WP-02-target-profile.md) and [shareable metadata](../tests/fixtures/machinedrum-sps1uw-os1.63.profile.json).
+[WP-02 — Target profiles](work_packets/WP-02-target-profiles.md) is done: [PR #6](https://github.com/repeat98/octamachine/pull/6) merged as `e964334ef84790a16a5a500399d8c0f8a0c4e97f` on 2026-09-23. The local Machinedrum SPS-1UW OS 1.63 image matches all recorded reference fingerprints; WP-05 verifies the Octatrack OS distribution archive pin and runtime version. The physical hardware identity remains unavailable, so the selected Octatrack MKII emulator profile is provisional. See the [profile report](reports/WP-02-target-profile.md) and [shareable metadata](../tests/fixtures/machinedrum-sps1uw-os1.63.profile.json).
 
 - [x] Identify the Machinedrum OS 1.63 raw image and document its model label, size, and matching public fingerprints.
 - [x] Record the provisional Octatrack MKII emulator profile, feature inventory, deferred variants, and missing input consequences.
@@ -68,6 +68,14 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Prove trace cap, missing-image, and stalled-driver outcomes report failure or incomplete evidence.
 - [x] Pass required GitHub checks, merge PR, and reconcile the accepted delivery.
 
+[WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md) is in review in [PR #11](https://github.com/repeat98/octamachine/pull/11) on `work/wp-05-octatrack-baseline`; required checks pass. The [report](reports/WP-05-ot-baseline.md) and two WP-03 metadata pairs record OS 1.40C reaching `PTCH` in headless and windowed runs, with a scripted PLAY/lamp/STOP response. The official distribution archive matched octemu's pin. The emulator's live monitor showed host-side pitch/underflow artifacts; no audio parity or hardware behavior is claimed.
+
+- [x] Verify the pinned OS archive and build the pinned octemu/QEMU/DSP sources.
+- [x] Reach the PTCH screen and complete the panel walk under bounded headless and windowed runs.
+- [x] Map CPU, DSP, panel, storage, and audio interfaces to the pinned source.
+- [x] Separate guest audio-block timing from host timeout/playback behavior; keep private inputs and captures local.
+- [ ] Merge PR #11 and reconcile the accepted delivery.
+
 ## Gate checklist
 
 - [ ] G0: reproducible source/target profiles and MD/OT baseline captures — WP-00–05.
@@ -82,20 +90,22 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 is accepted and WP-35's imported evidence is available. WP-05 can inspect the local Octatrack inputs, but the pinned source distribution archive is not present in current workspace evidence, so it must verify or reacquire that input before using the extracted OS as a baseline. WP-35's c10 reproduction follow-up is currently being delivered.
+WP-04 is accepted, WP-35's import and c10 follow-up are merged, and WP-05's technical evidence is ready for review. After WP-05's required checks and merge are reconciled, WP-06 is the next CPU compatibility audit; WP-35 remains prior Gearmulator evidence and does not change packet prerequisites.
 
-1. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): verify local distribution provenance or reacquire the pinned OS archive before a stock headless/UI run.
+1. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): review the verified stock OS 1.40C headless/UI baseline and accept the packet.
+2. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): compare executed Machinedrum MCF5206E firmware behavior with the Octatrack CFV4e target and identify instruction/control-state adaptations.
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
-[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) has its import accepted in [PR #8](https://github.com/repeat98/octamachine/pull/8), merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`. The c10 replay follow-up is open in [PR #10](https://github.com/repeat98/octamachine/pull/10), with required checks pending on its latest revision. The original excursion remains Gearmulator-only prior evidence and adds no roadmap prerequisite.
+[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) is done. Import [PR #8](https://github.com/repeat98/octamachine/pull/8) merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`; c10 replay follow-up [PR #10](https://github.com/repeat98/octamachine/pull/10) merged as `711ca1114190ebaf4d7c04a834353d3ff6e0ec12` after required checks passed. Its excursion remains Gearmulator-only evidence and adds no roadmap prerequisite.
 
 ## Cross-cutting unknowns and blockers
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
-| Source reproduction and MD reference startup | WP-01 records recursive revisions and clean builds; WP-04 records full repeated startup traces, checkpoints, and WP-03 cold/cached manifest comparisons in Gearmulator only | Reconcile WP-04 merge, then WP-05 establishes the independent Octatrack baseline |
-| Exact target profile | WP-02 documents octemu's Octatrack MKII/MCF54455 profile and expected OS 1.40C; the extracted local OS section's source archive and physical board/carrier identity are unavailable | WP-05 verifies/reacquires the pinned firmware input; physical profile remains provisional and the hardware gate stays closed |
+| Source reproduction and reference startup | WP-01 records recursive revisions and clean builds; WP-04 records repeated MD startup traces/checkpoints in Gearmulator; WP-05 records unchanged OS 1.40C reaching `PTCH` and a scripted panel response in octemu | Accept WP-05, then begin WP-06; neither emulator establishes physical parity |
+| Exact target profile | WP-02 documents octemu's Octatrack MKII/MCF54455 profile; WP-05 verifies the OS 1.40C distribution archive pin and boots the extracted image. Physical board/carrier identity remains unavailable | Keep the hardware profile provisional; physical identification stays open for later hardware gates |
+| Octatrack panel response | measured (octemu only) | A bounded windowed run accepted PLAY and STOP; the panel screenshot shows a PLAY indicator and lit sequencer lamp. This is one scripted path, not full control coverage. See [WP-05](reports/WP-05-ot-baseline.md). | [WP-05](work_packets/WP-05-octatrack-baseline.md), [WP-18](work_packets/WP-18-panel-protocol.md), [WP-20](work_packets/WP-20-control-surface.md) |
 | Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references; [WP-35](reports/WP-35-octamad-md-import.md) adds static firmware evidence for the HI08 map | WP-07 resolves with traces/primary sources |
 | Target execution strategy | CPU/DSP similarity alone does not establish a port. [WP-35](reports/WP-35-octamad-md-import.md): both MD DSP programs execute from external RAM, which the DSP56721 lacks. Voice-DSP relocation is demonstrated in the reference, and the E12 samples cannot be DSP-resident | WP-06–10 assess and choose a realizable mechanism, starting from the WP-35 ledger candidates |
 | Distribution | WP-01 records source notices and octemu's stated combined-QEMU restriction; no octamachine-wide license is declared | WP-32 follows the recorded notices and any maintainer decision |

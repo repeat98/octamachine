@@ -1,12 +1,12 @@
 # WP-35 — Import the octamad Machinedrum evidence and tools
 
-- Status: `in_review`
+- Status: `done`
 - Owner: repeat98 (agent-assisted)
 - Branch: `work/wp-35-c10-replay-evidence`
 - Updated: 2026-09-23
 - Depends on: none (maintenance; it adds no prerequisite to WP-00–33)
 - Gate: maintenance
-- Accepted delivery: import PR #8 merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`; c10 follow-up PR #10 open
+- Accepted delivery: import PR #8 merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`; c10 follow-up PR #10 merged as `711ca1114190ebaf4d7c04a834353d3ff6e0ec12`
 
 ## Result
 
@@ -34,19 +34,19 @@ The source is octamad branch `machinedrum-phase0`, head `aad3e11` (23 Sep 2026).
 - [x] The load-image parser has synthetic tests that pass under `make check`, including truncated and malformed images.
 - [x] Each affected waiting packet links the evidence in its handoff, with no acceptance item checked on its strength.
 - [x] `md_profile`, `md_replay`, and `md_dis` are rebuilt from the pinned Gearmulator source; capture `c10` replays bit-identically under a WP-03 manifest and redacted JSONL summary.
-- [ ] Merged after review and required checks.
+- [x] Both the import and c10 evidence follow-up are merged after required checks.
 
 The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies. Keep unchecked criteria visible across prompts.
 
 ## Current handoff
 
 - Completed: imported report, tools, patches, tests and packet pointers (PR #8 merged); rebuilt `md_profile`, `md_replay`, and `md_dis`; captured and replayed `c10` twice with zero differing blocks; recorded one replay in a WP-03 manifest and redacted JSONL summary.
-- Remaining: merge the c10 evidence follow-up after required checks pass.
-- Next action: wait for PR #10's required checks, merge when they pass, then reconcile the accepted delivery.
-- Waiting on: PR #10 required checks and merge conditions.
+- Remaining: none.
+- Next action: none; use the imported report and tools from the dependent packet handoffs.
+- Waiting on: none.
 - Blockers: none.
 - Evidence: [WP-35 report](../reports/WP-35-octamad-md-import.md), [WP-03 manifest](../reports/WP-35-c10-replay-v1.manifest.json), and redacted [event summary](../reports/WP-35-c10-replay-v1.events.jsonl).
-- Delivery: [PR #10](https://github.com/repeat98/octamachine/pull/10) open; import PR #8 merged.
+- Delivery: [PR #10](https://github.com/repeat98/octamachine/pull/10) merged as `711ca1114190ebaf4d7c04a834353d3ff6e0ec12`; [PR #8](https://github.com/repeat98/octamachine/pull/8) merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`.
 
 ## Prompt history
 
@@ -100,3 +100,19 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: none.
 - Next action: wait for PR #10's required checks, merge when they pass, then reconcile accepted delivery.
 - Delivery: [PR #10](https://github.com/repeat98/octamachine/pull/10); commit `41a2eba` records the c10 evidence.
+
+### 2026-09-23 / prompt 3 — reconcile c10 delivery before WP-05
+
+- Request: continue the overnight port after the user confirmed the manual PR #8 merge; reconcile the already-authorized PR #10 merge before starting WP-05.
+- Starting state → ending state: `in_review` → `done`; PR #10's merge and required checks were verified before starting WP-05.
+- Owner / branch: Codex / `work/wp-05-octatrack-baseline` (reconciliation recorded with the next packet's work).
+- Completed:
+  - [x] Verified PR #10 merged at 2026-09-23 21:11:06 UTC as `711ca1114190ebaf4d7c04a834353d3ff6e0ec12`; required check runs passed.
+  - [x] Marked the merged delivery complete and updated the handoff/status before beginning dependent work.
+- Remaining: none.
+- Changed files: this packet and `docs/STATUS.md`.
+- Verification: `gh pr view 10 --json state,mergedAt,mergeCommit,statusCheckRollup` — merged; all required checks passed. The merge commit is the base for WP-05.
+- Findings: the c10 replay remains a single Gearmulator voice-DSP capture result; this merge does not add Octatrack or hardware evidence.
+- Blockers: none.
+- Next action: continue with WP-05, the unmodified Octatrack emulator baseline.
+- Delivery: recorded in the WP-05 packet commit on `work/wp-05-octatrack-baseline`; PR #10 merged as `711ca1114190ebaf4d7c04a834353d3ff6e0ec12`.
