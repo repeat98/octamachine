@@ -43,3 +43,18 @@ Record findings as dated entries. Each entry should state the upstream repositor
 - Validation: `scripts/compare_captures.py` reports the first event/field mismatch and returns separate outcomes for equivalent, divergent, missing input, invalid input, incomplete trace, and capture failure. It rejects mismatched comparison plans and initial-state modes; it never treats a partial JSONL record as complete.
 - Synthetic verification: `make check` runs ten tests against checked-in and temporary fixture data without firmware: equivalent within the fixture-only tolerance, divergent, all four accepted initial-state modes, missing trace/manifest, duplicate-key rejection, firmware identity enforcement, failed capture, trace cap, and truncated final record.
 - Limit: the fixture's `0.1` absolute tolerance is a synthetic boundary-test parameter only. No firmware, emulator, clock mapping, timeout, or behavioral tolerance is established. Actual checkpoint triggers remain to be recorded from measured WP-04/WP-05 runs. See [WP-03 evidence report](reports/WP-03-evidence.md).
+
+## 2026-09-23 — Machinedrum DSP and interface evidence imported from octamad (WP-35)
+
+- Source: octamad branch `machinedrum-phase0`, head `aad3e11` (the user's MIT octabam working copy; local). Reference: Gearmulator MD/MM `8cea0524a75435122c20b669ca114c9ac6509ba2` with `dsp56kEmu` `1378c43`, instrumented by `patches/gearmulator-md-mm/md-reference/`. Firmware: MD SPS-1UW OS 1.63; update `.syx` SHA-256 `a58cd61f…42cabd5`; the dump matches FNV-64 `33b7c1a9e29f43fd`.
+- Procedure (octamad): `md_extract.py` decodes the update and parses both DSP load images and the 135 machine descriptors. `md_profile` boots the dump and profiles both DSPs per JIT block, traces host-port, handler and ESSI traffic, maps parameters to record words and captures the voice DSP. `md_replay` runs the voice DSP's loop standalone from a capture, and `md_relocate.py` moves its code. The tools and commands are in `scripts/md_reference/`.
+- Observations:
+  - **identities:** section 1 is the voice DSP (Gearmulator DSP2 at `0x600000`), section 2 the mixer (DSP1 at `0x500000`);
+  - **external memory:** both programs execute from external RAM at `0x100000+`;
+  - **voice DSP work:** peak ~1,650 cycles/sample with 16 voices, the mixer's a constant ~1,850, both of 2,304 (emulator cycle model);
+  - **inter-DSP link:** 512-word periods of 32 samples × 16 voices;
+  - **standalone replay:** the voice loop outside the MD is bit-identical in six captures covering all 50 core engines, also after relocating its code (987 patched words);
+  - **memory:** the voice DSP needs ~71–76 K words plus P-I buffers, and the E12 samples add 201.8 K words;
+  - **window fetch:** fetching from the shared window adds ~80 % (fetch-counted).
+- Checked in this repository: `md_extract.py` reproduces every pinned section hash, both load maps and the catalog. The patches stack cleanly after `0001` and `0002` on the pinned sources.
+- Inference and limits: everything is Gearmulator-only or static; nothing ran on octemu, a DSP5636x model or hardware. The runs predate the WP-03 contract and are prior evidence. The mixer is not relocated, and its host stream is not decoded. The interpreter and JIT builds disagree on two captures, for a reason not found. Details, retractions and adaptation-ledger candidates: [WP-35 report](reports/WP-35-octamad-md-import.md).
