@@ -18,7 +18,7 @@ cd octamachine
 make check
 ```
 
-This validates the reference manifest and compiles the Python scripts. Emulator builds and firmware execution have separate prerequisites.
+This validates the reference manifest, compiles the Python scripts, and runs the synthetic capture-comparison checks. Emulator builds and firmware execution have separate prerequisites.
 
 | I want to… | Start with |
 | --- | --- |
@@ -81,7 +81,7 @@ These projects supply the research and tooling foundations. Each has its own lic
 | `docs/PORT_PLAN.md` | Architecture questions, gates, dependency index |
 | `docs/work_packets/` | Packet briefs, checklists, prompt histories |
 | `docs/templates/` | Reusable work packet and agent handoff |
-| `scripts/` | Reference management, emulator patch setup, read-only image audit |
+| `scripts/` | Reference management, emulator patch setup, read-only image audit, and capture comparison |
 | `src/image/`, `src/compat/`, `src/dsp/` | Reserved homes for port implementation |
 | `patches/` | Separate octemu and Gearmulator changes |
 | `tests/fixtures/` | Reviewed metadata and future synthetic comparison fixtures |

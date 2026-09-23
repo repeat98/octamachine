@@ -75,7 +75,7 @@ A reviewer should understand the claim without proprietary firmware. Use [review
 
 Run `make check` for every changed packet. Run relevant emulator or hardware checks when the change requires them. For documentation-only work, check local links, command names against the implementation, and whitespace; do not invent runtime results.
 
-Source comments, static image inspection, emulator traces, and physical measurements are different kinds of evidence. Label them. The scaffold check validates the reference manifest and Python syntax; it does not prove firmware compatibility.
+Source comments, static image inspection, emulator traces, and physical measurements are different kinds of evidence. Label them. `make check` validates the reference manifest, Python syntax, and synthetic capture cases; it does not prove firmware compatibility.
 
 ## Commit, push, and open a PR
 

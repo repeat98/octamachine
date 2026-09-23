@@ -5,6 +5,7 @@ PYTHON ?= python3
 check:
 	$(PYTHON) scripts/references.py validate
 	$(PYTHON) -m compileall -q scripts
+	$(PYTHON) -m unittest discover -s tests -p 'test_*.py'
 
 refs:
 	$(PYTHON) scripts/references.py fetch

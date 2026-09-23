@@ -1,0 +1,3 @@
+{"sequence":0,"clock_id":"guest_cpu","time":0,"kind":"mmio_write","pc":{"value":12,"semantics":"current_instruction"},"address":"0x00ff0000","width_bits":32,"endianness":"big","value":1}
+{"sequence":1,"clock_id":"guest_cpu","time":10,"kind":"mmio_write","pc":{"value":16,"semantics":"current_instruction"},"address":"0x00ff0004","width_bits":32,"endianness":"big","value":2}
+{"sequence":2,"clock_id":"guest_cpu","time":20,"kind":"mmio_write","pc":{"value":20,"semantics":"current_instruction"},"address":"0x00ff0008","width_bits":32,"endianness":"big","value":4}

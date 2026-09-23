@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "run": {
+    "run_id": "wp03-synthetic-reference",
+    "scenario_id": "synthetic-mmio-sequence-v1",
+    "purpose": "Independently authored validator fixture; no device or firmware data.",
+    "origin": "synthetic",
+    "started_at_utc": "2026-09-23T18:00:00Z",
+    "firmware": {
+      "profile_id": "synthetic-no-firmware",
+      "revision": "none",
+      "public_fingerprints": {}
+    },
+    "source_state": [
+      {
+        "repository": "octamachine-synthetic-fixture",
+        "revision": "wp03-fixture-v1",
+        "dirty": false,
+        "patches": []
+      }
+    ],
+    "build": {
+      "command": ["synthetic fixture"],
+      "toolchain": {"python": "3.10+"}
+    },
+    "initial_state": {
+      "kind": "cold_boot",
+      "description": "Synthetic initial state; no emulator was started."
+    },
+    "clock_domains": {
+      "stimulus_clock": {
+        "unit": "nanoseconds",
+        "origin": "scenario start",
+        "frequency_hz": 1000000000
+      },
+      "guest_cpu": {
+        "unit": "cycles",
+        "origin": "synthetic reset release",
+        "frequency_hz": null
+      }
+    },
+    "stimuli": [
+      {
+        "sequence": 0,
+        "stimulus_id": "release-reset",
+        "kind": "reset_release",
+        "at": {"clock_id": "stimulus_clock", "value": 0},
+        "parameters": {}
+      },
+      {
+        "sequence": 1,
+        "stimulus_id": "write-test-register",
+        "kind": "synthetic_mmio_write",
+        "at": {"clock_id": "stimulus_clock", "value": 10},
+        "parameters": {"width_bits": 32, "endianness": "big"}
+      }
+    ]
+  },
+  "checkpoint": {
+    "checkpoint_id": "synthetic-first-three-writes",
+    "trigger": "three synthetic MMIO writes recorded",
+    "timeout": {"value": 1, "unit": "seconds"}
+  },
+  "capture": {
+    "status": "complete",
+    "trace_file": "reference.events.jsonl",
+    "format": "jsonl-v1",
+    "expected_records": 3,
+    "recorded_records": 3,
+    "trace_limit": null,
+    "dropped_events": 0,
+    "stop_reason": "checkpoint_reached"
+  },
+  "comparison": {
+    "plan_id": "synthetic-mmio-sequence-v1",
+    "declared_at_utc": "2026-09-23T17:00:00Z",
+    "fields": [
+      {"path": "kind", "mode": "exact"},
+      {"path": "pc.value", "mode": "exact"},
+      {"path": "pc.semantics", "mode": "exact"},
+      {"path": "address", "mode": "exact"},
+      {"path": "width_bits", "mode": "exact"},
+      {"path": "endianness", "mode": "exact"},
+      {"path": "value", "mode": "absolute_tolerance", "tolerance": 0.1, "unit": "synthetic-value-units"}
+    ]
+  }
+}
