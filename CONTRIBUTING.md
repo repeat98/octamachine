@@ -2,6 +2,8 @@
 
 Pull requests are welcome for measured compatibility research, image inspection tools, boot traces, CPU/DSP/peripheral shims, emulator integration, and documentation. The shared goal is to run the Machinedrum firmware itself on the Octatrack with minimal documented changes. A narrow PR with one reproducible claim is easier to review than a broad unmeasured port.
 
+Follow [AGENTS.md](AGENTS.md) for the shared work packet, commit, push, and PR submission workflow.
+
 ## Set up
 
 ```sh
