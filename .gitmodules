@@ -1,0 +1,3 @@
+[submodule "vendor/octemu"]
+	path = vendor/octemu
+	url = https://github.com/markandrus/octemu.git

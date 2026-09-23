@@ -1,0 +1,2 @@
+# A patch's diff context contains a mandatory leading space on blank lines.
+patches/**/*.patch whitespace=-blank-at-eol

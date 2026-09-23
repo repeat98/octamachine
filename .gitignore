@@ -1,0 +1,22 @@
+# Locally fetched references and build output
+/vendor/*
+!/vendor/octemu/
+/build/
+/out/
+/.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Firmware, ROMs, images, and local captures must stay out of this repository
+*.bin
+*.rom
+*.syx
+*.img
+*.dump
+*.wav
+*.aiff
+*.flac
+*.ot
+*.zip
+/private/

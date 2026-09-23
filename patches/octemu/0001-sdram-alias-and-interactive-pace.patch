@@ -1,0 +1,156 @@
+diff --git a/src/board/ot-board.c b/src/board/ot-board.c
+index dda4b8f..97f6894 100644
+--- a/src/board/ot-board.c
++++ b/src/board/ot-board.c
+@@ -48,6 +48,17 @@
+ #include "ot-audio-shm.h"
+ 
+ #define OT_SDRAM_BASE   0x40000000
++/* The part is 128 MiB; SDCS0 = 0x4000001b decodes 256 MiB over it, so
++ * 0x48000000..0x4fffffff is THE SAME memory a second time. CACR's
++ * DDCM_P makes the default data mode cache-inhibited and ACR0 =
++ * 0x4007e020 covers only the lower 128 MiB copyback, so the high
++ * decode is how the firmware (and every octabam loader) writes
++ * UNCACHED: stage, depack and the stock boot memset of the delay
++ * rings all name 0x4f... for memory that is read back at 0x47....
++ * Mapping 256 MiB of flat RAM here instead made the two halves
++ * separate memory: an octabam DRAM runtime depacked to 0x48a955e0
++ * and every detour into it read zeros at 0x40a955e0. */
++#define OT_SDRAM_ALIAS  0x48000000
+ #define OT_IMAGE_LOAD   0x40000400
+ #define OT_INIT_SP      0x47F00000
+ #define OT_LOWRAM_SIZE  0x00010000
+@@ -2180,6 +2191,10 @@ static uint32_t ot_atap_produced;
+ #define OT_SCRATCH_HI   0x4ec94a00u
+ #define OT_SCRATCH_POISON 0xa5c3a5c3u   /* not 0, not a valid pointer */
+ 
++/* NB since the uncached decode became an alias of the part: this range is
++ * the LOW 115 MB of SDRAM seen through OT_SDRAM_ALIAS, not a region of
++ * its own. It runs before the reset path loads the OS image, so the
++ * image still lands on top of the poison. */
+ static void ot_scratch_poison(void)
+ {
+     uint32_t buf[1024];
+@@ -2435,6 +2450,13 @@ static void octatrack_init(MachineState *machine)
+     env->vbr = 0;
+ 
+     memory_region_add_subregion(sysmem, OT_SDRAM_BASE, machine->ram);
++    {
++        MemoryRegion *uncached = g_new(MemoryRegion, 1);
++
++        memory_region_init_alias(uncached, NULL, "octatrack.ram.uncached",
++                                 machine->ram, 0, machine->ram_size);
++        memory_region_add_subregion(sysmem, OT_SDRAM_ALIAS, uncached);
++    }
+     memory_region_init_ram(lowram, NULL, "octatrack.lowram",
+                            OT_LOWRAM_SIZE, &error_fatal);
+     memory_region_add_subregion(sysmem, 0, lowram);
+@@ -2791,8 +2813,11 @@ static void octatrack_machine_class_init(ObjectClass *oc, const void *data)
+     mc->init = octatrack_init;
+     mc->default_cpu_type = M68K_CPU_TYPE_NAME("cfv4e");
+     mc->default_ram_id = "octatrack.ram";
+-    /* 256 MiB: the storage buffers span up to 244.7 MB above the SDRAM base. */
+-    mc->default_ram_size = 256 * MiB;
++    /* 128 MiB, the size of the part. The storage buffers that appear to
++     * span up to 244.7 MB above the SDRAM base are the same memory seen
++     * through the uncached decode at OT_SDRAM_ALIAS, which
++     * octatrack_init() maps as an alias of this RAM. */
++    mc->default_ram_size = 128 * MiB;
+ 
+     object_class_property_add_bool(oc, "mk1", ot_get_mk1, ot_set_mk1);
+     object_class_property_set_description(oc, "mk1",
+diff --git a/src/board/ot-dsp-shim.cc b/src/board/ot-dsp-shim.cc
+index 189ddd4..9f4eebc 100644
+--- a/src/board/ot-dsp-shim.cc
++++ b/src/board/ot-dsp-shim.cc
+@@ -252,6 +252,7 @@ std::atomic<int> g_clientFd {-1};
+ OtAudioShm *g_shm = nullptr;
+ char g_shmName[64];
+ bool g_throttle = OT_THROTTLE_DEFAULT; /* ot_dspcore_init always overrides */
++uint32_t g_pace = 1;                    /* interactive host-load relief */
+ /*
+  * -M octatrack,exit-with-frontend=on: octemu sets this on the QEMU
+  * it spawns. The frontend is the only thing that ever connects to the audio
+@@ -279,7 +280,7 @@ uint64_t g_blocks = 0;
+  * loosens this must re-test KEY DELIVERY, not just blocks per second. */
+ std::chrono::nanoseconds blockPeriod()
+ {
+-    return std::chrono::nanoseconds(g_throttle ? 1000000000ull * kFrames / ot::kRate
++    return std::chrono::nanoseconds(g_throttle ? g_pace * 1000000000ull * kFrames / ot::kRate
+                                                : 0);
+ }
+ 
+@@ -726,6 +727,12 @@ void ot_dspcore_init(const char *audio_path, int throttle, uint32_t interleave,
+                      int exit_with_frontend)
+ {
+     g_throttle = throttle != 0;              /* off = unthrottled, see above */
++    if (const char *pace = getenv("OCTEMU_PACE")) {
++        const unsigned long parsed = strtoul(pace, nullptr, 10);
++        if (parsed >= 1 && parsed <= 8) {
++            g_pace = (uint32_t)parsed;
++        }
++    }
+     g_exitWithFrontend = exit_with_frontend != 0;
+     g_interleave = interleave;
+     /* A TB holds at most TCG_MAX_INSNS instructions and the budget is checked
+diff --git a/src/main.c b/src/main.c
+index 6bc71a0..1b8c2f0 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -34,7 +34,7 @@ static struct {
+     bool headless, mk1, read_only;
+     VideoMode video;
+     int video_width;
+-    int throttle, interleave;
++    int throttle, interleave, pace;
+     const char *recording, *nvram, *cf, *script, *keymap, *os, *machine;
+     const char *usb_host;           /* --usb-host PATH: packet-bench socket */
+     bool audio_tap;                 /* --audio-tap: MAIN mirror in guest RAM */
+@@ -69,7 +69,7 @@ static const char *k_usage =
+     "                          [--script F.jsonl] [--timeout SECS]\n"
+     "                          [--recording X.wav|X.mov|X.gif]\n"
+     "                          [--video MODE] [--video-width N] [--no-hints]\n"
+-    "                          [--midi]\n"
++    "                          [--midi] [--half-speed]\n"
+     "                          [--in-a SPEC]..[--in-d SPEC]\n"
+     "\n"
+     "Boots the Octatrack on the patched QEMU with the real DSP cores, at real\n"
+@@ -125,6 +125,8 @@ static const char *k_usage =
+     "  --help, -h    this text\n"
+     "\n"
+     "Advanced (measurement, and the USB test gates):\n"
++    "  --half-speed  run the emulated audio clock at half speed for a more\n"
++    "                responsive interactive UI on a loaded host\n"
+     "  --unthrottled a MEASUREMENT mode, not a speed setting: run flat out\n"
+     "                instead of at real time, because capacity cannot be read\n"
+     "                through a throttle. Flat out, the guest stops being\n"
+@@ -310,6 +312,13 @@ static void spawn_qemu(const char *panel_sock, const char *audio_sock)
+         const char *argv[32];
+         int n = 0;
+ 
++        if (g.pace > 1) {
++            char pace[16];
++
++            snprintf(pace, sizeof pace, "%d", g.pace);
++            setenv("OCTEMU_PACE", pace, 1);
++        }
++
+         argv[n++] = QEMU_BIN;
+         argv[n++] = "-M"; argv[n++] = machine;
+         argv[n++] = "-kernel"; argv[n++] = g.os;
+@@ -415,6 +424,7 @@ int main(int argc, char **argv)
+     g.machine = "octatrack";
+     g.throttle = OT_THROTTLE_DEFAULT;   /* real time; see ot-board.c */
+     g.interleave = OT_INTERLEAVE_DEFAULT;
++    g.pace = 1;
+ 
+     for (int i = 1; i < argc; i++) {
+         const char *a = argv[i];
+@@ -449,6 +459,7 @@ int main(int argc, char **argv)
+         else if (!strcmp(a, "--machine"))     { ARG(); g.machine = val; }
+         else if (!strcmp(a, "--timeout"))     { ARG(); g.timeout = atof(val); }
+         else if (!strcmp(a, "--unthrottled"))  { g.throttle = 0; }
++        else if (!strcmp(a, "--half-speed"))   { g.pace = 2; }
+         else if (!strcmp(a, "--midi"))        g.midi = true;
+         else if (!strcmp(a, "--no-hints"))   { g.no_hints = true; }
+         else if (!strcmp(a, "--interleave"))  { ARG(); g.interleave = atoi(val); }

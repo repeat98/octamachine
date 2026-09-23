@@ -1,0 +1,13 @@
+{
+  "repositories": [
+    {"name": "octabam", "url": "https://github.com/sambanks/octabam.git", "ref": "main", "purpose": "Octatrack image builder and verification harness"},
+    {"name": "octemu", "url": "https://github.com/markandrus/octemu.git", "ref": "main", "commit": "87000189418c8ca2026dc047bda220b66802809d", "purpose": "Real-time Octatrack emulator with headless and SDL panel modes"},
+    {"name": "gearmulator-md-mm", "url": "https://github.com/joelanders/gearmulator-md-mm.git", "ref": "release/md-mm-alpha", "purpose": "Machinedrum behavior and audio oracle"},
+    {"name": "gearmulator", "url": "https://github.com/dsp56300/gearmulator.git", "ref": "main", "purpose": "Upstream emulator architecture"},
+    {"name": "octamax", "url": "https://github.com/mxldyn/octamax.git", "ref": "main", "purpose": "Earlier Octatrack reverse engineering"},
+    {"name": "dsp56300", "url": "https://github.com/dsp56300/dsp56300.git", "ref": "dsp56300", "purpose": "DSP56300 emulator core"},
+    {"name": "mc68k", "url": "https://github.com/joelanders/mc68k-md-mm.git", "ref": "release/md-mm-alpha", "purpose": "ColdFire/68k emulator fork used by Gearmulator MD/MM"},
+    {"name": "elektron-firmware-tool", "url": "https://github.com/mischa85/elektron-firmware-tool.git", "ref": "main", "purpose": "Elektron firmware container tooling"},
+    {"name": "mame", "url": "https://github.com/mamedev/mame.git", "ref": "master", "purpose": "Machinedrum hardware skeleton driver", "sparse": "src/mame/elektron/elektronmono.cpp"}
+  ]
+}
