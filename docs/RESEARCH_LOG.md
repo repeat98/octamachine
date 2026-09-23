@@ -68,3 +68,11 @@ Record findings as dated entries. Each entry should state the upstream repositor
   - **window fetch:** fetching from the shared window adds ~80 % (fetch-counted).
 - Checked in this repository: `md_extract.py` reproduces every pinned section hash, both load maps and the catalog. The patches stack cleanly after `0001` and `0002` on the pinned sources.
 - Inference and limits: everything is Gearmulator-only or static; nothing ran on octemu, a DSP5636x model or hardware. The runs predate the WP-03 contract and are prior evidence. The mixer is not relocated, and its host stream is not decoded. The interpreter and JIT builds disagree on two captures, for a reason not found. Details, retractions and adaptation-ledger candidates: [WP-35 report](reports/WP-35-octamad-md-import.md).
+
+## 2026-09-23 — WP-35 c10 voice-DSP replay reproduction
+
+- Source: octamachine's WP-35 reference tools at `fb2c29d07f6d0468944fa5d80c960fb7e387e6ec`; Gearmulator MD/MM `8cea0524a75435122c20b669ca114c9ac6509ba2`, recursive DSP56300 `1378c43074e6ec22f69f14ed55c21e44c5ccadc1`, and the recursive revisions recorded in the [WP-03 manifest](reports/WP-35-c10-replay-v1.manifest.json). WP-04 trace/checkpoint patches and both WP-35 reference patches were applied to a separate clean source copy.
+- Firmware: local MD SPS-1UW OS 1.63, identified by public size/CRC-32/SHA-1/FNV-64 fingerprints. Firmware bytes, DSP payloads, `c10`, and raw logs remain local.
+- Procedure: configured Gearmulator with CMake 4.0.1 and Apple Clang 21.0.0 in Release mode on macOS 26.6.2 arm64, built `md_profile`, `md_replay`, and `md_dis` for arm64/x86_64; ran `md_profile <local OS 1.63 image> out/md_profile/cap capture=0x10`; then ran `md_replay out/md_profile/cap/c10` twice.
+- Observation: build and profile completed successfully. Both replay runs exited 0 and compared 33,513 blocks of 32 samples with zero differing blocks. The second run's terminal summary is the only event in the WP-03 JSONL trace; the manifest and JSONL validate. The profiler destination directory must exist before invocation.
+- Limit: this is one standalone voice-DSP capture in the Gearmulator model. It does not reproduce the six-capture/all-engine or relocated replay results in the original WP-35 report and establishes no Octatrack or physical behavior. See the [follow-up report](reports/WP-35-octamad-md-import.md).

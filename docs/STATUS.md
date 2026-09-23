@@ -15,7 +15,7 @@ Source reproduction and first runtime baselines. The pinned Gearmulator Machined
 - [x] Capture and repeat the Machinedrum reference boot in Gearmulator, including firmware-ready, factory-initialized, and idle checkpoints; see the [WP-04 baseline report](reports/WP-04-md-baseline.md).
 - [ ] Capture an unmodified Octatrack headless/UI baseline.
 
-Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [WP-04 baseline report](reports/WP-04-md-baseline.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `2d13237`.
+Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [WP-02 profile report](reports/WP-02-target-profile.md), [WP-03 evidence contract](reports/WP-03-evidence.md), [WP-04 baseline report](reports/WP-04-md-baseline.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `fb2c29d`.
 
 ## Active work and current handoff
 
@@ -60,13 +60,13 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Run the synthetic checks through `make check`.
 - [x] Merge WP-03 after required CI checks pass.
 
-[WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md) is in review on `work/wp-04-machinedrum-baseline`. The [baseline report](reports/WP-04-md-baseline.md) records two matching full MMIO runs, bounded cold/cached boot checkpoints, failure handling, and passing WP-03 comparisons of the repeated cold and cached manifests. Raw traces remain private and local.
+[WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md) is done: [PR #9](https://github.com/repeat98/octamachine/pull/9) merged as `fb2c29d07f6d0468944fa5d80c960fb7e387e6ec`. The [baseline report](reports/WP-04-md-baseline.md) records two matching full MMIO runs, bounded cold/cached boot checkpoints, failure handling, and passing WP-03 comparisons of the repeated cold and cached manifests. Raw traces remain private and local.
 
 - [x] Reach named firmware-ready, factory-initialized, and no-stimulus idle checkpoints under finite frame and wall-clock limits.
 - [x] Compare two repeated blank-flash runs and separately labeled cached starts; event order and checkpoint metadata match.
 - [x] Capture reset, SIM, both DSP HI08 boot streams, panel startup, and idle scheduler progress.
 - [x] Prove trace cap, missing-image, and stalled-driver outcomes report failure or incomplete evidence.
-- [ ] Pass required GitHub checks, merge PR, and reconcile the accepted delivery.
+- [x] Pass required GitHub checks, merge PR, and reconcile the accepted delivery.
 
 ## Gate checklist
 
@@ -82,14 +82,13 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-03 is accepted. WP-04 has completed its runtime criteria and is pending PR checks/merge. WP-05 can now inspect the local Octatrack inputs, but the pinned source distribution archive is not present in current workspace evidence, so it must verify or reacquire that input before using the extracted OS as a baseline.
+WP-04 is accepted and WP-35's imported evidence is available. WP-05 can inspect the local Octatrack inputs, but the pinned source distribution archive is not present in current workspace evidence, so it must verify or reacquire that input before using the extracted OS as a baseline. WP-35's c10 reproduction follow-up is currently being delivered.
 
-1. [WP-04 — Machinedrum baseline](work_packets/WP-04-machinedrum-baseline.md): finish PR checks, merge, and reconcile accepted delivery.
-2. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): verify local distribution provenance or reacquire the pinned OS archive before a stock headless/UI run.
+1. [WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md): verify local distribution provenance or reacquire the pinned OS archive before a stock headless/UI run.
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
-[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) is in review on `work/wp-35-octamad-md-import`. It is maintenance and adds no prerequisite. It brings Gearmulator-only prior evidence and tools for WP-06–10, WP-14–17, WP-25 and WP-26 (the [report](reports/WP-35-octamad-md-import.md), `scripts/md_reference/`), linked from each of those packets. No acceptance item or gate changes on its strength.
+[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) has its import accepted in [PR #8](https://github.com/repeat98/octamachine/pull/8), merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`. The c10 replay follow-up is open in [PR #10](https://github.com/repeat98/octamachine/pull/10), with required checks pending on its latest revision. The original excursion remains Gearmulator-only prior evidence and adds no roadmap prerequisite.
 
 ## Cross-cutting unknowns and blockers
 

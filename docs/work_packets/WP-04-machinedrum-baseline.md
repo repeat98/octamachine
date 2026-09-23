@@ -1,12 +1,12 @@
 # WP-04 — Capture the Machinedrum reference boot
 
-- Status: `in_review`
+- Status: `done`
 - Owner: Codex
 - Branch: `work/wp-04-machinedrum-baseline`
 - Updated: 2026-09-23
 - Depends on: [WP-01](WP-01-source-provenance.md), [WP-02](WP-02-target-profiles.md), [WP-03](WP-03-evidence-contract.md)
 - Gate: G0
-- Accepted delivery: pending PR and required checks
+- Accepted delivery: PR #9 merged as `fb2c29d07f6d0468944fa5d80c960fb7e387e6ec` after required checks passed
 
 ## Result
 
@@ -33,12 +33,12 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: All four packet acceptance criteria have runtime or negative-case evidence in the [baseline report](../reports/WP-04-md-baseline.md). The repeated cold and cached run manifests compare equivalent through the WP-03 comparator. Results apply to the Gearmulator MD model only.
-- Remaining: Required PR checks, merge, and delivery reconciliation.
-- Next action: Push the task branch, open the WP-04 PR, wait for required checks, then merge when GitHub reports the authorized merge is eligible.
-- Waiting on: GitHub checks and merge conditions for this PR.
+- Remaining: None for WP-04. Project gate G0 remains open until WP-05 establishes the Octatrack baseline.
+- Next action: Begin WP-05 by verifying the pinned Octatrack OS distribution archive and its local provenance before using the extracted OS as a baseline.
+- Waiting on: none for WP-04.
 - Blockers: None for WP-04 evidence; G0 still awaits the Octatrack baseline.
 - Evidence: The report contains safe checkpoint metadata, source/patch fingerprints, trace counts, WP-03 comparison results, and reproduction commands. Raw firmware-dependent traces remain under a private local path.
-- Delivery: `work/wp-04-machinedrum-baseline`; PR pending.
+- Delivery: PR #9 merged as `fb2c29d07f6d0468944fa5d80c960fb7e387e6ec`.
 
 ## Prompt history
 
@@ -94,3 +94,21 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: None for WP-04 evidence; GitHub checks/merge and WP-05's source archive provenance remain.
 - Next action: Commit and push the branch, open the WP-04 PR, then wait for checks before merging.
 - Delivery: Enclosing commit on `work/wp-04-machinedrum-baseline`; PR pending.
+
+### 2026-09-23 / prompt 3 — reconcile the merged WP-04 delivery
+
+- Request: continue the overnight port and reconcile WP-04 PR #9 after required checks passed and it was merged under the user's earlier authorization.
+- Starting state → ending state: `in_review` → `done`; all four runtime acceptance criteria remain supported by the report and traces.
+- Owner / branch: Codex / `work/wp-04-machinedrum-baseline` (delivery reconciliation recorded in the WP-35 follow-up branch).
+- Completed:
+  - [x] Confirmed PR #9 merged at `fb2c29d07f6d0468944fa5d80c960fb7e387e6ec` after all required GitHub checks passed.
+  - [x] Reconciled the accepted delivery and marked WP-04 done.
+  - [x] Kept G0 open because WP-05's Octatrack baseline is still missing.
+- Remaining:
+  - [ ] WP-05 must verify or reacquire the pinned Octatrack OS source distribution archive before a stock headless/UI run.
+- Changed files: this packet and `docs/STATUS.md`.
+- Verification: PR merge metadata and required check status confirmed; WP-04 report evidence remains unchanged. `make check` is run with the enclosing WP-35 follow-up.
+- Findings: PR acceptance confirms delivery only; the documented Gearmulator-only limits and no-hardware claim remain unchanged.
+- Blockers: none for WP-04; WP-05 owns the remaining G0 evidence.
+- Next action: proceed to WP-05 input provenance and baseline capture after this WP-35 follow-up is delivered.
+- Delivery: enclosing commit on `work/wp-35-c10-replay-evidence`.
