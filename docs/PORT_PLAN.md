@@ -143,6 +143,7 @@ WP-00–33 define the port roadmap. Maintenance packets track supporting reposit
 | [WP-32](work_packets/WP-32-release-and-handoff.md) | Prepare a reproducible contributor release | WP-28, WP-29, WP-31 | G6 |
 | [WP-33](work_packets/WP-33-additional-variants.md) | Extend to another firmware or hardware variant | WP-32 | Optional |
 | [WP-34](work_packets/WP-34-contributor-documentation.md) | Improve README, setup, and contributor documentation | WP-00 | Maintenance |
+| [WP-35](work_packets/WP-35-octamad-md-import.md) | Import the octamad Machinedrum evidence and tools | — | Maintenance |
 
 ### Dispatch order and splitting
 

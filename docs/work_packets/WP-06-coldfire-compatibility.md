@@ -35,8 +35,10 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Next action: Use the reference startup trace to inventory the first control-register and exception operations and probe those on the target CPU model.
 - Waiting on: The dependency packets listed above; preparation is allowed, acceptance requires their evidence.
 - Blockers: none recorded.
-- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result.
+- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result. Prior evidence from the octamad Machinedrum excursion: the MD MAIN OS startup (link address `0x200000`, SP `0x300000`, the 2,466-byte SRAM copy, entry `0x213a0c`), and a static census of the 44 engine handlers: pure ISA_A functions with no MAC/EMAC, hardware access or calls (section "ColdFire side") ([WP-35 report](../reports/WP-35-octamad-md-import.md)). It is Gearmulator-only, predates the WP-03 contract, and checks no item here.
 
 ## Prompt history
 
 No work prompt has executed this packet. Append a dated entry after every work prompt using the [packet template](../templates/WORK_PACKET.md#prompt-history).
+
+2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.

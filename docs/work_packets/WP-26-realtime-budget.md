@@ -35,8 +35,10 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Next action: Instrument resource counters and run one representative high-load scenario to identify the first limiting resource.
 - Waiting on: The dependency packets listed above; preparation is allowed, acceptance requires their evidence.
 - Blockers: none recorded.
-- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result.
+- Evidence: No packet acceptance evidence yet. Existing research is a starting point, not proof of this packet's result. Prior evidence from the octamad Machinedrum excursion: reference-model work per sample of ~1,650 (voice DSP, 16 voices, busiest 10 ms) and ~1,850 (mixer, constant) out of the MD's 2,304. Fetching code from the shared window adds ~80 %, and moving hot code to private P recovers most of it ([WP-35 report](../reports/WP-35-octamad-md-import.md)). It is Gearmulator-only, predates the WP-03 contract, and checks no item here.
 
 ## Prompt history
 
 No work prompt has executed this packet. Append a dated entry after every work prompt using the [packet template](../templates/WORK_PACKET.md#prompt-history).
+
+2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.
