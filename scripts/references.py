@@ -59,6 +59,9 @@ def status() -> int:
             print(f'{repo["name"]:20} directory exists but is not a usable Git checkout')
             return 1
         suffix = " dirty" if dirty else ""
+        pin = repo.get("commit")
+        if pin and commit != pin:
+            suffix += f" PIN MISMATCH (expected {pin})"
         expected = repo["url"].removesuffix(".git")
         mismatch = " URL MISMATCH" if origin.removesuffix(".git") != expected else ""
         print(f'{repo["name"]:20} {commit}{suffix}{mismatch}')
@@ -89,6 +92,9 @@ def fetch() -> int:
                 args.append("--sparse")
             args.extend(("--branch", repo["ref"], repo["url"], str(path)))
             git(*args)
+            if repo.get("commit"):
+                git("fetch", "--depth", "1", "origin", repo["commit"], cwd=path)
+                git("checkout", "--detach", repo["commit"], cwd=path)
             if "sparse" in repo:
                 git("sparse-checkout", "set", "--no-cone", "/" + repo["sparse"], cwd=path)
         except (OSError, subprocess.CalledProcessError) as exc:

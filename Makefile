@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: check refs refs-status octemu-prepare
+.PHONY: check refs refs-status octemu-prepare gearmulator-prepare audit-md
 
 check:
 	$(PYTHON) scripts/references.py validate
@@ -14,3 +14,10 @@ refs-status:
 
 octemu-prepare:
 	$(PYTHON) scripts/prepare_octemu.py
+
+gearmulator-prepare:
+	$(PYTHON) scripts/prepare_gearmulator.py
+
+audit-md:
+	@test -n "$(IMAGE)" || (echo "usage: make audit-md IMAGE=/path/to/your-flash.bin" >&2; exit 2)
+	$(PYTHON) scripts/audit_md_image.py "$(IMAGE)"

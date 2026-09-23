@@ -4,6 +4,7 @@
 /build/
 /out/
 /.venv/
+/base_firmware/
 __pycache__/
 *.py[cod]
 .DS_Store

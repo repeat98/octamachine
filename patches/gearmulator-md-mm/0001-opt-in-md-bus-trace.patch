@@ -1,0 +1,175 @@
+diff --git a/source/elektron/md/mdLib/mdmc.cpp b/source/elektron/md/mdLib/mdmc.cpp
+index dae644c3..9f14ac39 100644
+--- a/source/elektron/md/mdLib/mdmc.cpp
++++ b/source/elektron/md/mdLib/mdmc.cpp
+@@ -67,6 +67,46 @@ namespace md
+ 		static_assert(g_mmPanelStartupProbe[27] == 0xff);
+ 		static_assert(g_mmPanelStartupProbe[28] == 0x30);
+ 		static_assert(g_mmPanelStartupProbe.back() == 0x00);
++
++		void traceBusAccess(const Microcontroller& _uc, const uint32_t _address,
++			const uint32_t _value, const uint8_t _size, const bool _write)
++		{
++			static const char* const path = std::getenv("GEARMULATOR_MD_BUS_TRACE");
++			static FILE* const trace = []
++			{
++				if(!path || !*path)
++					return static_cast<FILE*>(nullptr);
++				auto* const file = std::fopen(path, "w");
++				if(file)
++					(void)std::setvbuf(file, nullptr, _IOLBF, 0);
++				return file;
++			}();
++			if(!trace)
++				return;
++			static unsigned limit = []
++			{
++				const char* const value = std::getenv("GEARMULATOR_MD_BUS_TRACE_LIMIT");
++				if(!value || !*value)
++					return 100000u;
++				const auto parsed = std::strtoul(value, nullptr, 10);
++				return parsed == 0 ? 100000u : static_cast<unsigned>(parsed);
++			}();
++			static unsigned count = 0;
++			if(count >= limit)
++			{
++				if(count == limit)
++				{
++					std::fputs("mdbus trace truncated at configured event limit\n", trace);
++					std::fflush(trace);
++					++count;
++				}
++				return;
++			}
++			std::fprintf(trace, "mdbus cycle=%llu pc=%08x %c%u addr=%08x value=%08x\n",
++				static_cast<unsigned long long>(_uc.getCycles()), _uc.getPC(),
++				_write ? 'W' : 'R', static_cast<unsigned>(_size), _address, _value);
++			++count;
++		}
+ 	}
+ 
+ 	Microcontroller::Microcontroller(const Rom& _rom, const MachineModel _model,
+@@ -330,10 +370,7 @@ namespace md
+ 
+ 	void Microcontroller::logPeripheral(const uint32_t _addr, const uint32_t _value, const uint8_t _size, const bool _write)
+ 	{
+-		(void)_addr;
+-		(void)_value;
+-		(void)_size;
+-		(void)_write;
++		traceBusAccess(*this, _addr, _value, _size, _write);
+ 	}
+ 
+ 	void Microcontroller::onPanelTransmit(const uint8_t _byte)
+@@ -572,9 +609,24 @@ namespace md
+ 				if(const auto value = m_flashCommands.read8(offset))
+ 					return *value;
+ 		}
+-		if(memorymap::g_sim.contains(_addr))		return m_sim.read8(memorymap::g_sim.offset(_addr));
+-		if(memorymap::g_dsp1Hdi08.contains(_addr))	return m_hdi08Dsp1.read8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)));
+-		if(memorymap::g_dsp2Hdi08.contains(_addr))	return m_hdi08Dsp2.read8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)));
++		if(memorymap::g_sim.contains(_addr))
++		{
++			const auto value = m_sim.read8(memorymap::g_sim.offset(_addr));
++			traceBusAccess(*this, _addr, value, 1, false);
++			return value;
++		}
++		if(memorymap::g_dsp1Hdi08.contains(_addr))
++		{
++			const auto value = m_hdi08Dsp1.read8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)));
++			traceBusAccess(*this, _addr, value, 1, false);
++			return value;
++		}
++		if(memorymap::g_dsp2Hdi08.contains(_addr))
++		{
++			const auto value = m_hdi08Dsp2.read8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)));
++			traceBusAccess(*this, _addr, value, 1, false);
++			return value;
++		}
+ 		const bool patchRam = memorymap::isPatchRam(_addr);
+ 		std::shared_lock patchLock(m_patchRamMutex, std::defer_lock);
+ 		if(patchRam)
+@@ -597,9 +649,24 @@ namespace md
+ 				if(const auto value = m_flashCommands.read16(offset))
+ 					return *value;
+ 		}
+-		if(memorymap::g_sim.contains(_addr))		return m_sim.read16(memorymap::g_sim.offset(_addr));
+-		if(memorymap::g_dsp1Hdi08.contains(_addr))	return m_hdi08Dsp1.read16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)));
+-		if(memorymap::g_dsp2Hdi08.contains(_addr))	return m_hdi08Dsp2.read16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)));
++		if(memorymap::g_sim.contains(_addr))
++		{
++			const auto value = m_sim.read16(memorymap::g_sim.offset(_addr));
++			traceBusAccess(*this, _addr, value, 2, false);
++			return value;
++		}
++		if(memorymap::g_dsp1Hdi08.contains(_addr))
++		{
++			const auto value = m_hdi08Dsp1.read16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)));
++			traceBusAccess(*this, _addr, value, 2, false);
++			return value;
++		}
++		if(memorymap::g_dsp2Hdi08.contains(_addr))
++		{
++			const auto value = m_hdi08Dsp2.read16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)));
++			traceBusAccess(*this, _addr, value, 2, false);
++			return value;
++		}
+ 		const bool patchRam = memorymap::isPatchRam(_addr);
+ 		std::shared_lock patchLock(m_patchRamMutex, std::defer_lock);
+ 		if(patchRam)
+@@ -612,9 +679,24 @@ namespace md
+ 
+ 	void Microcontroller::write8(const uint32_t _addr, const uint8_t _val)
+ 	{
+-		if(memorymap::g_sim.contains(_addr))		{ m_sim.write8(memorymap::g_sim.offset(_addr), _val); return; }
+-		if(memorymap::g_dsp1Hdi08.contains(_addr))	{ m_hdi08Dsp1.write8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)), _val); return; }
+-		if(memorymap::g_dsp2Hdi08.contains(_addr))	{ m_hdi08Dsp2.write8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)), _val); return; }
++		if(memorymap::g_sim.contains(_addr))
++		{
++			m_sim.write8(memorymap::g_sim.offset(_addr), _val);
++			traceBusAccess(*this, _addr, _val, 1, true);
++			return;
++		}
++		if(memorymap::g_dsp1Hdi08.contains(_addr))
++		{
++			m_hdi08Dsp1.write8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)), _val);
++			traceBusAccess(*this, _addr, _val, 1, true);
++			return;
++		}
++		if(memorymap::g_dsp2Hdi08.contains(_addr))
++		{
++			m_hdi08Dsp2.write8(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)), _val);
++			traceBusAccess(*this, _addr, _val, 1, true);
++			return;
++		}
+ 		const bool patchRam = memorymap::isPatchRam(_addr);
+ 		std::unique_lock patchLock(m_patchRamMutex, std::defer_lock);
+ 		if(patchRam)
+@@ -673,9 +755,24 @@ namespace md
+ 				return;
+ 			}
+ 		}
+-		if(memorymap::g_sim.contains(_addr))		{ m_sim.write16(memorymap::g_sim.offset(_addr), _val); return; }
+-		if(memorymap::g_dsp1Hdi08.contains(_addr))	{ m_hdi08Dsp1.write16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)), _val); return; }
+-		if(memorymap::g_dsp2Hdi08.contains(_addr))	{ m_hdi08Dsp2.write16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)), _val); return; }
++		if(memorymap::g_sim.contains(_addr))
++		{
++			m_sim.write16(memorymap::g_sim.offset(_addr), _val);
++			traceBusAccess(*this, _addr, _val, 2, true);
++			return;
++		}
++		if(memorymap::g_dsp1Hdi08.contains(_addr))
++		{
++			m_hdi08Dsp1.write16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp1Hdi08.offset(_addr)), _val);
++			traceBusAccess(*this, _addr, _val, 2, true);
++			return;
++		}
++		if(memorymap::g_dsp2Hdi08.contains(_addr))
++		{
++			m_hdi08Dsp2.write16(static_cast<mc68k::PeriphAddress>(memorymap::g_dsp2Hdi08.offset(_addr)), _val);
++			traceBusAccess(*this, _addr, _val, 2, true);
++			return;
++		}
+ 		if(m_monomachineFlash && (memorymap::g_flashFull.contains(_addr)
+ 			|| memorymap::g_flashLow.contains(_addr)))
+ 		{

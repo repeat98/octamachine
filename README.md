@@ -4,6 +4,8 @@ Research scaffold for porting the **actual Elektron Machinedrum firmware** to Oc
 
 **Status:** scaffolding and feasibility research only. There is no Machinedrum boot on octemu or Octatrack hardware yet, and no flashable image. The different ColdFire, DSP, memory, and peripheral arrangements are substantial compatibility questions. The [port plan](docs/PORT_PLAN.md) and [compatibility matrix](docs/COMPATIBILITY_MATRIX.md) define the evidence needed to answer them.
 
+The first feasibility tool is a read-only audit of a locally supplied Machinedrum image. It checks the known 1.63 size/fingerprints and prints reset vectors without writing or retaining the image. See [boot feasibility](docs/BOOT_FEASIBILITY.md).
+
 ## Upstream work
 
 | Repository | What we use it for |
@@ -46,10 +48,14 @@ git clone --recurse-submodules <this-repository-url>
 cd octamachine
 make check
 make octemu-prepare             # apply the local octemu compatibility patch
+make gearmulator-prepare        # apply optional local MD bus tracing
 python3 scripts/references.py list
 python3 scripts/references.py fetch       # clones reference repos into vendor/
 python3 scripts/references.py status      # records the exact checkout commits
+python3 scripts/audit_md_image.py /path/to/your-machinedrum-flash.bin
 ```
+
+Place local Machinedrum dumps under `base_firmware/`; that directory is Git-ignored. The image audit prints fingerprints and reset vectors but never modifies the dump. For the trace setup and its scope, see [boot feasibility](docs/BOOT_FEASIBILITY.md).
 
 MAME is fetched sparsely: only its Machinedrum/Monomachine driver is checked out. The research checkouts are ignored by Git; octemu is the one tracked submodule. Record exact commits used for a result in `docs/RESEARCH_LOG.md`. See [CONTRIBUTING.md](CONTRIBUTING.md) for PR scope and evidence expectations.
 

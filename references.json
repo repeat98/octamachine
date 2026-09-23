@@ -2,7 +2,7 @@
   "repositories": [
     {"name": "octabam", "url": "https://github.com/sambanks/octabam.git", "ref": "main", "purpose": "Octatrack image builder and verification harness"},
     {"name": "octemu", "url": "https://github.com/markandrus/octemu.git", "ref": "main", "commit": "87000189418c8ca2026dc047bda220b66802809d", "purpose": "Real-time Octatrack emulator with headless and SDL panel modes"},
-    {"name": "gearmulator-md-mm", "url": "https://github.com/joelanders/gearmulator-md-mm.git", "ref": "release/md-mm-alpha", "purpose": "Machinedrum behavior and audio oracle"},
+    {"name": "gearmulator-md-mm", "url": "https://github.com/joelanders/gearmulator-md-mm.git", "ref": "release/md-mm-alpha", "commit": "8cea0524a75435122c20b669ca114c9ac6509ba2", "purpose": "Machinedrum behavior and audio oracle"},
     {"name": "gearmulator", "url": "https://github.com/dsp56300/gearmulator.git", "ref": "main", "purpose": "Upstream emulator architecture"},
     {"name": "octamax", "url": "https://github.com/mxldyn/octamax.git", "ref": "main", "purpose": "Earlier Octatrack reverse engineering"},
     {"name": "dsp56300", "url": "https://github.com/dsp56300/dsp56300.git", "ref": "dsp56300", "purpose": "DSP56300 emulator core"},
