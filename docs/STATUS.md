@@ -4,18 +4,17 @@ Updated: 2026-09-23. Read this before claiming work. The [port plan](PORT_PLAN.m
 
 ## Present state
 
-Scaffolding and feasibility research. **No Machinedrum boot on octemu or Octatrack hardware has been demonstrated.** No ported DSP audio or flashable candidate is available. Planning progress does not count as runtime progress.
+Scaffolding, feasibility research, and source reproduction. A clean trace-instrumented Gearmulator `mdLib` build is now reproduced. **No Machinedrum boot on octemu or Octatrack hardware has been demonstrated.** No ported DSP audio or flashable candidate is available.
 
 ### Established before the expanded plan
 
 - [x] Reference index, contributor workflow, pinned octemu source, and separate emulator patches are in place.
 - [x] Local firmware and research checkouts are ignored; proprietary inputs stay local.
 - [x] Read-only image audit identifies the supplied 8 MiB MD UW OS 1.63 dump and its static reset vectors.
-- [x] Optional MD bus tracing instrumentation compiled as mdLib in the existing local setup.
-- [ ] Reproduce that build from clean recursive source state; the earlier setup included nested DSP changes.
+- [x] Reproduced the trace-instrumented Gearmulator `mdLib` build from the pinned parent source and relevant recursive dependency commits; see [WP-01 provenance report](reports/WP-01-provenance.md).
 - [ ] Capture an actual Machinedrum reference boot and unmodified Octatrack headless/UI baseline.
 
-Evidence: [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `0e8e42b`.
+Evidence: [WP-01 provenance report](reports/WP-01-provenance.md), [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.md), [compatibility matrix](COMPATIBILITY_MATRIX.md), repository history through `6cdc258`.
 
 ## Active work and current handoff
 
@@ -27,15 +26,21 @@ Evidence: [boot feasibility](BOOT_FEASIBILITY.md), [research log](RESEARCH_LOG.m
 - [x] Pass document validation: 42 Markdown files, 240 local links/anchors, 34 packet IDs, acyclic dependencies, truthful initial states; `make check` and whitespace checks pass.
 - [x] Accept/merge WP-00 and reconcile its status.
 
-[WP-34 — Contributor documentation](work_packets/WP-34-contributor-documentation.md) is `in_review` on `work/readme-and-contributor-guide`.
+[WP-34 — Contributor documentation](work_packets/WP-34-contributor-documentation.md) is done: [PR #3](https://github.com/repeat98/octamachine/pull/3) merged as `6cdc258` on 2026-09-23; its acceptance and delivery are reconciled in the packet record.
 
 - [x] Rewrite the README around the goal, current evidence, emulator roles, and contribution entry points.
 - [x] Add a single getting-started guide and improve contributor, fixture, and compatibility guidance.
 - [x] Document the verified main protection requirements and reconcile WP-00 acceptance.
 - [x] Validate 51 Markdown files, 301 local links/anchors, 35 packet records, all 10 upstream links, and 15 shell examples; `make check` passes. Detailed results are in WP-34.
-- [ ] Maintainer review/merge, then reconcile WP-34 acceptance.
+- [x] Reconcile maintainer merge and mark WP-34 done.
 
-No technical execution packet has been completed by writing this plan.
+[WP-01 — Source provenance](work_packets/WP-01-source-provenance.md) is `in_progress` on `work/wp-01-source-provenance`. The source/build criteria and documentation checks pass; commit, push, and review submission remain.
+
+- [x] Record local reference and recursive dependency revisions, source modifications, patch hashes, toolchain, prerequisites, and license notices.
+- [x] Apply the bus trace patch to a clean Gearmulator MD/MM worktree and build `mdLib` with pinned dependency contents.
+- [ ] Complete scoped delivery and submit WP-01 for review.
+
+This advances source reproducibility only; no firmware runtime checkpoint has been reached.
 
 ## Gate checklist
 
@@ -51,11 +56,10 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-These packets have no technical packet prerequisite. Their first actions establish the inputs needed for later work.
+WP-01 is being delivered. WP-02 and WP-03 still have no technical packet prerequisite and can start after its review; their first actions establish inputs needed for later work.
 
-1. [WP-01 — Source provenance](work_packets/WP-01-source-provenance.md): inspect exact recursive revisions, local changes, build prerequisites, and licenses; reproduce a clean source build.
-2. [WP-02 — Target profiles](work_packets/WP-02-target-profiles.md): establish baseline MD and OT firmware/hardware identities, local input availability, and supported-feature inventory.
-3. [WP-03 — Evidence contract](work_packets/WP-03-evidence-contract.md): define capture fields, checkpoint triggers, reset/stimulus conventions, and comparison rules.
+1. [WP-02 — Target profiles](work_packets/WP-02-target-profiles.md): establish baseline MD and OT firmware/hardware identities, local input availability, and supported-feature inventory.
+2. [WP-03 — Evidence contract](work_packets/WP-03-evidence-contract.md): define capture fields, checkpoint triggers, reset/stimulus conventions, and comparison rules.
 
 After those are accepted, dispatch [WP-04](work_packets/WP-04-machinedrum-baseline.md) and [WP-05](work_packets/WP-05-octatrack-baseline.md). Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
@@ -63,11 +67,11 @@ After those are accepted, dispatch [WP-04](work_packets/WP-04-machinedrum-baseli
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
-| Source reproduction | Existing trace build is not a clean recursive reproduction | WP-01 records patches, nested revisions and clean build |
+| Source reproduction | WP-01 report records recursive revisions; clean trace-patched `mdLib` build passes, with no firmware execution | Review WP-01, then WP-04 records the first MD runtime trace |
 | Exact target profile | Hardware revision and local OT input availability are not established by the current audit | WP-02 inventories inputs; use a clearly provisional emulator profile if needed |
 | Source map disagreements | HI08 addresses, SRAM size, CPU clock differ across references | WP-07 resolves with traces/primary sources |
 | Target execution strategy | CPU/DSP similarity alone does not establish a port | WP-06–10 assess and choose a realizable mechanism |
-| Distribution | octemu documents restrictions on distributing its combined binaries | WP-01 records license/provenance constraints; WP-32 follows them |
+| Distribution | WP-01 records source notices and octemu's stated combined-QEMU restriction; no octamachine-wide license is declared | WP-32 follows the recorded notices and any maintainer decision |
 | Physical validation/recovery | No hardware test or recovery proof exists | WP-29–31 after emulator gates and explicit hardware authorization |
 
 These are open project questions. Mark an individual packet blocked only when a specific condition actually prevents its next action.
