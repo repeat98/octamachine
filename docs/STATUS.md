@@ -88,7 +88,7 @@ WP-04 is accepted and WP-35's imported evidence is available. WP-05 can inspect 
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 
-[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) has its import accepted in [PR #8](https://github.com/repeat98/octamachine/pull/8), merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`. A follow-up on `work/wp-35-c10-replay-evidence` rebuilds the tools and records a `c10` replay under WP-03; it remains in review pending checks. The original excursion remains Gearmulator-only prior evidence and adds no roadmap prerequisite.
+[WP-35 — octamad Machinedrum import](work_packets/WP-35-octamad-md-import.md) has its import accepted in [PR #8](https://github.com/repeat98/octamachine/pull/8), merged as `a5d53264a68015b5d6d057079e41d535ed9b98e5`. The c10 replay follow-up is open in [PR #10](https://github.com/repeat98/octamachine/pull/10), with required checks pending on its latest revision. The original excursion remains Gearmulator-only prior evidence and adds no roadmap prerequisite.
 
 ## Cross-cutting unknowns and blockers
 

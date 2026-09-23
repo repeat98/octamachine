@@ -97,7 +97,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ### 2026-09-23 / prompt 3 — reconcile the merged WP-04 delivery
 
-- Request: continue the overnight port and reconcile the manually merged WP-04 PR after its checks passed.
+- Request: continue the overnight port and reconcile WP-04 PR #9 after required checks passed and it was merged under the user's earlier authorization.
 - Starting state → ending state: `in_review` → `done`; all four runtime acceptance criteria remain supported by the report and traces.
 - Owner / branch: Codex / `work/wp-04-machinedrum-baseline` (delivery reconciliation recorded in the WP-35 follow-up branch).
 - Completed:
