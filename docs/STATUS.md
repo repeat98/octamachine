@@ -68,13 +68,13 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Prove trace cap, missing-image, and stalled-driver outcomes report failure or incomplete evidence.
 - [x] Pass required GitHub checks, merge PR, and reconcile the accepted delivery.
 
-[WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md) is in review on `work/wp-05-octatrack-baseline`. The [report](reports/WP-05-ot-baseline.md) and two WP-03 metadata pairs record OS 1.40C reaching `PTCH` in headless and windowed runs, with a scripted PLAY/lamp/STOP response. The official distribution archive matched octemu's pin. The emulator's live monitor showed host-side pitch/underflow artifacts; no audio parity or hardware behavior is claimed.
+[WP-05 — Octatrack baseline](work_packets/WP-05-octatrack-baseline.md) is in review in [PR #11](https://github.com/repeat98/octamachine/pull/11) on `work/wp-05-octatrack-baseline`; required checks pass. The [report](reports/WP-05-ot-baseline.md) and two WP-03 metadata pairs record OS 1.40C reaching `PTCH` in headless and windowed runs, with a scripted PLAY/lamp/STOP response. The official distribution archive matched octemu's pin. The emulator's live monitor showed host-side pitch/underflow artifacts; no audio parity or hardware behavior is claimed.
 
 - [x] Verify the pinned OS archive and build the pinned octemu/QEMU/DSP sources.
 - [x] Reach the PTCH screen and complete the panel walk under bounded headless and windowed runs.
 - [x] Map CPU, DSP, panel, storage, and audio interfaces to the pinned source.
 - [x] Separate guest audio-block timing from host timeout/playback behavior; keep private inputs and captures local.
-- [ ] Pass required GitHub checks, then reconcile the accepted delivery.
+- [ ] Merge PR #11 and reconcile the accepted delivery.
 
 ## Gate checklist
 

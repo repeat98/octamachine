@@ -34,11 +34,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 - Completed: Verified octemu's pinned OS 1.40C archive; built the pinned emulator; booted the unchanged image to `PTCH` headless and windowed; verified PLAY/lamp/STOP response in each; recorded versioned metadata and source mapping.
 - Remaining: PR review, required checks, and merge reconciliation.
-- Next action: Stage the scoped packet files, inspect the staged diff, commit and push the branch, then open the PR.
-- Waiting on: Required GitHub checks and review after PR submission.
+- Next action: Merge PR #11 after the required checks pass, then reconcile the accepted delivery.
+- Waiting on: PR merge reconciliation.
 - Blockers: none.
 - Evidence: [WP-05 report](../reports/WP-05-ot-baseline.md), headless [manifest](../reports/WP-05-ot-headless-v1.manifest.json) and [events](../reports/WP-05-ot-headless-v1.events.jsonl), windowed [manifest](../reports/WP-05-ot-ui-v1.manifest.json) and [events](../reports/WP-05-ot-ui-v1.events.jsonl); reusable walks in `tests/walks/`.
-- Delivery: `work/wp-05-octatrack-baseline`; PR pending.
+- Delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) open on `work/wp-05-octatrack-baseline`; required checks have passed for `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
 
 ## Prompt history
 
@@ -53,7 +53,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
   - [x] Ran unmodified OS 1.40C in bounded headless and windowed modes from independent copies of the same card/NVRAM fixture. Both observed `PTCH`, dismissed the loading overlay, verified the PLAY lamp condition, accepted STOP, and exited successfully.
   - [x] Added reusable scripted walks, redacted WP-03 v1 manifests/events, the source map, and the guest/host timing and audio limitations.
 - Remaining:
-  - [ ] Open the review PR, pass required GitHub checks, and reconcile the merge.
+  - [ ] Merge PR #11 and reconcile the accepted delivery.
 - Changed files: this packet; `docs/reports/WP-05-ot-baseline.md`; four WP-03 metadata files; two `tests/walks/wp05-*.jsonl` files; `docs/STATUS.md`, `docs/RESEARCH_LOG.md`, and `docs/COMPATIBILITY_MATRIX.md`; WP-35 merge reconciliation.
 - Verification:
   - `make -C vendor/octemu doctor`, `setup`, `os`, `JOBS=8 make -C vendor/octemu qemu`, `make -C vendor/octemu`, and `make -C vendor/octemu fixtures` — passed; archive digest matched octemu's pin.
@@ -62,10 +62,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
   - An earlier no-card run reached `C0MPACT` under 90 seconds; it is supplementary and not counted as the `PTCH` checkpoint.
   - The optional GIF attempt failed after the installed ffmpeg could not load its local x265 dylib; built-in panel screenshots succeeded without ffmpeg.
   - `make check` — passed; nine reference repositories validated, scripts compiled, and all 20 tests passed.
+  - PR #11 workflow run `35927460970` — required `scaffold` job passed for `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
   - `git diff --cached --check` and WP-03 manifest/event validation — passed for both v1 runs; 8 headless and 9 windowed records are complete.
   - The first sandboxed emulator attempt could not open its local panel socket; rerunning the bounded walks with required local IPC access succeeded. The initial fixture retry used stale partial ignored output from that attempt; deleting only those local outputs and rerunning `make fixtures` succeeded.
   - The first `make setup` attempt encountered the root checkout's pre-existing symlink to a dirty shared firmware-tool checkout and stopped before modifying it; setup was rerun with an isolated tool checkout and passed.
 - Findings: See the [WP-05 report](../reports/WP-05-ot-baseline.md). The successful UI run reported monitor ratio `0.8420–1.0000`, 298 cents, and 90,181 starved frames. That is a host live-monitor artifact, not guest timing or audio-parity evidence. The optional GIF attempt failed on a missing local x265 dylib; the built-in PPM screenshots were captured and inspected. No physical Octatrack or Machinedrum firmware was run.
 - Blockers: none.
-- Next action: push the branch, open the PR, and wait for required checks.
-- Delivery: enclosing commit on `work/wp-05-octatrack-baseline`; PR pending.
+- Next action: merge PR #11, then reconcile the accepted delivery.
+- Delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) open; head commit `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
