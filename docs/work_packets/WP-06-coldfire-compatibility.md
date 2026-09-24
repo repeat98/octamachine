@@ -31,9 +31,9 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix plus nine assignment/eight-hit scenarios and nine trigger/encoder scenarios spanning all eight core engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
-- Remaining: Broader runtime coverage across the 44 distinct descriptor handlers; atomic/cache/self-modifying-code and device-memory behavior; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
-- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege; retain level 7 and reset-vector fetch as explicit model/hardware limits. Extend per-engine coverage where a bounded run adds evidence.
+- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix, all 50 core synthesis IDs plus INP/MID/CTR assignment scenarios, and nine trigger/encoder scenarios spanning all eight source engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
+- Remaining: Attribute execution to the 44 distinct descriptor handlers; probe atomic/cache/self-modifying-code and device-memory behavior; map startup register operands/effects before selecting an adaptation; physical level-7 and reset-vector behavior.
+- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege. Pursue per-handler attribution only if source instrumentation can avoid retaining firmware-derived addresses.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths.
 - Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). The new runtime profiles are Gearmulator-only and keep raw traces local.
@@ -174,5 +174,26 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: WP-07's proposed memory/MMIO map remains in draft PR #13 pending review. The PR #12 description remains stale after the GitHub integration returned 403; the branch report is current. No physical hardware is available.
 - Next action: continue bounded WP-06 runtime coverage, and resume startup-register operand/effect mapping only after WP-07's map is accepted.
 - Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); retain draft status while the adaptation and hardware gaps remain.
+
+### 2026-09-24 / prompt 6 — profile all core synthesis IDs
+
+- Request: finish the active WP-06 profile sweep, preserve firmware-derived traces locally, and continue the port after reconciling accepted deliveries.
+- Starting state → ending state: `in_review` → `in_review`; assignment/eight-hit profiles now cover every core synthesis ID, while startup adaptation, descriptor attribution, and physical-hardware criteria remain open.
+- Owner / branch: Codex / `work/wp-06-coldfire-compatibility`, based on pushed branch head `a9f15d7701feb14b5f4ab9375928784c3f7a8b67`.
+- Completed:
+  - [x] Ran assignment/eight-hit profiles for all 50 core synthesis IDs (`0x01–0x03`, `0x10–0x1d`, `0x20–0x27`, `0x30–0x3f`, and `0x40–0x48`). The runs exited 0 below the 1,000,000,000-instruction ceiling; totals ranged from 562,087,831 to 562,321,559, RTE counts from 139,028 to 139,497, and every run recorded 12 TRAPs.
+  - [x] Confirmed the complete core set by asserting the expected 50 IDs against the local engine catalog. A first `0x12` attempt used a non-instrumented binary and emitted no execution summary; it was discarded and rerun with the instrumented binary, which exited 0 at 562,177,565 instructions.
+  - [x] Consolidated the 50 rows in the [WP-06 report](../reports/WP-06-coldfire.md), alongside the three existing INP/MID/CTR assignment runs and nine trigger/encoder traces. The counters remain Gearmulator-only and do not attribute calls to all 44 descriptor handlers or compare execution with the target CPU.
+  - [x] Kept the OS image, raw output, and detailed trace products under `/private/tmp`; no firmware or capture data entered the repository.
+- Remaining:
+  - [ ] Map startup-register operands/effects against WP-07's accepted memory/MMIO map before selecting any adaptation.
+  - [ ] Attribute runtime calls across the 44 descriptor handlers; investigate atomic/cache/self-modifying-code and device-memory behavior where bounded probes can provide evidence.
+  - [ ] Resolve device-memory behavior, reset-vector fetch, edge-sensitive level 7, and physical CPU behavior with suitable hardware or preserve them as explicit limits.
+- Changed files: `docs/reports/WP-06-coldfire.md`; this packet; `docs/STATUS.md`; `docs/COMPATIBILITY_MATRIX.md`; `docs/RESEARCH_LOG.md`.
+- Verification: all 43 newly scheduled engine runs exited 0 below the ceiling; the previously incorrect non-instrumented `0x12` attempt was discarded and its instrumented rerun succeeded. Safe local aggregation asserted the exact 50-ID set and reported only aggregate counts. `make check` passed (nine reference validations, Python compilation, 20 tests); `git diff --check` and the local Markdown-link scan passed. No target CPU or physical hardware run was available.
+- Findings: every core synthesis assignment profile recorded 12 TRAPs and approximately 562.1–562.3 million executed source instructions. The range is consistent across IDs but does not establish instruction-by-instruction CFV4e compatibility or per-descriptor handler coverage. The earlier nine traces still provide aggregate handler-range activity across all eight source engine families.
+- Blockers: WP-07's map remains in draft PR #13 pending review. The PR #12 description remains stale because GitHub integration metadata writes returned 403. No physical hardware is available.
+- Next action: continue with WP-07 review/acceptance and its memory/MMIO map; then map startup register effects and consider safe per-handler attribution. Keep WP-06 in review until the adaptation and physical gates are addressed.
+- Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); retain draft status while acceptance gaps remain.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.

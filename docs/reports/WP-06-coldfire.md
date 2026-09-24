@@ -50,14 +50,17 @@ patch was applied in a separate Gearmulator clone at the revisions above,
 after WP-04 patches `0001`/`0002`. WP-35's host-trace and DSP execution-hook
 patches were applied only for `md_profile`; the resulting `md_profile` and
 `mdPanelReadinessFirmwareTest` binaries were built locally. The startup driver
-was run with a 1,000,000-instruction summary limit. The single-engine
-assignment/eight-hit and trigger/encoder trace profiles each ran for nine
-machine IDs: GND-SN (`0x01`), TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD (`0x20`),
-E12-BD (`0x30`), P-I-BD (`0x40`), INP-GA (`0x50`), MID 01 (`0x60`), and CTR-AL
-(`0x70`). This represents all eight core engine families, with two TRX
-variants. Each scenario used a 1,000,000,000-instruction counter ceiling and
-the local Machinedrum OS 1.63 image. Output directories, firmware, detailed
-DSP/host traces, and address-bearing handler rows remain under `/private/tmp`.
+was run with a 1,000,000-instruction summary limit. Single-engine
+assignment/eight-hit profiles ran for all 50 core synthesis engine IDs across
+GND, TRX, EFM, E12, and P-I. Three additional assignment profiles covered
+INP-GA (`0x50`), MID 01 (`0x60`), and CTR-AL (`0x70`). Trigger/encoder trace
+profiles ran for GND-SN (`0x01`), TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD
+(`0x20`), E12-BD (`0x30`), P-I-BD (`0x40`), INP-GA (`0x50`), MID 01 (`0x60`),
+and CTR-AL (`0x70`), adding three families beyond the five core synthesis
+families. Each scenario used a
+1,000,000,000-instruction counter ceiling and the local Machinedrum OS 1.63
+image. Output directories, firmware, detailed DSP/host traces, and
+address-bearing handler rows remain under `/private/tmp`.
 
 The scenarios are reproducible with the local image and binaries as follows;
 all destinations must be created first. The capture directories are private
@@ -83,10 +86,12 @@ GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
   /private/tmp/wp06-md-profile-trace10 trace=0x10
 ```
 
-Repeat the bare-ID invocation and the trace invocation for `0x01`, `0x11`,
-`0x20`, `0x30`, `0x40`, `0x50`, `0x60`, and `0x70` to reproduce the remaining
-listed scenarios. These samples do not identify every one of the 44 distinct
-descriptor handlers.
+The bare-ID assignment invocation was run for all core synthesis IDs
+`0x01–0x03`, `0x10–0x1d`, `0x20–0x27`, `0x30–0x3f`, and `0x40–0x48`; `0x00` is
+the empty machine. The additional INP/MID/CTR assignment runs used `0x50`,
+`0x60`, and `0x70`. Trace profiles were run for the nine IDs listed above.
+The per-engine instruction totals do not attribute execution to each of the
+44 distinct ColdFire descriptor handlers.
 
 The startup readiness driver exited 0 after its cold and cached checks. Its
 summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
@@ -94,17 +99,63 @@ summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
 writes, and no counted `RTE`, `TRAP`, `RESET`, `STOP`, or USP/stack-mode
 instructions in that prefix.
 
-| Assignment/eight-hit engine | Executed instructions | `RTE` | `TRAP` | Result |
-| --- | ---: | ---: | ---: | --- |
-| `0x01` GND-SN | 562,282,775 | 139,329 | 12 | Completed below ceiling |
-| `0x10` TRX-BD | 562,290,551 | 139,161 | 12 | Completed below ceiling |
-| `0x11` TRX-SD | 562,231,801 | 139,231 | 12 | Completed below ceiling |
-| `0x20` EFM-BD | 562,249,453 | 139,272 | 12 | Completed below ceiling |
-| `0x30` E12-BD | 562,158,592 | 139,236 | 12 | Completed below ceiling |
-| `0x40` P-I-BD | 562,301,574 | 139,271 | 12 | Completed below ceiling |
-| `0x50` INP-GA | 562,183,361 | 139,402 | 12 | Completed below ceiling |
-| `0x60` MID 01 | 562,194,086 | 139,508 | 12 | Completed below ceiling |
-| `0x70` CTR-AL | 562,162,921 | 139,445 | 12 | Completed below ceiling |
+| Core engine ID | Engine | Executed instructions | `RTE` | `TRAP` |
+| --- | --- | ---: | ---: | ---: |
+| `0x01` | GND-SN | 562,282,775 | 139,329 | 12 |
+| `0x02` | GND-NS | 562,293,738 | 139,470 | 12 |
+| `0x03` | GND-IM | 562,154,785 | 139,422 | 12 |
+| `0x10` | TRX-BD | 562,290,551 | 139,161 | 12 |
+| `0x11` | TRX-SD | 562,231,801 | 139,231 | 12 |
+| `0x12` | TRX-XT | 562,177,565 | 139,244 | 12 |
+| `0x13` | TRX-CP | 562,142,768 | 139,275 | 12 |
+| `0x14` | TRX-RS | 562,178,453 | 139,324 | 12 |
+| `0x15` | TRX-CB | 562,087,831 | 139,238 | 12 |
+| `0x16` | TRX-CH | 562,230,949 | 139,309 | 12 |
+| `0x17` | TRX-OH | 562,299,674 | 139,306 | 12 |
+| `0x18` | TRX-CY | 562,298,425 | 139,286 | 12 |
+| `0x19` | TRX-MA | 562,237,184 | 139,272 | 12 |
+| `0x1a` | TRX-CL | 562,183,289 | 139,211 | 12 |
+| `0x1b` | TRX-XC | 562,215,141 | 139,236 | 12 |
+| `0x1c` | TRX-B2 | 562,228,240 | 139,028 | 12 |
+| `0x1d` | TRX-S2 | 562,182,759 | 139,497 | 12 |
+| `0x20` | EFM-BD | 562,249,453 | 139,272 | 12 |
+| `0x21` | EFM-SD | 562,217,247 | 139,261 | 12 |
+| `0x22` | EFM-XT | 562,182,333 | 139,193 | 12 |
+| `0x23` | EFM-CP | 562,175,300 | 139,274 | 12 |
+| `0x24` | EFM-RS | 562,179,286 | 139,261 | 12 |
+| `0x25` | EFM-CB | 562,204,349 | 139,282 | 12 |
+| `0x26` | EFM-HH | 562,259,015 | 139,285 | 12 |
+| `0x27` | EFM-CY | 562,259,594 | 139,269 | 12 |
+| `0x30` | E12-BD | 562,158,592 | 139,236 | 12 |
+| `0x31` | E12-SD | 562,241,406 | 139,230 | 12 |
+| `0x32` | E12-HT | 562,220,016 | 139,247 | 12 |
+| `0x33` | E12-LT | 562,203,280 | 139,256 | 12 |
+| `0x34` | E12-CP | 562,171,169 | 139,247 | 12 |
+| `0x35` | E12-RS | 562,248,495 | 139,219 | 12 |
+| `0x36` | E12-CB | 562,241,526 | 139,246 | 12 |
+| `0x37` | E12-CH | 562,134,310 | 139,235 | 12 |
+| `0x38` | E12-OH | 562,160,865 | 139,209 | 12 |
+| `0x39` | E12-RC | 562,158,173 | 139,226 | 12 |
+| `0x3a` | E12-CC | 562,321,559 | 139,253 | 12 |
+| `0x3b` | E12-BR | 562,295,320 | 139,237 | 12 |
+| `0x3c` | E12-TA | 562,263,765 | 139,252 | 12 |
+| `0x3d` | E12-TR | 562,233,899 | 139,245 | 12 |
+| `0x3e` | E12-SH | 562,283,269 | 139,233 | 12 |
+| `0x3f` | E12-BC | 562,216,042 | 139,214 | 12 |
+| `0x40` | P-I-BD | 562,301,574 | 139,271 | 12 |
+| `0x41` | P-I-SD | 562,215,407 | 139,235 | 12 |
+| `0x42` | P-I-MT | 562,147,964 | 139,228 | 12 |
+| `0x43` | P-I-ML | 562,229,061 | 139,318 | 12 |
+| `0x44` | P-I-MA | 562,307,581 | 139,353 | 12 |
+| `0x45` | P-I-RS | 562,278,002 | 139,284 | 12 |
+| `0x46` | P-I-RC | 562,223,834 | 139,238 | 12 |
+| `0x47` | P-I-CC | 562,234,393 | 139,239 | 12 |
+| `0x48` | P-I-HH | 562,211,064 | 139,242 | 12 |
+
+Three additional assignment profiles completed below the ceiling: INP-GA
+(`0x50`) at 562,183,361 instructions (`RTE` 139,402; `TRAP` 12), MID 01
+(`0x60`) at 562,194,086 (`RTE` 139,508; `TRAP` 12), and CTR-AL (`0x70`) at
+562,162,921 (`RTE` 139,445; `TRAP` 12).
 
 | Trigger/encoder trace engine | Executed instructions | `RTE` | `TRAP` | Handler-range entries | Buckets |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -124,10 +175,11 @@ operations, around 77 thousand move-from-SR operations, and no RESET, STOP, or
 other counted control-register writes. The trace counter records transitions
 into the source descriptor-handler PC range and groups them by handler and
 return address. Only aggregate counts are reported; no address rows are
-published. These scenarios establish source-model execution across all eight
-core engine families, but do not attribute the observed handler buckets to
-each engine descriptor, measure every engine/opcode, cover cache/atomic
-behavior, or run code on the target ColdFire.
+published. The 50 assignment runs cover the core synthesis IDs; the nine
+traces add representative activity across all eight source engine families.
+These source-model runs do not attribute handler buckets to each descriptor,
+compare the firmware instruction stream with the target CPU, cover
+cache/atomic behavior, or establish physical compatibility.
 
 ## Independent CPU-model probe
 
@@ -267,4 +319,4 @@ rules above; selecting and implementing one remains open for WP-10.
 
 `python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target built and all listed engine scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
 
-WP-06 remains `in_review`. The one-million startup prefix, nine assignment/eight-hit profiles, and nine trace scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.
+WP-06 remains `in_review`. The one-million startup prefix, assignment/eight-hit profiles for all 50 core synthesis IDs plus three additional engine families, and nine trigger/encoder traces extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.
