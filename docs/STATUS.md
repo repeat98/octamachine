@@ -80,7 +80,7 @@ No new firmware execution or hardware checkpoint is established by this profile 
 
 [WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) remains in review in draft PR #13 on work/wp-07-memory-and-mmio. Its packet-level reference map criteria are checked with trace and manual evidence; target aliases/peripheral mappings remain unimplemented and physical decode/clock are unmeasured. Checks pass; maintainer review and G1 architecture evidence remain open.
 
-[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review in draft PR #14 on work/wp-08-dsp-payload-inventory. The report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. Initial PR checks pass; maintainer review and G1 architecture evidence remain open.
+[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review in draft PR #14 on work/wp-08-dsp-payload-inventory. The report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. Both scaffold checks and GitGuardian passed at last audited head e9cb222aa089a533e88725400b2e849284ad8d86; maintainer review and G1 architecture evidence remain open.
 
 ## Gate checklist
 
@@ -96,7 +96,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08 is delivered in draft PR #14 with initial checks passing; WP-06 and WP-07 remain draft G1 work. The payload/trace data stay local, and G1 architecture evidence and maintainer review remain outstanding.
+WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08 remains delivered in draft PR #14; its last audited head e9cb222aa089a533e88725400b2e849284ad8d86 passed scaffold and GitGuardian checks. WP-06 and WP-07 remain draft G1 work. The payload/trace data stay local, and G1 architecture evidence and maintainer review remain outstanding.
 
 1. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): continue target control-register/privilege checks and runtime coverage while keeping reset and physical level-7 limits explicit.
 2. [WP-09 — DSP feasibility](work_packets/WP-09-dsp-feasibility.md): assess whether the source DSP images, external-memory execution, and sample footprint can fit a realizable Octatrack architecture using the WP-35 candidate ledger and WP-08 verified payload inventory.

@@ -32,11 +32,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: Extracted and deterministically reproduced all five pinned OS 1.63 section hashes; reconciled section 1/2 record streams against both source DSP upload ports in cold and cached instances across two independent full traces; documented the load maps and parser limits in [the report](../reports/WP-08-dsp-payloads.md).
-- Next action: Obtain maintainer review for draft PR #14 and reconcile accepted delivery. Keep the PR in draft while G1 architecture evidence remains open; continue WP-09 after WP-08 acceptance.
+- Next action: Obtain maintainer review for draft PR #14 and reconcile accepted delivery. Continue WP-06 as the next independent G1 packet; keep WP-09 gated on WP-08 acceptance.
 - Waiting on: Maintainer review/acceptance and the G1 hardware-realizable architecture decision across WP-06–10.
-- Blockers: No target DSP56721 execution, target memory-fit, or physical HI08 evidence is claimed. The private firmware and traces used for the reported reconciliation are absent from this checkout and remain local.
+- Blockers: Target DSP56721 execution, target memory fit, and physical HI08 evidence remain unmeasured. Private firmware and traces stay local and are excluded from the PR.
 - Evidence: [WP-04 baseline](../reports/WP-04-md-baseline.md) provides the private repeated HI08 traces; the [WP-08 report](../reports/WP-08-dsp-payloads.md) records this packet's independent extraction and exact upload reconciliation while keeping all firmware values local.
-- Delivery: Draft PR #14 is open from work/wp-08-dsp-payload-inventory. The initial head's scaffold and GitGuardian checks passed; maintainer review and G1 acceptance remain open.
+- Delivery: Draft PR #14 remains open on work/wp-08-dsp-payload-inventory; last audited head e9cb222aa089a533e88725400b2e849284ad8d86 passed both scaffold checks and GitGuardian. Maintainer review and G1 acceptance remain open.
 
 ## Prompt history
 
@@ -84,3 +84,26 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: maintainer review and G1 architecture acceptance; private firmware-derived values and traces remain unavailable in this checkout and are not part of the PR.
 - Next action: obtain review for PR #14 while continuing independent G1 evidence work; keep WP-09 gated on WP-08 acceptance.
 - Delivery: draft PR #14 is open at https://github.com/repeat98/octamachine/pull/14. The enclosing documentation commit and push are reported after delivery.
+
+### 2026-09-24 / prompt 3 — audit WP-08 draft delivery
+
+- Request: continue from the dispatch queue by auditing draft PR #14 against its packet evidence, acceptance checklist, and private-data constraints.
+- Starting state → ending state: in_review → in_review; the packet's source-emulator evidence is unchanged and remains pending review/G1 acceptance.
+- Owner / branch: Codex / work/wp-08-dsp-payload-inventory, continuing from PR head e9cb222aa089a533e88725400b2e849284ad8d86 based on accepted main 148494c212d2d11fd21ad58f56c44b324d4c91bb.
+- Completed:
+  - [x] Confirmed the three evidence criteria against the report, extractor history, and parser validation; confirmed the privacy criterion by auditing all eight changed files.
+  - [x] Audited the eight-file PR diff and verifier output contract; only reviewed documentation and source code are included, with no firmware, extracted DSP payload, raw trace, or generated capture output.
+  - [x] Confirmed PR #14 is open and draft, both scaffold checks and GitGuardian pass at head e9cb222aa089a533e88725400b2e849284ad8d86, and no review decision is present.
+  - [x] Refreshed the current WP-08 handoff and project status to the checked PR head and queued WP-06 as the next independent G1 packet.
+- Remaining:
+  - [ ] Obtain maintainer review and reconcile accepted delivery; keep PR #14 draft while G1 architecture evidence is incomplete.
+  - [ ] Continue WP-09 only after WP-08's accepted evidence is available.
+- Changed files: docs/work_packets/WP-08-dsp-payload-inventory.md; docs/STATUS.md.
+- Verification:
+  - make check passed: nine reference repositories validated, Python compilation passed, and all 20 tests passed.
+  - git diff --check origin/main...HEAD and git diff --check passed. GitHub's two scaffold checks and GitGuardian passed at audited head e9cb222aa089a533e88725400b2e849284ad8d86.
+  - Data-dependent extraction and upload comparisons were skipped in this audit; private values and traces were neither opened nor changed.
+- Findings: the report confines upload equality to the pinned Gearmulator model and labels the unresolved pre-record word, trailing words, and target/hardware behavior clearly. The verifier emits metadata only and documents its capture-completeness limit.
+- Blockers: no maintainer review decision or G1 architecture acceptance.
+- Next action: continue WP-06 as the next independent G1 packet; keep WP-09 gated on WP-08 acceptance and leave PR #14 in draft pending review/G1.
+- Delivery: this audit and handoff update are delivered by the enclosing commit on the existing WP-08 branch.
