@@ -67,6 +67,14 @@ SELF_MODIFY_FIELDS = (
     "first_execution",
     "execution_after_write",
 )
+CACHE_CONTROL_FIELDS = (
+    "result",
+    "cpushl_returned",
+    "cacr_write_returned",
+    "cacr_read_completed",
+    "cacr_read_value",
+    "memory_after_trap",
+)
 
 
 class Monitor:
@@ -238,6 +246,7 @@ def main() -> int:
         irq_elf = temp_dir / "interrupt_mask.elf"
         cas_elf = temp_dir / "cas_model.elf"
         self_modify_elf = temp_dir / "self_modifying_code.elf"
+        cache_control_elf = temp_dir / "cache_control.elf"
         rambar_elf = temp_dir / "unimplemented_rambar.elf"
         mbar_elf = temp_dir / "unimplemented_mbar.elf"
         build = [
@@ -290,6 +299,16 @@ def main() -> int:
             str(Path(__file__).with_name("self_modifying_code.S")),
         ]
         subprocess.run(self_modify_build, check=True, cwd=ROOT)
+        cache_control_build = [
+            args.cc,
+            "-mcpu=5206e",
+            "-nostdlib",
+            f"-Wl,-T,{LINKER_SCRIPT}",
+            "-o",
+            str(cache_control_elf),
+            str(Path(__file__).with_name("cache_control.S")),
+        ]
+        subprocess.run(cache_control_build, check=True, cwd=ROOT)
         for mask, stack_elf in ((0x20, stack_device_elf), (0x10, stack_emulator_elf)):
             stack_build = [
                 args.cc,
@@ -340,6 +359,16 @@ def main() -> int:
         }
         self_modify_results = {
             cpu: run_cpu(args.qemu, self_modify_elf, cpu, SELF_MODIFY_FIELDS)
+            for cpu in ("m5206", "cfv4e")
+        }
+        cache_control_results = {
+            cpu: run_cpu(
+                args.qemu,
+                cache_control_elf,
+                cpu,
+                CACHE_CONTROL_FIELDS,
+                expected_marker=FAILURE_PREFIX | 4,
+            )
             for cpu in ("m5206", "cfv4e")
         }
         stack_device_result = run_cpu(args.qemu, stack_device_elf, "cfv4e", STACK_FIELDS)
@@ -413,6 +442,21 @@ def main() -> int:
         print("the code-write probe did not execute the updated instruction on both CPU models")
         return 1
     print("both CPU models execute the replacement instruction after a RAM code write")
+    print("cache-control instructions and CACR model behavior:")
+    for cpu, values in cache_control_results.items():
+        print(f"{cpu}: {values}")
+    expected_cache_control = {
+        "result": FAILURE_PREFIX | 4,
+        "cpushl_returned": 1,
+        "cacr_write_returned": 1,
+        "cacr_read_completed": 0,
+        "cacr_read_value": 0,
+        "memory_after_trap": 0x13579BDF,
+    }
+    if any(values != expected_cache_control for values in cache_control_results.values()):
+        print("the pinned cache-control/CACR behavior changed")
+        return 1
+    print("both models execute supervisor CPUSHL and CACR write, then take vector 4 on CACR read")
     print("cfv4e EUSP with MCF54455 manual bit 0x20:")
     for field, value in stack_device_result.items():
         print(f"  {field}: 0x{value:08x}")

@@ -76,7 +76,7 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Separate guest audio-block timing from host timeout/playback behavior; keep private inputs and captures local.
 - [x] Merge PR #11 and reconcile the accepted delivery.
 
-[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) is in review in draft PR #12 on work/wp-06-coldfire-compatibility; GitHub Checks run 59 passed for the fetched PR head, while later local evidence is not yet on the remote branch. The report and firmware-free probes cover selected arithmetic, exception, privilege, level-4 interrupt, VBR, EUSP, MOVEC, alignment, and byte-order behavior. A pinned-QEMU runtime follow-up adds CAS.L decoding against a 68020 control and a RAM code-write probe on m5206/cfv4e; these are emulator-only results. Sanitized Gearmulator profiles cover the startup prefix, all 50 core synthesis IDs plus INP/MID/CTR, and nine trigger/encoder traces; they do not compare source instructions with the target or attribute counts to all 44 descriptor handlers. Startup operand mapping, cache-control effects, reset-vector fetch, external edge-sensitive level 7, and physical behavior remain open.
+[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) is in review in draft PR #12 on work/wp-06-coldfire-compatibility; the fetched PR head's Checks run 59 passed, while newer local evidence is not on the remote branch. Existing probes cover selected CPU, exception, interrupt, alignment, and byte-order behavior. Pinned-QEMU runtime probes now measure CAS decoding, RAM code writes, supervisor CPUSHL execution, and CACR write/read paths on m5206/cfv4e. These are emulator results; physical cache effects, startup operand mapping, reset-vector fetch, external level 7, and CPU behavior remain open.
 
 - [x] Reproduce the first 1,000,000 executed Machinedrum startup instructions as a sanitized Gearmulator summary; local firmware and raw traces remain private.
 - [x] Compare selected arithmetic, stack, trap/RTE, and privilege behavior on the `m5206` and `cfv4e` QEMU CPU models.
@@ -84,6 +84,7 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Compare aligned/odd byte, word, and long accesses plus big-endian values on the two QEMU CPU models using a synthetic RAM probe.
 - [ ] Map startup register operands/effects and check adaptation mechanisms against a reviewed target memory map and privilege rules; attribute executed calls to the 44 distinct descriptor handlers.
 - [x] Measure CAS decoding with a 68020 control and RAM self-modifying code on pinned m5206/cfv4e QEMU profiles; results are limited to the emulator models.
+- [x] Measure pinned-QEMU supervisor CPUSHL decode and CACR MOVEC write/read paths; keep physical cache effects open.
 - [ ] Establish cache-control effects, physical/device-memory alignment, and physical CPU behavior where evidence is available.
 - [ ] Resolve reset-vector fetch and external level-7 comparisons or preserve their explicit hardware/model limits.
 - [ ] Establish physical CPU/control-register behavior.
@@ -108,7 +109,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04/WP-05 and WP-35's import/c10 follow-up are accepted. WP-07's evidence remains in draft PR #13; its reviewed map will bound WP-06 startup-register analysis. WP-06 now has pinned-QEMU source inspection and firmware-free CAS/code-write measurements; the Linux QEMU build required a generated-link adjustment in ignored local output. These results do not establish silicon behavior. WP-08 needs acceptance before WP-09. The available GitHub integration cannot merge or update the existing PRs; PRs #12 and #13 remain drafts. The local credential previously returned 403 on push, leaving newer WP-06 evidence local.
+WP-04/WP-05 and WP-35's import/c10 follow-up are accepted. WP-07's evidence remains in draft PR #13; its reviewed map will bound WP-06 startup-register analysis. WP-06 now has pinned-QEMU source inspection and firmware-free CAS, code-write, CPUSHL, and CACR access measurements; cache effects, firmware use, and physical behavior remain open. The Linux QEMU build required a generated-link adjustment in ignored local output. WP-08 needs acceptance before WP-09. PRs #12 and #13 remain drafts; GitHub merge and push attempts returned 403, leaving the newest WP-06 evidence local.
 
 1. [WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md): review/accept draft PR #13; its map will bound the remaining WP-06 startup register analysis.
 2. [WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md): open a draft PR from the [published branch compare](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1), then obtain review/acceptance.

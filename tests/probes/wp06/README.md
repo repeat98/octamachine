@@ -58,6 +58,13 @@ return 1 before the write and 2 after it. This exercises TCG translated-code
 invalidation for an overlapping guest store; it does not model the physical
 instruction cache or cache-control register effects.
 
+The cache_control.S probe runs CPUSHL.L in supervisor mode, writes CACR,
+then attempts a CACR read. Both ColdFire models return from CPUSHL and the
+write, then take vector 4 on the read. The handler records the unchanged
+synthetic memory sentinel. Pinned QEMU source marks CPUSHL as a no-op and
+stores CACR writes; this probe does not measure physical cache effects or
+establish firmware use.
+
 ## Target-only user stack and startup MOVEC probes
 
 `stack_eusp.S` initializes distinct supervisor and user stacks, enters user
