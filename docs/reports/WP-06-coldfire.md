@@ -51,13 +51,13 @@ after WP-04 patches `0001`/`0002`. WP-35's host-trace and DSP execution-hook
 patches were applied only for `md_profile`; the resulting `md_profile` and
 `mdPanelReadinessFirmwareTest` binaries were built locally. The startup driver
 was run with a 1,000,000-instruction summary limit. The single-engine
-assignment/eight-hit profile ran for TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD
-(`0x20`), and E12-BD (`0x30`). The trace profile ran for GND-SN (`0x01`),
-TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD (`0x20`), E12-BD (`0x30`), and
-P-I-BD (`0x40`). Each scenario used a 1,000,000,000-instruction counter
-ceiling and the local Machinedrum OS 1.63 image. Output directories, firmware,
-detailed DSP/host traces, and address-bearing handler rows remain under
-`/private/tmp`.
+assignment/eight-hit and trigger/encoder trace profiles each ran for nine
+machine IDs: GND-SN (`0x01`), TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD (`0x20`),
+E12-BD (`0x30`), P-I-BD (`0x40`), INP-GA (`0x50`), MID 01 (`0x60`), and CTR-AL
+(`0x70`). This represents all eight core engine families, with two TRX
+variants. Each scenario used a 1,000,000,000-instruction counter ceiling and
+the local Machinedrum OS 1.63 image. Output directories, firmware, detailed
+DSP/host traces, and address-bearing handler rows remain under `/private/tmp`.
 
 The scenarios are reproducible with the local image and binaries as follows;
 all destinations must be created first. The capture directories are private
@@ -83,10 +83,10 @@ GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
   /private/tmp/wp06-md-profile-trace10 trace=0x10
 ```
 
-Repeat the trace invocation with `trace=0x01`, `trace=0x11`, `trace=0x20`,
-`trace=0x30`, and `trace=0x40` to run the other listed engine families. The
-single-engine profile uses the corresponding bare engine ID instead of
-`trace=<id>`.
+Repeat the bare-ID invocation and the trace invocation for `0x01`, `0x11`,
+`0x20`, `0x30`, `0x40`, `0x50`, `0x60`, and `0x70` to reproduce the remaining
+listed scenarios. These samples do not identify every one of the 44 distinct
+descriptor handlers.
 
 The startup readiness driver exited 0 after its cold and cached checks. Its
 summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
@@ -94,26 +94,39 @@ summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
 writes, and no counted `RTE`, `TRAP`, `RESET`, `STOP`, or USP/stack-mode
 instructions in that prefix.
 
-| Gearmulator scenario | Executed instructions | Aggregate CPU summary | Result |
-| --- | ---: | --- | --- |
-| Single-engine `0x10` assignment/eight hits | 562,290,551 | `RTE` 139,161; `TRAP` 12; move-to-SR 1,030,050; move-from-SR 77,568 | Completed below the ceiling; aggregate output only |
-| Single-engine `0x11`, `0x20`, `0x30` assignment/eight hits | 562,231,801; 562,249,453; 562,158,592 | `RTE` 139,231; 139,272; 139,236; `TRAP` 12 in each | All completed below the ceiling; aggregate output only |
-| `trace=0x01` (GND-SN) | 559,631,603 | `RTE` 137,933; `TRAP` 6; 3,472 handler-range entries | Completed below ceiling; two handler/return buckets |
-| `trace=0x10` (TRX-BD) | 559,651,805 | `RTE` 137,761; `TRAP` 6; 3,440 handler-range entries | Completed below ceiling; two handler/return buckets |
-| `trace=0x11` (TRX-SD) | 559,752,802 | `RTE` 137,876; `TRAP` 6; 3,584 handler-range entries | Completed below ceiling; two handler/return buckets |
-| `trace=0x20` (EFM-BD) | 559,750,509 | `RTE` 137,921; `TRAP` 6; 3,552 handler-range entries | Completed below ceiling; two handler/return buckets |
-| `trace=0x30` (E12-BD) | 559,692,448 | `RTE` 137,847; `TRAP` 6; 3,488 handler-range entries | Completed below ceiling; two handler/return buckets |
-| `trace=0x40` (P-I-BD) | 559,777,600 | `RTE` 137,918; `TRAP` 6; 3,600 handler-range entries | Completed below ceiling; two handler/return buckets |
+| Assignment/eight-hit engine | Executed instructions | `RTE` | `TRAP` | Result |
+| --- | ---: | ---: | ---: | --- |
+| `0x01` GND-SN | 562,282,775 | 139,329 | 12 | Completed below ceiling |
+| `0x10` TRX-BD | 562,290,551 | 139,161 | 12 | Completed below ceiling |
+| `0x11` TRX-SD | 562,231,801 | 139,231 | 12 | Completed below ceiling |
+| `0x20` EFM-BD | 562,249,453 | 139,272 | 12 | Completed below ceiling |
+| `0x30` E12-BD | 562,158,592 | 139,236 | 12 | Completed below ceiling |
+| `0x40` P-I-BD | 562,301,574 | 139,271 | 12 | Completed below ceiling |
+| `0x50` INP-GA | 562,183,361 | 139,402 | 12 | Completed below ceiling |
+| `0x60` MID 01 | 562,194,086 | 139,508 | 12 | Completed below ceiling |
+| `0x70` CTR-AL | 562,162,921 | 139,445 | 12 | Completed below ceiling |
 
-All six trace scenarios also recorded 24 `MOVEC`-to operations (VBR/CACR ×6
+| Trigger/encoder trace engine | Executed instructions | `RTE` | `TRAP` | Handler-range entries | Buckets |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `0x01` GND-SN | 559,631,603 | 137,933 | 6 | 3,472 | 2 |
+| `0x10` TRX-BD | 559,651,805 | 137,761 | 6 | 3,440 | 2 |
+| `0x11` TRX-SD | 559,752,802 | 137,876 | 6 | 3,584 | 2 |
+| `0x20` EFM-BD | 559,750,509 | 137,921 | 6 | 3,552 | 2 |
+| `0x30` E12-BD | 559,692,448 | 137,847 | 6 | 3,488 | 2 |
+| `0x40` P-I-BD | 559,777,600 | 137,918 | 6 | 3,600 | 2 |
+| `0x50` INP-GA | 559,644,338 | 138,014 | 6 | 3,355 | 1 |
+| `0x60` MID 01 | 560,135,090 | 138,194 | 16 | 3,680 | 2 |
+| `0x70` CTR-AL | 559,619,278 | 138,051 | 6 | 3,408 | 2 |
+
+All nine trace scenarios recorded 24 `MOVEC`-to operations (VBR/CACR ×6
 each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each), around 1.014 million move-to-SR
 operations, around 77 thousand move-from-SR operations, and no RESET, STOP, or
 other counted control-register writes. The trace counter records transitions
 into the source descriptor-handler PC range and groups them by handler and
 return address. Only aggregate counts are reported; no address rows are
-published. The scenarios establish source-model execution across five core
-engine families, but do not attribute the observed handler buckets to each
-engine descriptor, measure every engine/opcode, cover cache/alignment
+published. These scenarios establish source-model execution across all eight
+core engine families, but do not attribute the observed handler buckets to
+each engine descriptor, measure every engine/opcode, cover cache/atomic
 behavior, or run code on the target ColdFire.
 
 ## Independent CPU-model probe
@@ -254,4 +267,4 @@ rules above; selecting and implementing one remains open for WP-10.
 
 `python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target built and all listed engine scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
 
-WP-06 remains `in_review`. The one-million startup prefix and ten engine scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.
+WP-06 remains `in_review`. The one-million startup prefix, nine assignment/eight-hit profiles, and nine trace scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.

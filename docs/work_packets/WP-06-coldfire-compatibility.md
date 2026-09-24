@@ -31,9 +31,9 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix plus four assignment/eight-hit scenarios and six trigger/encoder scenarios across GND, TRX, EFM, E12, and P-I engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
-- Remaining: Broader runtime coverage beyond the five sampled engine families; atomic/cache/self-modifying-code and device-memory behavior; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
-- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege; retain level 7 and reset-vector fetch as explicit model/hardware limits.
+- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix plus nine assignment/eight-hit scenarios and nine trigger/encoder scenarios spanning all eight core engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
+- Remaining: Broader runtime coverage across the 44 distinct descriptor handlers; atomic/cache/self-modifying-code and device-memory behavior; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
+- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege; retain level 7 and reset-vector fetch as explicit model/hardware limits. Extend per-engine coverage where a bounded run adds evidence.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths.
 - Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). The new runtime profiles are Gearmulator-only and keep raw traces local.
@@ -153,5 +153,26 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: GitHub integration cannot edit PR metadata (403); the published branch and report are current but the PR body remains stale. The WP-07 map awaits review in draft PR #13; physical hardware/reset/level-7 evidence is unavailable.
 - Next action: run bounded firmware-free probes for atomic/cache behavior where supported, then return to startup register adaptation after WP-07's map is accepted. Keep the PR body limitation explicit until GitHub write access is available.
 - Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); the PR description could not be synchronized due to the documented 403.
+
+### 2026-09-24 / prompt 5 — complete core-family profile coverage
+
+- Request: continue the overnight Machinedrum-to-Octatrack port after the maintainer's manual WP-05 squash merge; complete representative runtime profiles across the core engine families and keep derived traces private.
+- Starting state → ending state: `in_review` → `in_review`; profiles now span all eight core families, while the startup adaptation and physical-hardware criteria remain open.
+- Owner / branch: Codex / `work/wp-06-coldfire-compatibility`, based on pushed branch head `63f80e49da64eef6ca74ce93d6359bf58f6519ad`.
+- Completed:
+  - [x] Ran assignment/eight-hit profiles for GND-SN (`0x01`), P-I-BD (`0x40`), INP-GA (`0x50`), MID 01 (`0x60`), and CTR-AL (`0x70`); all exited 0 below the 1,000,000,000-instruction ceiling at 562,282,775; 562,301,574; 562,183,361; 562,194,086; and 562,162,921 instructions respectively.
+  - [x] Ran trigger/encoder traces for INP-GA (`0x50`), MID 01 (`0x60`), and CTR-AL (`0x70`); all exited 0 below the ceiling at 559,644,338; 560,135,090; and 559,619,278 instructions. Safe aggregation reported 3,355; 3,680; and 3,408 handler-range entries, respectively; `0x50` formed one handler/return bucket and the other two formed two.
+  - [x] Consolidated nine assignment/eight-hit profiles and nine traces across all eight core engine families in the report; the counters remain Gearmulator-only and do not claim all 44 descriptor handlers or target CPU execution.
+  - [x] Kept firmware, raw host/link/memory traces, DSP traces, stdout, and address-bearing call rows under `/private/tmp`.
+- Remaining:
+  - [ ] Map the source startup-register operands/effects against WP-07's accepted memory/MMIO map before selecting any adaptation.
+  - [ ] Expand executed coverage across the 44 descriptor handlers and establish atomic/cache/self-modifying-code behavior where observed.
+  - [ ] Resolve device-memory alignment, reset-vector fetch, edge-sensitive level 7, and physical CPU behavior with suitable hardware or preserve them as explicit limits.
+- Changed files: `docs/reports/WP-06-coldfire.md`; this packet; `docs/STATUS.md`; `docs/COMPATIBILITY_MATRIX.md`; `docs/RESEARCH_LOG.md`.
+- Verification: `md_profile <local OS 1.63 image> <private output> <engine ID>` for `0x01`, `0x40`, `0x50`, `0x60`, and `0x70`, and `md_profile <local OS 1.63 image> <private output> trace=<engine ID>` for `0x50`, `0x60`, and `0x70`, each with `GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000` — all exited 0 below the ceiling. Safe `awk` aggregation emitted only counts; no trace rows were published. `make check` passed (nine reference validations, Python compilation, and 20 tests); `git diff --check` passed; the local Markdown-link scan passed for all five changed documents. No target CPU or physical hardware run was available.
+- Findings: the new scenarios extend the earlier TRX/EFM/E12/P-I/GND sample to INP, MID, and CTR; handler-range entries total 3,355–3,680 in these traces. These address-free totals do not identify a specific descriptor handler. The MID trace records 16 TRAPs while the other newly traced scenarios record six; source-model cause is not investigated.
+- Blockers: WP-07's proposed memory/MMIO map remains in draft PR #13 pending review. The PR #12 description remains stale after the GitHub integration returned 403; the branch report is current. No physical hardware is available.
+- Next action: continue bounded WP-06 runtime coverage, and resume startup-register operand/effect mapping only after WP-07's map is accepted.
+- Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); retain draft status while the adaptation and hardware gaps remain.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.
