@@ -1,12 +1,12 @@
 # WP-05 — Capture Octatrack boot in headless and UI modes
 
-- Status: `in_review`
+- Status: `done`
 - Owner: Codex
 - Branch: `work/wp-05-octatrack-baseline`
 - Updated: 2026-09-24
 - Depends on: [WP-01](WP-01-source-provenance.md), [WP-02](WP-02-target-profiles.md), [WP-03](WP-03-evidence-contract.md)
 - Gate: G0
-- Accepted delivery: pending review
+- Accepted delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) squash-merged as `148494c212d2d11fd21ad58f56c44b324d4c91bb` on 2026-09-23.
 
 ## Result
 
@@ -27,18 +27,19 @@ Use octemu's `src/board/ot-board.c`, panel/DSP bridges, `src/script.c`, and its 
 - [x] A windowed UI run accepts PLAY and STOP and observes a lit panel lamp; before/after panel screenshots were inspected locally; see the [UI run metadata](../reports/WP-05-ot-ui-v1.manifest.json).
 - [x] CPU, DSP, panel, storage, and audio interfaces are located in octemu/QEMU source and linked to the target run profile in the [report](../reports/WP-05-ot-baseline.md#source-map-for-the-run-profile).
 - [x] Host pacing, guest audio-block timing, and the live monitor artifact are distinguished in the report; no hardware parity is inferred.
+- [x] PR #11 was squash-merged and the accepted delivery reconciled.
 
 The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies. Check an item only when its evidence exists.
 
 ## Current handoff
 
-- Completed: Verified octemu's pinned OS 1.40C archive; built the pinned emulator; booted the unchanged image to `PTCH` headless and windowed; verified PLAY/lamp/STOP response in each; recorded versioned metadata and source mapping.
-- Remaining: PR review, required checks, and merge reconciliation.
-- Next action: Merge PR #11 after the required checks pass, then reconcile the accepted delivery.
-- Waiting on: PR merge reconciliation.
+- Completed: Verified octemu's pinned OS 1.40C archive; built the pinned emulator; booted the unchanged image to `PTCH` headless and windowed; verified PLAY/lamp/STOP response in each; recorded versioned metadata and source mapping; reconciled the accepted merge.
+- Remaining: None for WP-05. Physical behavior remains outside this emulator baseline.
+- Next action: Continue WP-06 ColdFire compatibility.
+- Waiting on: None.
 - Blockers: none.
 - Evidence: [WP-05 report](../reports/WP-05-ot-baseline.md), headless [manifest](../reports/WP-05-ot-headless-v1.manifest.json) and [events](../reports/WP-05-ot-headless-v1.events.jsonl), windowed [manifest](../reports/WP-05-ot-ui-v1.manifest.json) and [events](../reports/WP-05-ot-ui-v1.events.jsonl); reusable walks in `tests/walks/`.
-- Delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) open on `work/wp-05-octatrack-baseline`; required checks have passed for `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
+- Delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) squash-merged as `148494c212d2d11fd21ad58f56c44b324d4c91bb` on 2026-09-23; required checks passed for submitted head `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
 
 ## Prompt history
 
@@ -70,3 +71,19 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: none.
 - Next action: merge PR #11, then reconcile the accepted delivery.
 - Delivery: [PR #11](https://github.com/repeat98/octamachine/pull/11) open; head commit `cc88ceeeeff31f91bb4797f0a335ac9465271d57`.
+
+### 2026-09-24 / merge reconciliation — PR #11
+
+- Request: reconcile the maintainer's manual squash merge before advancing the next packet.
+- Starting state → ending state: `in_review` → `done`.
+- Owner / branch: Codex / `work/wp-05-octatrack-baseline`; the reconciliation is recorded in `work/wp-07-memory-and-mmio`.
+- Completed:
+  - [x] Confirmed GitHub reports PR #11 merged as `148494c212d2d11fd21ad58f56c44b324d4c91bb` on 2026-09-23.
+  - [x] Checked the merge acceptance item and refreshed the handoff and delivery record.
+- Remaining: None for WP-05 acceptance.
+- Changed files: this packet and `docs/STATUS.md`.
+- Verification: GitHub PR state is `MERGED`; required checks passed for submitted head `cc88ceeeeff31f91bb4797f0a335ac9465271d57`. WP-05's G0 target-baseline prerequisite is now satisfied.
+- Findings: Merge acceptance confirms delivery only; the report's octemu-only and no-physical-hardware limits remain.
+- Blockers: none.
+- Next action: Continue WP-06 using accepted `main` commit `148494c212d2d11fd21ad58f56c44b324d4c91bb`.
+- Delivery: this reconciliation is included in the enclosing WP-07 commit.
