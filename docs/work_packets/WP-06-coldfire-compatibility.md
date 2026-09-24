@@ -31,13 +31,13 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Built and ran the pinned patched QEMU against firmware-free probes for CAS, RAM code writes, and cache-control/CACR model paths. The 68020 control executes CAS.L; m5206/cfv4e take vector 4 and report the unchanged CAS target. Both ColdFire models execute replacement RAM code after a write. They execute supervisor CPUSHL.L and CACR writes, then take vector 4 on CACR read. User-mode probes take vector 8 for CPUSHL, CACR writes, and ACR0 writes and vector 4 for CACR reads; each records the expected stacked PC, frame SP, and unchanged sentinel. These remain pinned-QEMU results, not physical cache or register measurements.
-- Remaining: Map startup register operands/effects after WP-07 memory/MMIO map acceptance; determine whether source firmware uses CAS or code modification; characterize cache-control effects and physical/device-memory behavior; pursue address-safe attribution across the 44 descriptor handlers; preserve reset, level-7, and physical CPU limits.
-- Next action: After WP-07 map acceptance, map source startup register effects and compare candidate adaptation mechanisms with target facilities and privilege rules. Continue only bounded cache-control or firmware-use work that adds address-safe evidence. PR #12 remains the delivery target; keep it in draft pending review and packet acceptance.
-- Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
-- Blockers: No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements. Gearmulator source/image inputs remain unavailable here. Earlier GitHub merge attempts returned 403; the WP-06 push succeeded, but PRs #12 and #13 remain open drafts pending review and acceptance.
-- Evidence: [WP-06 report](../reports/WP-06-coldfire.md); probes under [tests/probes/wp06](../../tests/probes/wp06/); startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). Gearmulator profile traces remain local.
-- Delivery: Cache-control evidence commit 1b34de1eeaa9753999ea2f818799a337faecf7d5 was pushed to work/wp-06-coldfire-compatibility and remains included in PR #12. The current head's reported scaffold and GitGuardian checks pass; the PR remains a draft pending review and acceptance.
+- Completed: Pinned-QEMU probes cover selected arithmetic, exception, cache-control, CACR, ACR0, and RAM self-modification paths. WP-07's measured source map and target-side register documentation are now accepted through merged PR #13.
+- Remaining: The third WP-06 acceptance item remains unchecked. Map source RAMBAR/MBAR operands and effects against the accepted target map before selecting any trap, relocation, or rewrite mechanism. Extend runtime coverage and preserve reset-vector, level-7, and physical CPU limits.
+- Next action: Use the accepted WP-07 report to map the source startup-register effects and identify whether an adaptation candidate can be justified against target facilities and privilege rules.
+- Waiting on: None for the WP-07 map; WP-04 and WP-05 remain accepted prerequisites.
+- Blockers: No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements. The pinned source checkout, firmware input, cross-compiler, and QEMU executable are not available in this checkout for reproducing prior source/model runs.
+- Evidence: [WP-06 report](../reports/WP-06-coldfire.md); probes under [tests/probes/wp06](../../tests/probes/wp06/); startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch); accepted [WP-07 report](../reports/WP-07-memory-mmio.md). Gearmulator profile traces remain local.
+- Delivery: PR #12 is open and ready for review on work/wp-06-coldfire-compatibility; its branch now incorporates the accepted WP-07 map. The user authorized merge of the open PRs; merging this partial evidence does not complete WP-06 or G1.
 
 ## Prompt history
 
@@ -346,3 +346,24 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: WP-07 map acceptance still gates startup-register adaptation. No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements.
 - Next action: commit and push this prompt's packet update to PR #12, keep it draft pending review/packet acceptance, then after WP-07 map acceptance map source startup register effects.
 - Delivery: this prompt's evidence and packet/status records are included in the enclosing commit; report its hash after committing.
+
+### 2026-09-24 / prompt 14 — reconcile WP-07 and prepare authorized merges
+
+- Request: Resume repository work, commit and push the local WP-06 merge reconciliation, then freeze this branch for the next owner. Leave the remaining PR checks and merge decisions to that handoff.
+- Starting state -> ending state: in_review -> in_review; WP-06 remains delivered with one acceptance item unchecked.
+- Owner / branch: Codex / work/wp-06-coldfire-compatibility, continuing the existing PR branch while merging the latest origin/main.
+- Completed:
+  - [x] Reconciled PR #13 as merged at 5184aa20cada2a949354874f77c58b3e440a84eb and marked WP-07 done against its four completed documentation criteria.
+  - [x] Preserved both WP-06 and WP-07 compatibility-matrix evidence and both dated research-log entries while resolving shared-document merge conflicts.
+  - [x] Updated WP-06's handoff to use the accepted WP-07 map and kept the adaptation-mechanism criterion unchecked.
+  - [x] Ran make check and git diff --check for the reconciled branch; results are recorded below.
+- Remaining:
+  - [ ] Confirm the pushed PR #12 head's required checks and review state; decide whether to merge it, preserving WP-06's unchecked adaptation criterion.
+  - [ ] Update PR #14 from latest main, verify its required checks, and decide whether to merge it.
+  - [ ] Keep G1 open; no PR merge establishes target compatibility or physical hardware feasibility.
+- Changed files: docs/BOOT_FEASIBILITY.md; docs/COMPATIBILITY_MATRIX.md; docs/RESEARCH_LOG.md; docs/STATUS.md; docs/reports/WP-07-memory-mmio.md; docs/work_packets/WP-05-octatrack-baseline.md; docs/work_packets/WP-06-coldfire-compatibility.md; docs/work_packets/WP-07-memory-and-mmio.md.
+- Verification: make check passed; git diff --check passed after conflict reconciliation and before staging.
+- Findings: The accepted WP-07 evidence narrows Gearmulator's reference map but does not test physical decoding, target aliases, or a port adaptation.
+- Blockers: The previously measured hardware and full-source limits remain; no new target behavior is claimed.
+- Next action: Hand off the pushed branch to the next owner to check PR #12 and #14, make any required refreshes, and take the separately authorized merge actions.
+- Delivery: This prompt's file update will be delivered by the enclosing commit on the existing WP-06 branch.
