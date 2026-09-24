@@ -227,6 +227,36 @@ failure marker. This establishes only the pinned QEMU models' behavior for
 these synthetic RAM accesses; it does not establish physical bus timing or
 all device-memory alignment rules.
 
+## Pinned source inspection: atomics, caches, and code coherence
+
+The exact QEMU base e8d693e12af9cbb89d724baadfcc08559669e279 was fetched into
+a temporary audit checkout and all 13 octemu QEMU patches applied there. This
+was static source inspection only; this prompt did not build or execute QEMU.
+
+- In target/m68k/cpu.c, the m5206 and cfv4e initializers enable their ColdFire
+  ISA feature sets but do not enable M68K_FEATURE_CAS; the feature is set in
+  the separate 68020 initialization path. These two QEMU CPU configurations
+  therefore cannot establish CAS/CAS2 execution behavior. This is a model
+  coverage gap, not evidence of a silicon incompatibility.
+- In target/m68k/helper.c::cf_movec_to, CACR writes update the saved CACR
+  value and call the stack-switch helper, while ACR0–ACR3 writes are marked
+  TODO. In target/m68k/translate.c, the cache push/invalidate and instruction
+  touch handlers have privilege checks but no cache operation body. This
+  source review does not establish whether the Machinedrum firmware executes
+  any of those paths.
+- QEMU TCG maintains a conservative translated-code extent for each page and
+  invalidates overlapping translation blocks after guest stores. octemu patch
+  0008-tcg-skip-notdirty-walk-for-codeless-pages.patch skips the walk only
+  when a page has no translated code or the store is provably outside that
+  extent; overlapping stores still reach invalidation. This is emulator code
+  coherence, not a model of MCF54455 instruction-cache behavior or proof that
+  the source firmware modifies code at runtime.
+
+The source checkout provides no new executed instruction evidence. The WSL
+environment has m68k-elf-gcc, but no qemu-system-m68k, Meson, Ninja,
+pkg-config, or built DSP56300 dependency archive for octemu's documented
+QEMU build. Runtime atomics/cache/self-modifying-code probes remain open.
+
 ## Findings and classification
 
 | Behavior | Evidence and result | Classification |
@@ -239,7 +269,7 @@ all device-memory alignment rules.
 | Reset and vector fetch | WP-04 records the Gearmulator reset checkpoint. The MCF54455 manual specifies SSP from address `0x00000000` and PC from `0x00000004` on reset. In the pinned QEMU CPU reset path, PC is set to zero with a TODO to fetch it; `an5206 -kernel` bypasses this path and starts at the ELF entry. A `system_reset` attempt did not reach the expected vector entry. | **Unresolved in QEMU.** No reset-vector equivalence claim. |
 | Interrupt masking and priority | Synthetic level-4 timer probe: with SR.I=5, the timer request is pending and no handler runs; lowering SR.I to 3 delivers exactly one handler. Both QEMU CPU models match. Both processor manuals document the non-maskable, edge-sensitive level-7 exception. In the pinned QEMU source, interrupt acceptance uses only `SR.I < pending_level`; `m68k_set_irq_level` stores a level and clears it when lowered, without an edge latch. The Octatrack board wires modeled device sources through two INTCs and exposes no separate external level-7 input. | **Measured for level 4; level 7 is a QEMU model gap and has no board stimulus.** Hardware interrupt behavior remains unresolved. |
 | Data alignment and byte order | New synthetic probe performs aligned and odd-address byte/word/long RAM reads and an odd-address long write. `m5206` and `cfv4e` both produce the same expected big-endian values. | **Direct in these QEMU RAM cases.** Physical behavior and device-memory accesses remain unmeasured. |
-| Atomic operations, cache effects, and self-modifying code | Not exercised by the startup prefix, the selected engine traces, or the synthetic probes. | **Unresolved.** |
+| Atomic operations, cache effects, and self-modifying code | Not exercised by the startup prefix, selected engine traces, or synthetic probes. Pinned-source inspection finds CAS/CAS2 disabled in the tested QEMU CPU feature sets, incomplete cache-control modeling, and generic TCG translated-code invalidation. | **Unresolved on firmware and hardware; the current QEMU models cannot close this evidence gap.** |
 
 ### Exception and privilege details
 
@@ -319,4 +349,4 @@ rules above; selecting and implementing one remains open for WP-10.
 
 `python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target built and all listed engine scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
 
-WP-06 remains `in_review`. The one-million startup prefix, assignment/eight-hit profiles for all 50 core synthesis IDs plus three additional engine families, and nine trigger/encoder traces extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.
+WP-06 remains in_review. The one-million startup prefix, assignment/eight-hit profiles for all 50 core synthesis IDs plus three additional engine families, and nine trigger/encoder traces extend only Gearmulator-side coverage. A pinned-source review now documents QEMU CAS/cache modeling gaps and its translated-code invalidation path; no new QEMU execution was performed. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07 reviewed memory map. No physical CPU or register behavior is established.

@@ -31,11 +31,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix, all 50 core synthesis IDs plus INP/MID/CTR assignment scenarios, and nine trigger/encoder scenarios spanning all eight source engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
-- Remaining: Attribute execution to the 44 distinct descriptor handlers; probe atomic/cache/self-modifying-code and device-memory behavior; map startup register operands/effects before selecting an adaptation; physical level-7 and reset-vector behavior.
-- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege. Pursue per-handler attribution only if source instrumentation can avoid retaining firmware-derived addresses. Restore GitHub merge/write access before reconciling PR acceptance.
+- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix, all 50 core synthesis IDs plus INP/MID/CTR assignment scenarios, and nine trigger/encoder scenarios spanning all eight source engine families; added independent m5206/cfv4e instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the WP-06 report. Initialized the pinned octemu submodule at 87000189418c8ca2026dc047bda220b66802809d, fetched the exact QEMU base, applied all 13 octemu patches in a temporary checkout, and recorded a static atomic/cache/code-coherence audit.
+- Remaining: Attribute execution to the 44 distinct descriptor handlers; run firmware-free atomic/cache/self-modifying-code probes against the pinned model when its build prerequisites are available; map startup register operands/effects after WP-07 acceptance; physical level-7 and reset-fetch behavior.
+- Next action: After WP-07 memory/MMIO map acceptance, revisit the source startup register effects against its target map. Provision the pinned QEMU build prerequisites and run bounded atomic/cache/code-coherence probes; pursue per-handler attribution only if source instrumentation can avoid retaining firmware-derived addresses. Restore GitHub merge/write access before reconciling PR acceptance.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
-- Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths. The connected GitHub integration returned 403 for merge attempts on PRs #12 and #13; both remain open drafts. The local push to origin was also denied with 403 to Aquitronic. This checkout has no initialized octemu submodule, Gearmulator research checkout, Machinedrum image at the documented input path, m68k-elf-gcc, or qemu-system-m68k, so new runtime probes cannot be run here.
+- Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without target hardware. The source review does not record Machinedrum firmware use of CAS/cache/code modification. m68k-elf-gcc is available, but the WSL environment has no QEMU binary, Meson, Ninja, pkg-config, or built DSP56300 dependency archive, so no new runtime probe can run here. The Gearmulator research checkout and local OS 1.63 image remain unavailable. The push of this prompt's enclosing commit and prior merge attempts returned 403 permission errors; PRs #12 and #13 remain open drafts.
 - Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). The new runtime profiles are Gearmulator-only and keep raw traces local.
 - Delivery: draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; it remains draft while checklist items are incomplete.
 
@@ -223,3 +223,27 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: GitHub merge/write operations are unavailable to this integration. No local WP-06 runtime inputs or CPU-model binaries are present.
 - Next action: restore GitHub write access and review/accept WP-07 when its broader G1 hold is cleared; then continue WP-06 with the accepted map and a provisioned probe toolchain.
 - Delivery: the local commit records this reconciliation for draft PR #12; push to origin was denied with 403, and no PR was merged.
+
+### 2026-09-24 / prompt 8 — inspect pinned QEMU atomic/cache paths
+
+- Request: continue WP-06, initialize and inspect the pinned CPU-model source, add bounded compatibility evidence, and keep packet/status records current.
+- Starting state -> ending state: in_review -> in_review; the source audit adds model-coverage findings, while all runtime, adaptation, and hardware acceptance gaps remain open.
+- Owner / branch: Codex / work/wp-06-coldfire-compatibility, starting at local commit 284dbe31c527cc8d4e2cad401f5072e83e1785f4; origin/main remains 148494c212d2d11fd21ad58f56c44b324d4c91bb.
+- Completed:
+  - [x] Initialized vendor/octemu at pinned commit 87000189418c8ca2026dc047bda220b66802809d; confirmed the parent repository submodule pointer is unchanged.
+  - [x] Fetched QEMU base e8d693e12af9cbb89d724baadfcc08559669e279 into /tmp/octamachine-qemu-audit and applied all 13 octemu patches successfully.
+  - [x] Inspected the pinned m5206/cfv4e CPU feature initializers, cf_movec_to, cache-instruction translator bodies, TCG code-page invalidation, and octemu patch 0008. Added the source-level findings to the report and research log without claiming firmware use or physical behavior.
+  - [x] Found m68k-elf-gcc at /home/jannikassfalg/.local/bin/m68k-elf-gcc; the earlier prompt's statement that the compiler and submodule were absent is superseded.
+- Remaining:
+  - [ ] Run synthetic atomic/cache/self-modifying-code probes against a built copy of the exact pinned model.
+  - [ ] Map startup register operands/effects after WP-07's map is accepted; attribute execution across all 44 descriptor handlers only if instrumentation can remain address-safe.
+  - [ ] Resolve reset-vector, level-7, device-memory, and physical CPU behavior through suitable board/hardware evidence or retain them as explicit limits.
+- Changed files: docs/reports/WP-06-coldfire.md; this packet; docs/RESEARCH_LOG.md; docs/STATUS.md.
+- Verification:
+  - Exact QEMU base fetched and all 13 octemu patches applied in the temporary source checkout; no build output or source changes were added to the repository.
+  - m68k-elf-gcc is present. qemu-system-m68k, Meson, Ninja, pkg-config, and the built DSP56300 archive are absent, so the new CPU probes could not be executed. No firmware-derived input was available.
+  - WSL make check passed: nine reference validations, Python compileall, and all 20 tests. Native Windows Git diff --check passed; WSL Git line-ending warnings on the Windows-mounted checkout were not used.
+- Findings: the source feature tables do not enable CAS/CAS2 for either tested QEMU model; ACR writes remain TODO, cache-operation bodies have no implementation there, and the TCG patch preserves invalidation for stores overlapping translated code. These are QEMU source observations only. They neither show that the firmware executes those paths nor establish physical MCF54455 behavior.
+- Blockers: the pinned QEMU build prerequisites and local Gearmulator/firmware inputs are unavailable; physical reset, level-7, and CPU behavior still require hardware/model evidence. GitHub write/merge access previously returned 403.
+- Next action: after WP-07 acceptance, map source startup effects against its memory/MMIO map; provision the pinned QEMU build dependencies and run bounded firmware-free CPU probes. Keep PR #12 in draft while acceptance gaps remain.
+- Delivery: the enclosing local commit updates the WP-06 report and draft PR #12 branch; pushing it to origin returned 403 Permission to repeat98/octamachine.git denied to Aquitronic. The remote PR head remains unchanged.
