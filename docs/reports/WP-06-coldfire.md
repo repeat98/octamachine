@@ -260,6 +260,19 @@ cf_movec_to stores CACR, and m68k_movec_from only returns CACR for 68020,
 QEMU model behavior. It does not measure physical cache effects, prove
 physical CACR readability, or establish firmware use.
 
+The separate user_privilege_cache.S probe enters user mode with SR 0x0500
+and checks each instruction independently. On both m5206 and cfv4e,
+user-mode CPUSHL.L and MOVEC D0-to-CACR take vector 8; MOVEC CACR-to-D1 takes
+vector 4, matching the ColdFire profiles' disabled CACR-read path. The handler
+records one exception in every case, a stacked PC equal to the tested
+instruction address, frame SP 0x7ef8 from the pre-exception SP 0x7f00, and
+the unchanged synthetic memory sentinel 0x13579bdf. The captured exception
+frame values are 0x40200500 for vector 8 and 0x40100500 for vector 4.
+
+This extends the pinned QEMU privilege/decode observation. It does not show
+which exception physical silicon would prioritize for CACR reads, measure
+physical cache state, or establish firmware use.
+
 ## Pinned QEMU source inspection and runtime follow-up
 
 The exact QEMU base e8d693e12af9cbb89d724baadfcc08559669e279 was fetched into

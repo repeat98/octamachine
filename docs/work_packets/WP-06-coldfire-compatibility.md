@@ -31,9 +31,9 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Built and ran the pinned patched QEMU against firmware-free probes for CAS, RAM code writes, and cache-control/CACR model paths. The 68020 control executes CAS.L; m5206/cfv4e take vector 4 and report the unchanged CAS target. Both ColdFire models execute replacement RAM code after a write. They execute supervisor CPUSHL.L and CACR writes, then take vector 4 on CACR read. The report, compatibility matrix, research log, and status record the model-only limits.
+- Completed: Built and ran the pinned patched QEMU against firmware-free probes for CAS, RAM code writes, and cache-control/CACR model paths. The 68020 control executes CAS.L; m5206/cfv4e take vector 4 and report the unchanged CAS target. Both ColdFire models execute replacement RAM code after a write. They execute supervisor CPUSHL.L and CACR writes, then take vector 4 on CACR read. New user-mode probes take vector 8 for CPUSHL and CACR writes and vector 4 for CACR reads; the captured stacked PC, frame SP, and sentinel are checked. The report, compatibility matrix, research log, and status record the model-only limits.
 - Remaining: Map startup register operands/effects after WP-07 memory/MMIO map acceptance; determine whether source firmware uses CAS or code modification; characterize cache-control effects and physical/device-memory behavior; pursue address-safe attribution across the 44 descriptor handlers; preserve reset, level-7, and physical CPU limits.
-- Next action: After WP-07 map acceptance, map source startup register effects and compare candidate adaptation mechanisms with target facilities and privilege rules. Continue only bounded cache-control or firmware-use work that adds address-safe evidence. PR #12 now contains the latest pushed WP-06 evidence; keep it in draft pending review and packet acceptance.
+- Next action: After WP-07 map acceptance, map source startup register effects and compare candidate adaptation mechanisms with target facilities and privilege rules. Continue only bounded cache-control or firmware-use work that adds address-safe evidence. PR #12 remains the delivery target; keep it in draft pending review and packet acceptance.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements. Gearmulator source/image inputs remain unavailable here. Earlier GitHub merge attempts returned 403; the WP-06 push succeeded, but PRs #12 and #13 remain open drafts pending review and acceptance.
 - Evidence: [WP-06 report](../reports/WP-06-coldfire.md); probes under [tests/probes/wp06](../../tests/probes/wp06/); startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). Gearmulator profile traces remain local.
@@ -299,3 +299,26 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: physical cache/register behavior remains unavailable; WP-07 map acceptance is still required for startup adaptation; earlier GitHub merge attempts returned 403 and PR #12 remains a draft pending review and acceptance.
 - Next action: after WP-07 map acceptance, map the source startup register effects; keep cache-instruction decode/readback results separate from physical cache conclusions.
 - Delivery: cache-control evidence commit 1b34de1eeaa9753999ea2f818799a337faecf7d5 was pushed to origin and remains included in PR #12. The current head's reported scaffold and GitGuardian checks pass; no review acceptance or merge has occurred, so the PR remains a draft.
+
+### 2026-09-24 / prompt 11 — measure user-mode cache-control exceptions
+
+- Request: continue WP-06 with bounded pinned-QEMU user-mode privilege evidence for CPUSHL and CACR MOVEC paths; do not claim physical behavior.
+- Starting state -> ending state: in_review -> in_review; user-mode exception dispatch is now measured in the pinned models, while target adaptation and physical acceptance remain open.
+- Owner / branch: Codex / work/wp-06-coldfire-compatibility, continuing from pushed commit 7b23ad71d40d57ea712053029d662e6974edd1b9; origin/main remains 148494c212d2d11fd21ad58f56c44b324d4c91bb.
+- Completed:
+  - [x] Added user_privilege_cache.S and integrated three independent user-mode cases into the WP-06 runner for CPUSHL, CACR write, and CACR read on m5206 and cfv4e.
+  - [x] Verified vector 8 for user-mode CPUSHL and CACR write and vector 4 for CACR read on both models. Each of the six cases records one exception, a stacked PC matching the instruction address, frame SP 0x7ef8 from pre-exception SP 0x7f00, and unchanged sentinel 0x13579bdf.
+  - [x] Updated the probe guide, WP-06 report, compatibility matrix, research log, packet handoff/history, and status. Reconciled WP-08's draft PR #14 in the project overview.
+- Remaining:
+  - [ ] Map startup register operands/effects against WP-07's accepted memory/MMIO map and check any adaptation against target facilities and privilege rules.
+  - [ ] Establish physical cache-control effects and whether firmware uses these paths; preserve device-memory, reset-vector, level-7, and physical CPU limits.
+  - [ ] Attribute execution across all 44 descriptor handlers only if address-safe evidence supports it.
+- Changed files: tests/probes/wp06/run.py; tests/probes/wp06/user_privilege_cache.S; tests/probes/wp06/README.md; docs/reports/WP-06-coldfire.md; docs/COMPATIBILITY_MATRIX.md; docs/RESEARCH_LOG.md; this packet; docs/STATUS.md.
+- Verification:
+  - python3 tests/probes/wp06/run.py --cc /home/jannikassfalg/.local/bin/m68k-elf-gcc --qemu /home/jannikassfalg/octamachine/vendor/octemu/vendor/qemu/build/qemu-system-m68k — passed. The complete integrated suite passed; the new six cases reported vector/frame/SP/PC/sentinel values described above.
+  - make check — passed: nine reference validations, Python compileall, and all 20 tests.
+  - git -c core.autocrlf=true diff --check — passed. The QEMU source/build tree and submodule pin are unchanged; no firmware or physical hardware was used.
+- Findings: user-mode CPUSHL and MOVEC D0-to-CACR raise vector 8 in both pinned profiles. MOVEC CACR-to-D1 raises vector 4, consistent with the current QEMU ColdFire feature gate for CACR reads. These are emulator results and do not establish physical exception priority, cache effects, or firmware use.
+- Blockers: WP-07 map acceptance still gates startup-register adaptation. No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements.
+- Next action: after WP-07 map acceptance, map source startup register effects and compare adaptation candidates with target facilities and privilege rules; keep PR #12 draft until review and packet acceptance.
+- Delivery: enclosing commit advances the WP-06 branch and updates draft PR #12; report the resulting commit and push status after commit.

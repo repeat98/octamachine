@@ -166,3 +166,11 @@ Record findings as dated entries. Each entry should state the upstream repositor
 - Procedure: inspected the pinned CPUSHL translator, ColdFire CACR write helper, and generic CACR read feature gate. Added a firmware-free CPUSHL/CACR probe and ran the integrated WP-06 runner on the AN5206 QEMU machine. The GNU ColdFire assembler rejects CACR-to-D1 MOVEC syntax, so it uses raw words 0x4e7a, 0x1002, verified against GNU as output for -mcpu=68020.
 - Observations: m5206 and cfv4e both execute supervisor CPUSHL.L and return from MOVEC D0-to-CACR; both take vector 4 on CACR-to-D1. The trap handler records the unchanged synthetic word 0x13579bdf. QEMU source marks CPUSHL as a no-op, stores CACR writes, and feature-gates CACR reads to 68020/030/040/060 profiles.
 - Limits: the result measures only pinned QEMU decoding and helper behavior. It does not observe physical cache state, establish physical CACR readability, or show that Machinedrum firmware uses these paths. No firmware or physical target was used.
+
+
+## 2026-09-24 — WP-06 pinned-QEMU user-mode cache-control exception probes
+
+- Source: octemu 87000189418c8ca2026dc047bda220b66802809d; QEMU base e8d693e12af9cbb89d724baadfcc08559669e279 with all 13 octemu QEMU patches.
+- Procedure: added tests/probes/wp06/user_privilege_cache.S with independent CPUSHL, MOVEC D0-to-CACR, and MOVEC CACR-to-D1 cases. Each enters user mode with SR 0x0500, installs vectors 4 and 8, and records a fixed result block. Ran the integrated WP-06 runner on an5206 with m5206 and cfv4e.
+- Observation: both CPU profiles take vector 8 for user-mode CPUSHL and CACR writes and vector 4 for CACR reads. All six runs record one exception, stacked PC equal to the tested instruction, frame SP 0x7ef8 from 0x7f00, and unchanged sentinel 0x13579bdf. Captured frame values are 0x40200500 (vector 8) and 0x40100500 (vector 4).
+- Limit: this records only pinned QEMU exception dispatch and its CACR-read feature gate. It does not establish physical exception priority, physical cache effects, or Machinedrum firmware use. No firmware or physical target was used.

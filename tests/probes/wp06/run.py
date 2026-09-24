@@ -75,6 +75,15 @@ CACHE_CONTROL_FIELDS = (
     "cacr_read_value",
     "memory_after_trap",
 )
+USER_PRIVILEGE_FIELDS = (
+    "result",
+    "exception_count",
+    "exception_frame",
+    "stacked_pc",
+    "expected_pc",
+    "exception_frame_sp",
+    "memory_after_trap",
+)
 
 
 class Monitor:
@@ -168,6 +177,7 @@ def run_cpu(
                 FAILURE_PREFIX | 2,
                 FAILURE_PREFIX | 3,
                 FAILURE_PREFIX | 4,
+                FAILURE_PREFIX | 8,
             ):
                 break
             time.sleep(0.02)
@@ -247,6 +257,7 @@ def main() -> int:
         cas_elf = temp_dir / "cas_model.elf"
         self_modify_elf = temp_dir / "self_modifying_code.elf"
         cache_control_elf = temp_dir / "cache_control.elf"
+        user_privilege_elfs = {}
         rambar_elf = temp_dir / "unimplemented_rambar.elf"
         mbar_elf = temp_dir / "unimplemented_mbar.elf"
         build = [
@@ -309,6 +320,24 @@ def main() -> int:
             str(Path(__file__).with_name("cache_control.S")),
         ]
         subprocess.run(cache_control_build, check=True, cwd=ROOT)
+        for probe_kind, name in (
+            (0, "user_cpushl"),
+            (1, "user_cacr_write"),
+            (2, "user_cacr_read"),
+        ):
+            user_privilege_elf = temp_dir / f"{name}.elf"
+            user_privilege_build = [
+                args.cc,
+                "-mcpu=5206e",
+                f"-DPROBE_KIND={probe_kind}",
+                "-nostdlib",
+                f"-Wl,-T,{LINKER_SCRIPT}",
+                "-o",
+                str(user_privilege_elf),
+                str(Path(__file__).with_name("user_privilege_cache.S")),
+            ]
+            subprocess.run(user_privilege_build, check=True, cwd=ROOT)
+            user_privilege_elfs[name] = user_privilege_elf
         for mask, stack_elf in ((0x20, stack_device_elf), (0x10, stack_emulator_elf)):
             stack_build = [
                 args.cc,
@@ -370,6 +399,22 @@ def main() -> int:
                 expected_marker=FAILURE_PREFIX | 4,
             )
             for cpu in ("m5206", "cfv4e")
+        }
+        user_privilege_expected_markers = {
+            "user_cpushl": FAILURE_PREFIX | 8,
+            "user_cacr_write": FAILURE_PREFIX | 8,
+            "user_cacr_read": FAILURE_PREFIX | 4,
+        }
+        user_privilege_results = {
+            (cpu, name): run_cpu(
+                args.qemu,
+                user_privilege_elf,
+                cpu,
+                USER_PRIVILEGE_FIELDS,
+                expected_marker=user_privilege_expected_markers[name],
+            )
+            for cpu in ("m5206", "cfv4e")
+            for name, user_privilege_elf in user_privilege_elfs.items()
         }
         stack_device_result = run_cpu(args.qemu, stack_device_elf, "cfv4e", STACK_FIELDS)
         stack_emulator_result = run_cpu(args.qemu, stack_emulator_elf, "cfv4e", STACK_FIELDS)
@@ -457,6 +502,20 @@ def main() -> int:
         print("the pinned cache-control/CACR behavior changed")
         return 1
     print("both models execute supervisor CPUSHL and CACR write, then take vector 4 on CACR read")
+    print("user-mode cache-control privilege exceptions:")
+    for (cpu, name), values in user_privilege_results.items():
+        print(f"{cpu} {name}: {values}")
+    for (cpu, name), values in user_privilege_results.items():
+        if (
+            values["result"] != user_privilege_expected_markers[name]
+            or values["exception_count"] != 1
+            or values["stacked_pc"] != values["expected_pc"]
+            or values["exception_frame_sp"] != 0x00007EF8
+            or values["memory_after_trap"] != 0x13579BDF
+        ):
+            print(f"{cpu} {name} did not produce the expected bounded exception")
+            return 1
+    print("both models take vector 8 for user-mode CPUSHL/CACR writes and vector 4 for CACR reads")
     print("cfv4e EUSP with MCF54455 manual bit 0x20:")
     for field, value in stack_device_result.items():
         print(f"  {field}: 0x{value:08x}")
