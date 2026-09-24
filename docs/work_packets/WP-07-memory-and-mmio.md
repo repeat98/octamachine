@@ -81,7 +81,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Owner / branch: Codex / work/wp-07-memory-and-mmio, continuing from PR head dfa80bb372d4888db483efb7cedc5371fab7acec; origin/main remains 148494c212d2d11fd21ad58f56c44b324d4c91bb.
 - Completed:
   - [x] Rechecked all four WP-07 acceptance items against the report; they are bounded to Gearmulator/source documentation and proposed target ownership, with no alias or physical behavior claimed.
-  - [x] Confirmed draft PR #13 has successful scaffold and GitGuardian checks at head dfa80bb372d4888db483efb7cedc5371fab7acec and no review decision.
+  - [x] Confirmed draft PR #13 has successful scaffold and GitGuardian checks at audited head dfa80bb372d4888db483efb7cedc5371fab7acec and at pushed documentation-reconciliation head 9dafa73695bea65a6c996f6163e81efcd4fa84c7; no review decision is present.
   - [x] Moved the completed commit/push/PR item from the prior prompt's Remaining list to Completed, and refreshed the status overview to the current PR head.
 - Remaining:
   - [ ] Obtain maintainer review/acceptance; keep PR #13 draft while G1 architecture evidence is incomplete.
@@ -91,7 +91,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Verification:
   - `make check` - passed; reference validation succeeded and all 20 unit tests passed.
   - `git -c core.autocrlf=true diff --check` - passed; Git reported only the configured LF-to-CRLF conversion warnings for the two edited Markdown files.
-  - PR #13's existing scaffold and GitGuardian checks were successful at the audited head `dfa80bb372d4888db483efb7cedc5371fab7acec`; the new documentation-only commit still needs its own CI result.
+  - PR #13 checks passed at pushed head `9dafa73695bea65a6c996f6163e81efcd4fa84c7`: both scaffold jobs and GitGuardian.
   - No firmware, raw trace, source, or target behavior was changed or newly measured.
 - Findings: the current PR accurately labels its target map as a proposal and its measurements as Gearmulator/PC-model evidence. The packet acceptance list is complete for this documentation scope; G1 and the later implementation/hardware checks are separate and remain incomplete.
 - Blockers: no PR review decision has been submitted; hardware identity/access is unavailable; alias and bridge probes belong to later implementation work.
