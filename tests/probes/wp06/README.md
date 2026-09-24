@@ -65,14 +65,15 @@ synthetic memory sentinel. Pinned QEMU source marks CPUSHL as a no-op and
 stores CACR writes; this probe does not measure physical cache effects or
 establish firmware use.
 
-The user_privilege_cache.S probe selects user-mode CPUSHL, CACR write, or
-CACR read cases. On both models, CPUSHL and MOVEC D0-to-CACR take vector 8;
-MOVEC CACR-to-D1 takes vector 4 because the ColdFire profiles do not enable
-that read path. Each handler records one exception, the stacked PC, exception
-frame value, frame SP, and an unchanged 0x13579bdf sentinel. In all six runs,
-the stacked PC matches the selected instruction and the frame SP is 0x7ef8
-from the pre-exception 0x7f00. This is pinned-QEMU exception behavior only.
-It does not establish physical privilege or cache behavior.
+The user_privilege_cache.S probe selects user-mode CPUSHL, CACR write/read,
+or ACR0 write cases. On both models, CPUSHL and MOVEC D0-to-CACR/ACR0 take
+vector 8; MOVEC CACR-to-D1 takes vector 4 because the ColdFire profiles do not
+enable that read path. All eight runs record one exception, the tested
+instruction's stacked PC, exception frame value, frame SP, and unchanged
+0x13579bdf sentinel. The stacked PC matches the tested instruction and frame
+SP is 0x7ef8 from pre-exception SP 0x7f00. These are pinned-QEMU exception
+results only; they do not establish physical privilege, cache behavior, or
+Machinedrum firmware use.
 
 ## Target-only user stack and startup MOVEC probes
 

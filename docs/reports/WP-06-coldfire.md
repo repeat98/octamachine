@@ -262,16 +262,21 @@ physical CACR readability, or establish firmware use.
 
 The separate user_privilege_cache.S probe enters user mode with SR 0x0500
 and checks each instruction independently. On both m5206 and cfv4e,
-user-mode CPUSHL.L and MOVEC D0-to-CACR take vector 8; MOVEC CACR-to-D1 takes
-vector 4, matching the ColdFire profiles' disabled CACR-read path. The handler
-records one exception in every case, a stacked PC equal to the tested
-instruction address, frame SP 0x7ef8 from the pre-exception SP 0x7f00, and
-the unchanged synthetic memory sentinel 0x13579bdf. The captured exception
-frame values are 0x40200500 for vector 8 and 0x40100500 for vector 4.
+user-mode CPUSHL.L and MOVEC D0-to-CACR/ACR0 take vector 8; MOVEC CACR-to-D1
+takes vector 4, matching the ColdFire profiles' disabled CACR-read path. All
+eight cases record one exception, a stacked PC equal to the tested instruction
+address, frame SP 0x7ef8 from pre-exception SP 0x7f00, and the unchanged
+synthetic memory sentinel 0x13579bdf. The captured exception frame values are
+0x40200500 for vector 8 and 0x40100500 for vector 4. For the new ACR0
+write case, both models stack PC 0x0001006c, frame 0x40200500, and retain
+the sentinel. The MCF54455 manual lists ACR0–3 as supervisor-access-only
+([reference manual](https://www.nxp.com/docs/en/reference-manual/MCF54455RM.pdf));
+the emulator result matches that privilege rule but does not measure physical
+ACR effects.
 
 This extends the pinned QEMU privilege/decode observation. It does not show
-which exception physical silicon would prioritize for CACR reads, measure
-physical cache state, or establish firmware use.
+physical ACR0 effects, measure physical cache state, or establish that
+Machinedrum firmware uses these paths.
 
 ## Pinned QEMU source inspection and runtime follow-up
 
@@ -328,12 +333,12 @@ to reproduce this build with the current host toolchain.
 | Multiply, basic stack operations, `TRAP`, `RTE`, and privilege exception | Synthetic firmware-free probe returns identical results on the `m5206` and `cfv4e` QEMU models. The NXP ColdFire programmer's manual describes the fixed two-longword frame and `RTE` restoration. | **Direct in the tested emulator cases.** Broader firmware/runtime coverage remains open. |
 | VBR alignment | Both the MCF5206E and MCF54455 manuals say the low 20 VBR bits are not implemented and vector tables are 1 MiB-aligned. Both current QEMU models instead use the raw VBR value and select the unaligned synthetic vector table. QEMU's `cf_movec_to` assigns the value directly. | **Identified emulator mismatch on both profiles.** Keep the source and target vector tables 1 MiB-aligned; the firmware's actual VBR value and physical behavior still need measurement. |
 | Optional target USP stack | MCF54455 CACR[EUSP] is documented at bit 5 (`0x20`). QEMU defines `M68K_CACR_EUSP` as `0x10`. `stack_eusp.S` leaves the user SP unchanged with `0x20`, while the model switches to the user SP with `0x10`. | **Identified emulator mismatch.** The source MCF5206E model has one A7 stack pointer; no source dependency on the target-only dual-stack feature was observed in the startup prefix. |
-| ACR0/ACR1 | Actual startup writes both registers twice. The pinned QEMU `cf_movec_to` has a `TODO` and ignores ACR0–ACR3 writes. The synthetic MOVEC sequence reaches its next instruction without refusal. | **Target model gap.** Whether these startup writes change cache/address behavior on hardware is unresolved; WP-07 must map their values and effects before choosing a shim. |
+| ACR0/ACR1 | Actual startup writes both registers twice. The pinned QEMU `cf_movec_to` has a `TODO` and ignores supervisor ACR0–ACR3 writes. A user-mode MOVEC D0-to-ACR0 probe instead takes vector 8 on both m5206 and cfv4e, with the tested PC stacked and sentinel unchanged. | **Target model gap with a measured user-mode privilege path.** This does not establish supervisor ACR effects or physical cache/address behavior; WP-07 must map startup operands/effects before choosing a shim. |
 | RAMBAR and MBAR | Actual MCF5206E startup writes RAMBAR at MOVEC Rc `0xC04` and MBAR at `0xC0F`, once each. The MCF54455 manual documents its single SRAM RAMBAR at Rc `0xC05`; its core register table does not list the source MBAR encoding. Separate synthetic target ELFs execute the preceding ACR writes and make QEMU abort on source Rc `0xC04` and `0xC0F`. | **Register-map mismatch plus model gap.** The target has a RAMBAR facility, but not at the source encoding. Whether the source writes can be removed or translated depends on their operands and effects, which have not been recorded publicly; WP-07 must map these writes before selecting an adaptation. |
 | Reset and vector fetch | WP-04 records the Gearmulator reset checkpoint. The MCF54455 manual specifies SSP from address `0x00000000` and PC from `0x00000004` on reset. In the pinned QEMU CPU reset path, PC is set to zero with a TODO to fetch it; `an5206 -kernel` bypasses this path and starts at the ELF entry. A `system_reset` attempt did not reach the expected vector entry. | **Unresolved in QEMU.** No reset-vector equivalence claim. |
 | Interrupt masking and priority | Synthetic level-4 timer probe: with SR.I=5, the timer request is pending and no handler runs; lowering SR.I to 3 delivers exactly one handler. Both QEMU CPU models match. Both processor manuals document the non-maskable, edge-sensitive level-7 exception. In the pinned QEMU source, interrupt acceptance uses only `SR.I < pending_level`; `m68k_set_irq_level` stores a level and clears it when lowered, without an edge latch. The Octatrack board wires modeled device sources through two INTCs and exposes no separate external level-7 input. | **Measured for level 4; level 7 is a QEMU model gap and has no board stimulus.** Hardware interrupt behavior remains unresolved. |
 | Data alignment and byte order | New synthetic probe performs aligned and odd-address byte/word/long RAM reads and an odd-address long write. `m5206` and `cfv4e` both produce the same expected big-endian values. | **Direct in these QEMU RAM cases.** Physical behavior and device-memory accesses remain unmeasured. |
-| CAS, CPUSHL, CACR access, and self-modifying code | A 68020 control executes CAS.L; m5206/cfv4e take vector 4 and preserve the CAS target. Both ColdFire models execute supervisor CPUSHL.L, accept a CACR write, and take vector 4 on CACR read. Both also execute replacement RAM code after an overlapping guest store. | **Pinned-QEMU decode and register paths measured; cache effects, firmware use, and physical behavior remain open.** |
+| CAS, CPUSHL, CACR/ACR0 access, and self-modifying code | A 68020 control executes CAS.L; m5206/cfv4e take vector 4 and preserve the CAS target. Both ColdFire models execute supervisor CPUSHL.L, accept a CACR write, and take vector 4 on CACR read. In user mode, CPUSHL, CACR writes, and ACR0 writes take vector 8; CACR reads take vector 4. Both also execute replacement RAM code after an overlapping guest store. | **Pinned-QEMU decode and exception paths measured; cache effects, supervisor ACR effects, firmware use, and physical behavior remain open.** |
 
 ### Exception and privilege details
 

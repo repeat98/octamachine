@@ -324,6 +324,7 @@ def main() -> int:
             (0, "user_cpushl"),
             (1, "user_cacr_write"),
             (2, "user_cacr_read"),
+            (3, "user_acr0_write"),
         ):
             user_privilege_elf = temp_dir / f"{name}.elf"
             user_privilege_build = [
@@ -404,6 +405,7 @@ def main() -> int:
             "user_cpushl": FAILURE_PREFIX | 8,
             "user_cacr_write": FAILURE_PREFIX | 8,
             "user_cacr_read": FAILURE_PREFIX | 4,
+            "user_acr0_write": FAILURE_PREFIX | 8,
         }
         user_privilege_results = {
             (cpu, name): run_cpu(
@@ -515,7 +517,9 @@ def main() -> int:
         ):
             print(f"{cpu} {name} did not produce the expected bounded exception")
             return 1
-    print("both models take vector 8 for user-mode CPUSHL/CACR writes and vector 4 for CACR reads")
+    print(
+        "both models take vector 8 for user-mode CPUSHL/CACR/ACR0 writes and vector 4 for CACR reads"
+    )
     print("cfv4e EUSP with MCF54455 manual bit 0x20:")
     for field, value in stack_device_result.items():
         print(f"  {field}: 0x{value:08x}")

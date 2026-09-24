@@ -1,7 +1,7 @@
-/* Firmware-free user-mode privilege probe for ColdFire cache controls. */
+/* Firmware-free user-mode privilege probe for ColdFire control registers. */
 
 #ifndef PROBE_KIND
-#error "PROBE_KIND must select CPUSHL, CACR write, or CACR read"
+#error "PROBE_KIND must select CPUSHL, CACR write/read, or ACR0 write"
 #endif
 
 .text
@@ -39,6 +39,9 @@ user_privileged_instruction:
 #elif PROBE_KIND == 2
     /* GNU as rejects CACR reads for ColdFire; encode MOVEC CACR -> D1. */
     .word   0x4e7a, 0x1002
+#elif PROBE_KIND == 3
+    /* Encode MOVEC D0 -> ACR0 (control register 0x0004). */
+    .word   0x4e7b, 0x0004
 #else
 #error "unsupported PROBE_KIND"
 #endif

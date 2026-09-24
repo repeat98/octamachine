@@ -31,7 +31,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Built and ran the pinned patched QEMU against firmware-free probes for CAS, RAM code writes, and cache-control/CACR model paths. The 68020 control executes CAS.L; m5206/cfv4e take vector 4 and report the unchanged CAS target. Both ColdFire models execute replacement RAM code after a write. They execute supervisor CPUSHL.L and CACR writes, then take vector 4 on CACR read. New user-mode probes take vector 8 for CPUSHL and CACR writes and vector 4 for CACR reads; the captured stacked PC, frame SP, and sentinel are checked. The report, compatibility matrix, research log, and status record the model-only limits.
+- Completed: Built and ran the pinned patched QEMU against firmware-free probes for CAS, RAM code writes, and cache-control/CACR model paths. The 68020 control executes CAS.L; m5206/cfv4e take vector 4 and report the unchanged CAS target. Both ColdFire models execute replacement RAM code after a write. They execute supervisor CPUSHL.L and CACR writes, then take vector 4 on CACR read. User-mode probes take vector 8 for CPUSHL, CACR writes, and ACR0 writes and vector 4 for CACR reads; each records the expected stacked PC, frame SP, and unchanged sentinel. These remain pinned-QEMU results, not physical cache or register measurements.
 - Remaining: Map startup register operands/effects after WP-07 memory/MMIO map acceptance; determine whether source firmware uses CAS or code modification; characterize cache-control effects and physical/device-memory behavior; pursue address-safe attribution across the 44 descriptor handlers; preserve reset, level-7, and physical CPU limits.
 - Next action: After WP-07 map acceptance, map source startup register effects and compare candidate adaptation mechanisms with target facilities and privilege rules. Continue only bounded cache-control or firmware-use work that adds address-safe evidence. PR #12 remains the delivery target; keep it in draft pending review and packet acceptance.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
@@ -322,3 +322,27 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: WP-07 map acceptance still gates startup-register adaptation. No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements.
 - Next action: after WP-07 map acceptance, map source startup register effects and compare adaptation candidates with target facilities and privilege rules; keep PR #12 draft until review and packet acceptance.
 - Delivery: enclosing commit advances the WP-06 branch and updates draft PR #12; report the resulting commit and push status after commit.
+
+
+### 2026-09-24 / prompt 12 — measure user-mode ACR0 privilege behavior
+
+- Request: continue WP-06 with a firmware-free user-mode ACR0 MOVEC probe on the pinned ColdFire QEMU models.
+- Starting state -> ending state: in_review -> in_review; the ACR0 user-mode exception path is now measured, while target adaptation and physical acceptance remain open.
+- Owner / branch: Codex / work/wp-06-coldfire-compatibility, continuing from pushed commit b4c269eeeb7ee0fe8a219f9d36dbaaf002cf9e80; origin/main remains 148494c212d2d11fd21ad58f56c44b324d4c91bb.
+- Completed:
+  - [x] Added an independently authored MOVEC D0-to-ACR0 user-mode case to user_privilege_cache.S and integrated it into run.py for m5206 and cfv4e.
+  - [x] Ran the expanded integrated QEMU probe. Both profiles take vector 8 for ACR0 writes; each case records one exception, the expected instruction PC 0x0001006c, frame SP 0x7ef8 from 0x7f00, and unchanged sentinel 0x13579bdf.
+  - [x] Updated the probe guide, WP-06 report, compatibility matrix, research log, packet handoff/history, and status with model-only scope and limits.
+- Remaining:
+  - [ ] Map startup register operands/effects against WP-07's accepted memory/MMIO map and check adaptation against target facilities and privilege rules.
+  - [ ] Establish physical cache-control and ACR effects, firmware use, and physical CPU behavior; preserve device-memory, reset-vector, and external level-7 limits.
+  - [ ] Attribute execution across all 44 descriptor handlers only if address-safe evidence supports it.
+- Changed files: tests/probes/wp06/run.py; tests/probes/wp06/user_privilege_cache.S; tests/probes/wp06/README.md; docs/reports/WP-06-coldfire.md; docs/COMPATIBILITY_MATRIX.md; docs/RESEARCH_LOG.md; this packet; docs/STATUS.md.
+- Verification:
+  - python3 tests/probes/wp06/run.py --cc /home/jannikassfalg/.local/bin/m68k-elf-gcc --qemu /home/jannikassfalg/octamachine/vendor/octemu/vendor/qemu/build/qemu-system-m68k — passed on the pinned AN5206 QEMU machine with m5206/cfv4e profiles. The new ACR0 results match the expected vector 8, one exception, stacked PC, frame SP, and sentinel.
+  - make check — passed: nine reference repositories validated, Python compilation passed, and all 20 tests passed.
+  - git diff --check — passed on the reviewed working-tree diff; no whitespace errors. The octemu/QEMU submodule pin is unchanged; no firmware or physical hardware was used.
+- Findings: user-mode MOVEC D0-to-ACR0 raises vector 8 on both pinned QEMU profiles. This is consistent with the MCF54455 manual's supervisor-only ACR access classification ([reference manual](https://www.nxp.com/docs/en/reference-manual/MCF54455RM.pdf)), but does not measure supervisor ACR write effects, physical cache/address behavior, or Machinedrum firmware use.
+- Blockers: WP-07 map acceptance still gates startup-register adaptation. No physical target is available for silicon, device-memory, reset-vector, or edge-sensitive level-7 measurements.
+- Next action: commit and push this prompt's packet update to PR #12, keep it draft pending review/packet acceptance, then after WP-07 map acceptance map source startup register effects.
+- Delivery: this prompt's evidence and packet/status records are included in the enclosing commit; report its hash after committing.
