@@ -76,11 +76,11 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Separate guest audio-block timing from host timeout/playback behavior; keep private inputs and captures local.
 - [x] Reconcile the accepted PR #11 merge.
 
-[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) remains in review in draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; target register/privilege facility checks, runtime coverage, reset fetch, and physical level-7 behavior remain open.
+[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) remains in review in draft PR #12 on work/wp-06-coldfire-compatibility; current published probes cover CAS, RAM code writes, supervisor CPUSHL, and CACR paths on pinned QEMU. The latest branch checks pass. Startup-register adaptation, firmware-use mapping, physical cache effects, reset fetch, external level 7, and physical CPU behavior remain open.
 
-[WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) is in review in draft [PR #13](https://github.com/repeat98/octamachine/pull/13) on `work/wp-07-memory-and-mmio`. Its reference report resolves the Gearmulator HI08 map and bounds SRAM/clock differences; target alias probes and physical measurements remain open. Keep the PR draft while G1 architecture evidence is incomplete.
+[WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) remains in review in draft PR #13 on work/wp-07-memory-and-mmio. Its packet-level reference map criteria are checked with trace and manual evidence; target aliases/peripheral mappings remain unimplemented and physical decode/clock are unmeasured. Checks pass; maintainer review and G1 architecture evidence remain open.
 
-[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review on pushed branch `work/wp-08-dsp-payload-inventory`; evidence commit `eb7d041`. Its report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. PR creation is blocked by unavailable GitHub write access; [the compare link](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1) is ready. Keep the PR draft once opened while G1 architecture evidence remains incomplete.
+[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review in draft PR #14 on work/wp-08-dsp-payload-inventory. The report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. Initial PR checks pass; maintainer review and G1 architecture evidence remain open.
 
 ## Gate checklist
 
@@ -96,7 +96,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08's evidence is delivered on its pushed branch while draft PR creation awaits GitHub write access; WP-06 and WP-07 remain draft G1 work, and WP-35 remains prior Gearmulator evidence rather than a substitute for packet acceptance.
+WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08 is delivered in draft PR #14 with initial checks passing; WP-06 and WP-07 remain draft G1 work. The payload/trace data stay local, and G1 architecture evidence and maintainer review remain outstanding.
 
 1. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): continue target control-register/privilege checks and runtime coverage while keeping reset and physical level-7 limits explicit.
 2. [WP-09 — DSP feasibility](work_packets/WP-09-dsp-feasibility.md): assess whether the source DSP images, external-memory execution, and sample footprint can fit a realizable Octatrack architecture using the WP-35 candidate ledger and WP-08 verified payload inventory.

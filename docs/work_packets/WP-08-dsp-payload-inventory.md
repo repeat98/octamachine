@@ -32,10 +32,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 ## Current handoff
 
 - Completed: Extracted and deterministically reproduced all five pinned OS 1.63 section hashes; reconciled section 1/2 record streams against both source DSP upload ports in cold and cached instances across two independent full traces; documented the load maps and parser limits in [the report](../reports/WP-08-dsp-payloads.md).
-- Next action: Open a draft PR from the [published branch compare](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1); keep it in review until maintainer review and G1 architecture evidence are complete.
-- Waiting on: GitHub PR-write access for the connected tools; G1 hardware-realizable architecture remains open in WP-06–10.
-- Blockers: The branch is pushed, but the available GitHub connector returned 403 for PR creation, the saved `gh` login token is invalid, and the in-app browser is signed out. The compare link is ready for a signed-in contributor.
+- Next action: Obtain maintainer review for draft PR #14 and reconcile accepted delivery. Keep the PR in draft while G1 architecture evidence remains open; continue WP-09 after WP-08 acceptance.
+- Waiting on: Maintainer review/acceptance and the G1 hardware-realizable architecture decision across WP-06–10.
+- Blockers: No target DSP56721 execution, target memory-fit, or physical HI08 evidence is claimed. The private firmware and traces used for the reported reconciliation are absent from this checkout and remain local.
 - Evidence: [WP-04 baseline](../reports/WP-04-md-baseline.md) provides the private repeated HI08 traces; the [WP-08 report](../reports/WP-08-dsp-payloads.md) records this packet's independent extraction and exact upload reconciliation while keeping all firmware values local.
+- Delivery: Draft PR #14 is open from work/wp-08-dsp-payload-inventory. The initial head's scaffold and GitGuardian checks passed; maintainer review and G1 acceptance remain open.
 
 ## Prompt history
 
@@ -63,3 +64,23 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Delivery: commit `eb7d0412e1004410921ab40d61f010f93f6bed77` pushed to `work/wp-08-dsp-payload-inventory`; no PR created.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.
+
+### 2026-09-24 / prompt 2 — open WP-08 draft PR
+
+- Request: review the existing WP-08 branch against its packet criteria, validate available evidence, and open a draft PR while keeping private firmware data local.
+- Starting state → ending state: in_review → in_review; the verified evidence branch is now delivered for review, with G1 architecture acceptance still open.
+- Owner / branch: Codex / work/wp-08-dsp-payload-inventory, continuing from pushed branch head 4db20850876153b74c43441037f771a3c1fe31e2 based on accepted main 148494c212d2d11fd21ad58f56c44b324d4c91bb.
+- Completed:
+  - [x] Reviewed the full origin/main-to-WP-08 branch diff: eight intended text/source files; no firmware, ROM, extracted DSP payload, raw trace, or generated capture output is included.
+  - [x] Ran make check: nine reference repositories validated, Python compilation passed, and all 20 tests passed.
+  - [x] Ran git diff --check against origin/main; it passed.
+  - [x] Opened draft PR #14. Its initial scaffold and GitGuardian checks passed; no review decision is present.
+- Remaining:
+  - [ ] Receive maintainer review and acceptance; keep PR #14 in draft while G1 architecture evidence remains incomplete.
+  - [ ] Continue WP-09 only after WP-08 accepted evidence is available.
+- Changed files: docs/STATUS.md and this packet; no code or evidence files changed in this prompt.
+- Verification: the report records three deterministic extraction runs and eight exact upload-stream matches across two independent full-trace processes. The private update and traces are not present in this checkout, so those data-dependent commands were not rerun here. PR #14's initial checks passed.
+- Findings: GitHub CLI write access worked and the branch is now delivered as a draft PR. Target DSP execution, memory fit, audio parity, and physical HI08 wiring remain outside the evidence.
+- Blockers: maintainer review and G1 architecture acceptance; private firmware-derived values and traces remain unavailable in this checkout and are not part of the PR.
+- Next action: obtain review for PR #14 while continuing independent G1 evidence work; keep WP-09 gated on WP-08 acceptance.
+- Delivery: draft PR #14 is open at https://github.com/repeat98/octamachine/pull/14. The enclosing documentation commit and push are reported after delivery.
