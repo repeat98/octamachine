@@ -37,7 +37,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Waiting on: None; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths.
 - Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). Prior WP-35 evidence remains static/Gearmulator-only and predates the WP-03 evidence contract.
-- Delivery: Draft [WP-06 pull request](https://github.com/repeat98/octamachine/compare/main...work/wp-06-coldfire-compatibility?expand=1) on `work/wp-06-coldfire-compatibility`; it remains draft while checklist items are incomplete.
+- Delivery: draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; it remains draft while checklist items are incomplete.
 
 ## Prompt history
 
@@ -86,10 +86,10 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
   - [ ] Extend executed runtime handler coverage beyond the first 100,000 startup instructions.
   - [ ] Obtain a board path for reset-vector and level-7 edge tests, or keep those hardware/model gaps open.
 - Changed files: `docs/reports/WP-06-coldfire.md`; this packet; `docs/RESEARCH_LOG.md`; `docs/COMPATIBILITY_MATRIX.md`; `docs/STATUS.md`.
-- Verification: `git fetch origin main` succeeded and main remains at the branch base. `make check` passed (nine reference validations, Python compilation, 20 tests); the WP-06 QEMU probe passed on `m5206`/`cfv4e`, including arithmetic/exceptions and level-4 masking; `git diff --check` passed. Pinned-source and official-manual inspection supports the documented reset/level-7 limits and register-map comparison.
+- Verification: `git fetch origin main` succeeded and main remains at the branch base. `make check` passed (nine reference validations, Python compilation, 20 tests); the WP-06 QEMU probe passed on `m5206`/`cfv4e`, including arithmetic/exceptions and level-4 masking; `git diff --check` passed. Pinned-source and official-manual inspection supports the documented reset/level-7 limits and register-map comparison. PR #12's two `scaffold` runs and GitGuardian check passed.
 - Findings: the QEMU behavior is not a substitute for the manuals. The MCF54455 supports several registers which the generic `cfv4e` helper leaves unimplemented, but its RAMBAR encoding differs from the source; the source MBAR write has no matching target core-register entry.
 - Blockers: no physical Octatrack/Machinedrum and no separate external level-7 test input in either pinned board model.
-- Next action: verify the edited report, rerun `make check` and the WP-06 probe, then stage and publish the focused branch/PR update.
-- Delivery: enclosing commit; draft PR until the remaining evidence and checklist are resolved.
+- Next action: begin WP-07 from accepted `main`, using the reconciled WP-04 trace and the WP-06 startup register inventory; return to WP-06 for runtime coverage after mapping the control-register effects.
+- Delivery: enclosing commit updates [PR #12](https://github.com/repeat98/octamachine/pull/12); the PR remains a draft with `scaffold` and GitGuardian checks passing.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.
