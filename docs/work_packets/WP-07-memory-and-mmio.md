@@ -6,7 +6,7 @@
 - Updated: 2026-09-24
 - Depends on: [WP-04](WP-04-machinedrum-baseline.md), [WP-05](WP-05-octatrack-baseline.md)
 - Gate: G1
-- Accepted delivery: pending review; [draft PR #13](https://github.com/repeat98/octamachine/pull/13)
+- Accepted delivery: pending review; [PR #13 ready for review](https://github.com/repeat98/octamachine/pull/13)
 
 ## Result
 
@@ -34,11 +34,11 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 - Completed: Reconciled the accepted WP-05 baseline, traced source MMIO by address/direction/width through cold and cached idle, bounded source-map and clock disagreements against pinned models and NXP manuals, documented a proposed target alias/peripheral plan, and re-audited the report against its four acceptance criteria and cited manuals.
 - Remaining: PR acceptance and physical Machinedrum/Octatrack measurements. The mapping plan has not been implemented or probed in octemu.
-- Next action: Keep PR #13 in draft while G1 architecture evidence remains incomplete; continue WP-08 from accepted `main`.
+- Next action: PR #13 is ready for review following maintainer action; keep WP-07 in review and unmerged while G1 architecture evidence remains incomplete. Continue WP-08 from accepted `main`.
 - Waiting on: None for this documentation packet; physical board identity is needed for the remaining hardware measurements.
 - Blockers: No physical board/schematic is available, so physical HI08 decode, the `MBAR+0x1003` signal, and the host clock cannot be verified.
 - Evidence: [WP-07 memory/MMIO report](../reports/WP-07-memory-mmio.md), WP-04 trace summary and private full traces, MCF5206E and MCF54455 primary manuals, and the pinned octemu board source. Raw firmware-dependent traces remain private.
-- Delivery: [Draft PR #13](https://github.com/repeat98/octamachine/pull/13) is open on `work/wp-07-memory-and-mmio`; packet acceptance evidence is complete, but G1 remains open and delivery is not merged.
+- Delivery: [PR #13](https://github.com/repeat98/octamachine/pull/13) is open and ready for review on `work/wp-07-memory-and-mmio`; packet evidence is complete, but no review decision is recorded, G1 remains open, and delivery is not merged.
 
 ## Prompt history
 
@@ -122,3 +122,27 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: PR review/acceptance is pending; physical board identity/access is unavailable. These do not prevent independent WP-08 work.
 - Next action: continue WP-08 from accepted `main`; keep WP-07 draft pending review and G1 evidence, then use its reviewed map to bound remaining WP-06 startup-register analysis.
 - Delivery: this prompt's record/status reconciliation is committed and pushed on the existing draft PR #13 branch.
+
+### 2026-09-24 / prompt 4 — reconcile maintainer ready-for-review state
+
+- Request: Incorporate the maintainer's PR state change, correct the stale draft instruction, and continue only within the documented G1 gate.
+- Starting state → ending state: packet `in_review` → `in_review`; PR #13 changed from draft to ready for review, with no review decision or merge. G1 remains open.
+- Owner / branch: Codex / `work/wp-07-memory-and-mmio`; PR head `cff94ec283841ff9bdd4a3ac8218856afb26c155`; `origin/main` remains `148494c212d2d11fd21ad58f56c44b324d4c91bb`.
+- Completed:
+  - [x] Confirmed PR #13's `ready_for_review` timeline event was performed by `repeat98` at 2026-09-24 11:47 UTC; the PR is open, mergeable, has no reviews, and has no review decision.
+  - [x] Confirmed scaffold checks passed at head `cff94ec283841ff9bdd4a3ac8218856afb26c155`.
+  - [x] Replaced the PR description's stale “keep in draft” line with the current state: ready for review, but unmerged until G1 architecture evidence is accepted. The first `gh pr edit` attempt returned a Projects classic deprecation error and made no change; the equivalent REST update succeeded.
+  - [x] Updated the packet handoff and `docs/STATUS.md` to match the ready-for-review state.
+- Remaining:
+  - [ ] Obtain maintainer review/acceptance; G1 architecture evidence from WP-06–10 is incomplete, so do not mark WP-07 done or merge it yet.
+  - [ ] Implement and probe alias coherence, code copy/execute, vectors, stack, unknown MMIO, and HI08-to-HDI24 behavior under later packets.
+  - [ ] Measure physical clock, board decode, and SRAM access bounds when board identity and access are available.
+- Changed files: `docs/work_packets/WP-07-memory-and-mmio.md`; `docs/STATUS.md`. Updated external metadata: [PR #13 description](https://github.com/repeat98/octamachine/pull/13).
+- Verification:
+  - `make check` — passed after these record changes: nine reference repositories validated, Python scripts compiled, and 20 tests passed. `git diff --check` — passed.
+  - PR #13 scaffold checks passed at audited head `cff94ec283841ff9bdd4a3ac8218856afb26c155`; no review decision is present.
+  - No firmware, raw trace, target behavior, or hardware was changed or newly measured.
+- Findings: The maintainer's ready-for-review action supersedes the prior draft state. The stated G1 gate still prevents acceptance as done and merging. The packet's four documentation criteria remain complete.
+- Blockers: maintainer review/acceptance and G1 evidence are pending. Independent WP-08 work can proceed.
+- Next action: continue WP-08 from accepted `main`; return to WP-06 startup-register analysis after the WP-07 map is accepted.
+- Delivery: this reconciliation is committed and pushed on the existing PR #13 branch.

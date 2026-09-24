@@ -78,7 +78,7 @@ No new firmware execution or hardware checkpoint is established by this profile 
 
 [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) is in review in draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`. That draft adds narrow instruction/exception probes and a source startup summary; target register/privilege facility checks, runtime coverage, reset fetch, and physical level-7 behavior remain open.
 
-[WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) is in review in draft [PR #13](https://github.com/repeat98/octamachine/pull/13) on `work/wp-07-memory-and-mmio` (head `cc481624825cd7e1aa5821f24d4476ef8f8d5610`). Its scaffold and GitGuardian checks passed; no review decision or merge is recorded. The [report](reports/WP-07-memory-mmio.md) reconciles the Gearmulator HI08 windows, bounds SRAM and clock discrepancies, inventories peripherals through cold/cached idle, and proposes target aliases/MMIO ownership. The alias plan has not been implemented; physical board decode and clock remain unknown. Keep the PR draft while G1 architecture evidence is incomplete.
+[WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) is in review in open PR #13 on `work/wp-07-memory-and-mmio`; the maintainer marked it ready for review. Its scaffold checks passed at audited head `cff94ec283841ff9bdd4a3ac8218856afb26c155`; no review decision or merge is recorded. The [report](reports/WP-07-memory-mmio.md) reconciles the Gearmulator HI08 windows, bounds SRAM and clock discrepancies, inventories peripherals through cold/cached idle, and proposes target aliases/MMIO ownership. The alias plan has not been implemented; physical board decode and clock remain unknown. G1 architecture evidence is incomplete.
 
 ## Gate checklist
 
@@ -94,7 +94,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 and WP-05 are accepted, WP-35's import and c10 follow-up are merged, and G0 is complete. WP-07's four packet evidence criteria are complete, but PR #13 has no review decision and remains draft until G1 evidence is ready. WP-08 is the next independent packet; WP-06 startup mapping can use the reviewed report once its delivery is accepted. WP-35 remains prior Gearmulator evidence and does not change packet prerequisites.
+WP-04 and WP-05 are accepted, WP-35's import and c10 follow-up are merged, and G0 is complete. WP-07's four packet evidence criteria are complete; PR #13 is ready for maintainer review, but no review decision is recorded and G1 remains open. Keep the packet in review and unmerged until the WP-06–10 architecture evidence is accepted. WP-08 is the next independent packet; WP-06 startup mapping can then use the accepted report. WP-35 remains prior Gearmulator evidence and does not change packet prerequisites.
 
 1. [WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md): reconcile measured HI08 uploads with the extracted voice/mixer images; use WP-07's confirmed reference windows, preserve payload privacy, and obtain packet review before WP-09.
 2. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): map source RAMBAR/MBAR writes and effects against target facilities, extend executed runtime coverage, and keep reset/level-7 limits explicit.
