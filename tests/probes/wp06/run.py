@@ -58,6 +58,15 @@ ALIGNMENT_FIELDS = (
     "long_at_odd_address",
     "long_store_readback_at_odd_address",
 )
+CAS_FIELDS = (
+    "result",
+    "cas_memory_after",
+)
+SELF_MODIFY_FIELDS = (
+    "result",
+    "first_execution",
+    "execution_after_write",
+)
 
 
 class Monitor:
@@ -111,6 +120,7 @@ def run_cpu(
     elf: Path,
     cpu: str,
     fields: tuple[str, ...] = FIELDS,
+    expected_marker: int = SUCCESS,
 ) -> dict[str, int]:
     command = [
         qemu,
@@ -153,15 +163,17 @@ def run_cpu(
             ):
                 break
             time.sleep(0.02)
-        if marker != SUCCESS:
-            raise RuntimeError(f"{cpu}: probe did not reach success marker (0x{marker:08x})")
+        if marker != expected_marker:
+            raise RuntimeError(
+                f"{cpu}: expected marker 0x{expected_marker:08x}, got 0x{marker:08x}"
+            )
         monitor.command("stop")
         words = read_words(
             monitor.command(f"xp /{len(fields)}wx 0x{OUTPUT_ADDRESS:08x}"),
             len(fields),
         )
         result = dict(zip(fields, words, strict=True))
-        if result["result"] != SUCCESS:
+        if result["result"] != expected_marker:
             raise RuntimeError(f"{cpu}: unexpected result marker 0x{result['result']:08x}")
         return result
     finally:
@@ -224,6 +236,8 @@ def main() -> int:
         stack_device_elf = temp_dir / "stack_eusp_device_bit.elf"
         stack_emulator_elf = temp_dir / "stack_eusp_emulator_bit.elf"
         irq_elf = temp_dir / "interrupt_mask.elf"
+        cas_elf = temp_dir / "cas_model.elf"
+        self_modify_elf = temp_dir / "self_modifying_code.elf"
         rambar_elf = temp_dir / "unimplemented_rambar.elf"
         mbar_elf = temp_dir / "unimplemented_mbar.elf"
         build = [
@@ -256,6 +270,26 @@ def main() -> int:
             str(Path(__file__).with_name("interrupt_mask.S")),
         ]
         subprocess.run(irq_build, check=True, cwd=ROOT)
+        cas_build = [
+            args.cc,
+            "-mcpu=68020",
+            "-nostdlib",
+            f"-Wl,-T,{LINKER_SCRIPT}",
+            "-o",
+            str(cas_elf),
+            str(Path(__file__).with_name("cas_model.S")),
+        ]
+        subprocess.run(cas_build, check=True, cwd=ROOT)
+        self_modify_build = [
+            args.cc,
+            "-mcpu=5206e",
+            "-nostdlib",
+            f"-Wl,-T,{LINKER_SCRIPT}",
+            "-o",
+            str(self_modify_elf),
+            str(Path(__file__).with_name("self_modifying_code.S")),
+        ]
+        subprocess.run(self_modify_build, check=True, cwd=ROOT)
         for mask, stack_elf in ((0x20, stack_device_elf), (0x10, stack_emulator_elf)):
             stack_build = [
                 args.cc,
@@ -291,6 +325,21 @@ def main() -> int:
         }
         irq_results = {
             cpu: run_cpu(args.qemu, irq_elf, cpu, IRQ_FIELDS)
+            for cpu in ("m5206", "cfv4e")
+        }
+        cas_control_result = run_cpu(args.qemu, cas_elf, "m68020", CAS_FIELDS)
+        cas_coldfire_results = {
+            cpu: run_cpu(
+                args.qemu,
+                cas_elf,
+                cpu,
+                CAS_FIELDS,
+                expected_marker=FAILURE_PREFIX | 4,
+            )
+            for cpu in ("m5206", "cfv4e")
+        }
+        self_modify_results = {
+            cpu: run_cpu(args.qemu, self_modify_elf, cpu, SELF_MODIFY_FIELDS)
             for cpu in ("m5206", "cfv4e")
         }
         stack_device_result = run_cpu(args.qemu, stack_device_elf, "cfv4e", STACK_FIELDS)
@@ -340,6 +389,30 @@ def main() -> int:
     if irq_results["m5206"] != irq_results["cfv4e"]:
         print("interrupt outputs differ")
         return 1
+    print("CAS instruction decoding:")
+    print(f"m68020 control: {cas_control_result}")
+    for cpu, values in cas_coldfire_results.items():
+        print(f"{cpu}: {values}")
+    if cas_control_result != {"result": SUCCESS, "cas_memory_after": 0x87654321}:
+        print("CAS control result changed; check the known 68020 instruction encoding")
+        return 1
+    expected_cas_trap = {"result": FAILURE_PREFIX | 4, "cas_memory_after": 0x12345678}
+    if any(values != expected_cas_trap for values in cas_coldfire_results.values()):
+        print("a ColdFire QEMU model did not take the expected illegal-instruction vector for CAS")
+        return 1
+    print("CAS executes on the 68020 control model and takes vector 4 on both ColdFire models")
+    print("self-modifying code in RAM:")
+    for cpu, values in self_modify_results.items():
+        print(f"{cpu}: {values}")
+    expected_self_modify = {
+        "result": SUCCESS,
+        "first_execution": 1,
+        "execution_after_write": 2,
+    }
+    if any(values != expected_self_modify for values in self_modify_results.values()):
+        print("the code-write probe did not execute the updated instruction on both CPU models")
+        return 1
+    print("both CPU models execute the replacement instruction after a RAM code write")
     print("cfv4e EUSP with MCF54455 manual bit 0x20:")
     for field, value in stack_device_result.items():
         print(f"  {field}: 0x{value:08x}")

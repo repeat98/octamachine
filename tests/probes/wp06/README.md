@@ -43,6 +43,21 @@ zero; lowering SR.I to 3 delivers exactly one interrupt. The `m5206` and
 does not expose the MCF5206E external edge-sensitive level-7 input, so that
 special case remains untested.
 
+## CAS and code-coherence probes
+
+The cas_model.S probe assembles a real CAS.L instruction using the 68020
+encoding. The m68020 control model swaps the synthetic memory value from
+0x12345678 to 0x87654321; m5206 and cfv4e take the installed illegal
+instruction vector before changing memory. This confirms the pinned QEMU
+models' CAS feature gap. It does not show that the physical MCF54455 lacks CAS
+or that the Machinedrum firmware executes it.
+
+The self_modifying_code.S probe executes MOVEQ #1, writes the MOVEQ #2 opcode
+over that RAM instruction, then calls the address again. Both ColdFire models
+return 1 before the write and 2 after it. This exercises TCG translated-code
+invalidation for an overlapping guest store; it does not model the physical
+instruction cache or cache-control register effects.
+
 ## Target-only user stack and startup MOVEC probes
 
 `stack_eusp.S` initializes distinct supervisor and user stacks, enters user
