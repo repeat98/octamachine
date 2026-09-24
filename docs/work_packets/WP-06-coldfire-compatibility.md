@@ -31,12 +31,12 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled WP-05 as accepted; profiled the first 100,000 executed Machinedrum startup instructions with a sanitized Gearmulator counter; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, and MOVEC probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
-- Remaining: Physical level-7 and reset-vector behavior; executed runtime instruction coverage; map the unshared startup register writes and their operands before selecting an adaptation.
-- Next action: Start WP-07's memory/MMIO map reconciliation from the accepted WP-04 trace and MCF54455 register map; retain level 7 and reset-vector fetch as explicit model/hardware limits.
-- Waiting on: None; WP-04 and WP-05 prerequisites are accepted.
+- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix and two representative `0x10` Gearmulator scenarios; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, and MOVEC probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
+- Remaining: Broader runtime coverage across engines and memory behaviors; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
+- Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege; retain level 7 and reset-vector fetch as explicit model/hardware limits.
+- Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths.
-- Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). Prior WP-35 evidence remains static/Gearmulator-only and predates the WP-03 evidence contract.
+- Evidence: [WP-06 report](../reports/WP-06-coldfire.md); firmware-free probes and reproduction instructions in [`tests/probes/wp06/`](../../tests/probes/wp06/); sanitized startup-summary patch [0003](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch). The new runtime profiles are Gearmulator-only and keep raw traces local.
 - Delivery: draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; it remains draft while checklist items are incomplete.
 
 ## Prompt history
@@ -91,5 +91,37 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: no physical Octatrack/Machinedrum and no separate external level-7 test input in either pinned board model.
 - Next action: begin WP-07 from accepted `main`, using the reconciled WP-04 trace and the WP-06 startup register inventory; return to WP-06 for runtime coverage after mapping the control-register effects.
 - Delivery: enclosing commit updates [PR #12](https://github.com/repeat98/octamachine/pull/12); the PR remains a draft with `scaffold` and GitGuardian checks passing.
+
+### 2026-09-24 / prompt 3 — extend executed ColdFire runtime evidence
+
+- Request: continue the overnight Machinedrum-to-Octatrack port after the maintainer's manual WP-05 squash merge; extend WP-06 runtime evidence and keep firmware-derived traces private.
+- Starting state → ending state: `in_review` → `in_review` (runtime evidence expanded; adaptation and physical-hardware criteria remain open).
+- Owner / branch: Codex / `work/wp-06-coldfire-compatibility`, based on accepted main `148494c212d2d11fd21ad58f56c44b324d4c91bb`.
+- Completed:
+  - [x] Reconciled WP-07 as draft PR #13 in review and WP-08 as a pushed evidence branch awaiting PR creation; neither is marked accepted.
+  - [x] Built `mdPanelReadinessFirmwareTest` in a separate Gearmulator copy at `8cea0524a75435122c20b669ca114c9ac6509ba2` with the pinned recursive dependencies and WP-04/WP-06 instrumentation.
+  - [x] Extended its opt-in summary limit to 1,000,000 executed instructions; the cold/cached driver exited 0 and the summary still reports only control names/categories and aggregate counts.
+  - [x] Built the JIT `md_profile` tool with WP-35 host-trace/execution-hook patches in the same isolated source copy.
+  - [x] Profiled machine `0x10` assignment plus eight triggers: 562,290,551 instructions, 24 MOVEC-to, 139,161 RTE, 12 TRAP, 1,030,050 move-to-SR, and 77,568 move-from-SR operations.
+  - [x] Ran `trace=0x10` (assignment, trigger, encoder A +10, second trigger): 559,651,805 instructions and 3,440 descriptor-handler-range entries across two handler/return buckets. No firmware-derived addresses or raw values were added to the repository.
+  - [x] Kept acceptance item 3 unchecked: the exact source register operands/effects still need WP-07's accepted target memory map before a rewrite/shim can be selected.
+- Remaining:
+  - [ ] Extend runtime coverage beyond the two `0x10` scenarios, including additional engines and relevant memory/alignment/atomic/cache paths.
+  - [ ] Map source startup register operands/effects against a reviewed target map and check any proposed mechanism against the physical target's privilege/facility rules.
+  - [ ] Resolve reset-vector fetch and external edge-sensitive level 7 through a suitable board path or preserve these as hardware/model limits; establish physical CPU behavior.
+- Changed files: this packet; `docs/reports/WP-06-coldfire.md`; `docs/STATUS.md`; `docs/COMPATIBILITY_MATRIX.md`; `docs/RESEARCH_LOG.md`; `tests/probes/wp06/README.md`.
+- Verification:
+  - `cmake --build <isolated Gearmulator build> --target mdPanelReadinessFirmwareTest --parallel 4` — passed; compiler emitted upstream optimization/alignment warnings.
+  - `GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000` with the local OS 1.63 panel-readiness driver — exit 0 after cold/cached checkpoints; the sanitized counter reached 1,000,000 instructions.
+  - `cmake --build <isolated profile build> --target md_profile --parallel 4` — passed.
+  - `md_profile <local OS 1.63 image> <private output> 0x10` with a 1,000,000,000-instruction counter ceiling — exit 0 at 562,290,551 instructions.
+  - `md_profile <local OS 1.63 image> <private output> trace=0x10` with the same ceiling — exit 0 at 559,651,805 instructions; safe aggregation of the private `.calls.txt` reported 3,440 calls across two buckets.
+  - `make check` — passed: nine reference validations, Python script compilation, and 20 tests.
+  - `git diff --check` — passed.
+  - No physical hardware, full all-engine coverage, raw trace publication, or target instruction execution was performed.
+- Findings: the one-million startup summary adds no new watched control-register writes beyond the first 100,000 instructions. The two `0x10` runtime scenarios execute many `RTE`, `TRAP`, and SR operations and enter the instrumented source handler range; this is Gearmulator execution evidence only and is not instruction-by-instruction comparison against the target CPU.
+- Blockers: WP-07's memory/MMIO packet remains in draft PR #13; WP-08 is pushed but the PR flow was previously blocked by GitHub connector 403, invalid CLI token, and signed-out browser. Physical target and external level-7 stimulus remain unavailable.
+- Next action: use WP-07's reviewed map before mapping the startup operands/effects or choosing any control-register adaptation; extend bounded profiles across additional engines once this dependency is accepted. WP-08 still needs a draft PR from its compare link before WP-09 can rely on accepted evidence.
+- Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); keep it draft with the adaptation and physical gates open.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.

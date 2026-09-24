@@ -20,7 +20,7 @@ boots.
 
 | Input | Revision/profile |
 | --- | --- |
-| Machinedrum source | Gearmulator MD/MM `8cea0524a75435122c20b669ca114c9ac6509ba2`; recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f` |
+| Machinedrum source | Gearmulator MD/MM `8cea0524a75435122c20b669ca114c9ac6509ba2`; recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, DSP56300 `1378c43074e6ec22f69f14ed55c21e44c5ccadc1` |
 | Machinedrum firmware | Local Machinedrum SPS-1UW OS 1.63 image, matching WP-02's public size/CRC-32/SHA-1/FNV-64 fingerprints; image bytes and local SHA-256 remain private |
 | Reference startup | `mdPanelReadinessFirmwareTest` from WP-04, which passes its blank-flash and cached-firmware readiness checks |
 | Startup counter patch | [`0003-opt-in-coldfire-execution-summary.patch`](../../patches/gearmulator-md-mm/0003-opt-in-coldfire-execution-summary.patch); SHA-256 `e336bfb11875a95886ba798004e2bb3597659804631ea829b0c7d638d9aaf7f6` |
@@ -42,6 +42,62 @@ appear in this interval. This is a bounded prefix of startup, not a complete
 firmware instruction census. WP-35's separate static scan of 44 engine
 handlers found no MAC/EMAC, direct hardware access, or calls; it does not
 establish their executed instruction coverage.
+
+## Expanded executed source profile
+
+To extend coverage without retaining instruction traces, the startup counter
+patch was applied in a separate Gearmulator clone at the revisions above,
+after WP-04 patches `0001`/`0002`. WP-35's host-trace and DSP execution-hook
+patches were applied only for `md_profile`; the resulting `md_profile` and
+`mdPanelReadinessFirmwareTest` binaries were built locally. The startup driver
+was run with a 1,000,000-instruction summary limit. The two WP-35 profile
+scenarios were each run with a 1,000,000,000-instruction ceiling and the local
+Machinedrum OS 1.63 image. Output directories, firmware, detailed DSP/host
+traces, and address-bearing handler rows remain under `/private/tmp`.
+
+The scenarios are reproducible with the local image and binaries as follows;
+all destinations must be created first. The capture directories are private
+because `trace=0x10` writes firmware-derived host, link, memory, and handler
+address data.
+
+```sh
+env -u GEARMULATOR_MD_BUS_TRACE \
+  -u GEARMULATOR_MD_BUS_TRACE_ENABLED \
+  GEARMULATOR_MD_EXEC_SUMMARY=/private/tmp/wp06-execution-summary-1m.txt \
+  GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000 \
+  GEARMULATOR_MD_FIRMWARE_BIN=/path/to/local-md-os-1.63.bin \
+  /path/to/mdPanelReadinessFirmwareTest >/dev/null 2>&1
+
+mkdir -p /private/tmp/wp06-md-profile-engine10 /private/tmp/wp06-md-profile-trace10
+GEARMULATOR_MD_EXEC_SUMMARY=/private/tmp/wp06-exec-summary-engine10.txt \
+  GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
+  /path/to/md_profile /path/to/local-md-os-1.63.bin \
+  /private/tmp/wp06-md-profile-engine10 0x10
+GEARMULATOR_MD_EXEC_SUMMARY=/private/tmp/wp06-exec-summary-trace10.txt \
+  GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
+  /path/to/md_profile /path/to/local-md-os-1.63.bin \
+  /private/tmp/wp06-md-profile-trace10 trace=0x10
+```
+
+The startup readiness driver exited 0 after its cold and cached checks. Its
+summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
+(VBR ×2, CACR ×2, ACR0 ×2, ACR1 ×2, RAMBAR ×1, MBAR ×1), two status-register
+writes, and no counted `RTE`, `TRAP`, `RESET`, `STOP`, or USP/stack-mode
+instructions in that prefix.
+
+| Gearmulator scenario | Executed instructions | Aggregate CPU summary | Result |
+| --- | ---: | --- | --- |
+| Machine `0x10`, assigned to track 1, eight trigger hits | 562,290,551 | `MOVEC`-to 24 (VBR/CACR ×6 each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each); `RTE` 139,161; `TRAP` 12; move-to-SR 1,030,050; move-from-SR 77,568; RESET 0; STOP 0; other control writes 0 | Completed below the ceiling; aggregate output only |
+| `trace=0x10`: assignment, trigger, encoder A +10, second trigger | 559,651,805 | `MOVEC`-to 24 (VBR/CACR ×6 each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each); `RTE` 137,761; `TRAP` 6; move-to-SR 1,013,716; move-from-SR 77,254; RESET 0; STOP 0; other control writes 0 | Completed below the ceiling; 3,440 descriptor-handler-range entries across two handler/return buckets |
+
+The trace counter records transitions into the source descriptor-handler PC
+range and groups them by handler and return address. Only the aggregate count
+is reported here; no address rows are published. These profiles establish
+executed behavior for two Gearmulator scenarios, including `RTE`, `TRAP`, and
+status-register operations beyond the startup prefix. They do not measure
+every engine, every executed opcode, cache/alignment behavior, or the target
+ColdFire. The handler count is instrumentation of a source address range, not
+a complete inventory of distinct firmware handlers.
 
 ## Independent CPU-model probe
 
@@ -122,9 +178,11 @@ boards therefore cannot reproduce the manual's external edge-latched case.
 
 ## Port impact and next evidence
 
-- **Direct execution:** the source CPU's basic arithmetic, stack operations,
-  and fixed-frame exception pattern match the tested target CPU model cases.
-  This does not prove every firmware instruction or handler.
+- **Tested CPU instructions:** firmware-free probes show matching results on
+  the tested `m5206` and `cfv4e` QEMU cases for multiply, stack operations,
+  fixed-frame `TRAP`/`RTE`, and privilege handling. The Gearmulator runtime
+  profiles observe source execution but do not compare its instruction stream
+  against the target CPU and do not prove broad equivalence.
 - **Bounded adaptation candidate:** keep any Machinedrum vector table on a
   1 MiB boundary. Both processor manuals require that layout; the actual
   firmware VBR operands and physical exception behavior remain unmeasured.
@@ -166,6 +224,6 @@ rules above; selecting and implementing one remains open for WP-10.
 
 ## Verification and remaining work
 
-`python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
+`python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target also built and both `0x10` scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
 
-WP-06 remains `in_review`. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptations and runtime handler coverage remain open, with the target manual showing where the source and target control-register maps differ. The next packet can use WP-04/WP-05 evidence to reconcile memory and MMIO while these precisely bounded CPU-model gaps remain open.
+WP-06 remains `in_review`. The one-million startup prefix and two `0x10` scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.

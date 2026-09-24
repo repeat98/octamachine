@@ -76,12 +76,18 @@ No new firmware execution or hardware checkpoint is established by this profile 
 - [x] Separate guest audio-block timing from host timeout/playback behavior; keep private inputs and captures local.
 - [x] Merge PR #11 and reconcile the accepted delivery.
 
-[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) is in review in draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; its `scaffold` and GitGuardian checks pass. The [report](reports/WP-06-coldfire.md) and firmware-free probes compare selected MCF5206E/CFV4e arithmetic, exception, privilege, level-4 interrupt-mask, VBR, EUSP, and startup MOVEC behavior. The source startup prefix records ten control-register writes. Manual comparison shows the source and target RAMBAR encodings differ; target ACR/CACR facilities exist despite QEMU model gaps. Reset-vector fetch, external edge-sensitive level 7, adaptation selection, wider runtime coverage, and physical behavior remain open.
+[WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md) is in review in draft [PR #12](https://github.com/repeat98/octamachine/pull/12) on `work/wp-06-coldfire-compatibility`; its `scaffold` and GitGuardian checks pass. The [report](reports/WP-06-coldfire.md) and firmware-free probes compare selected MCF5206E/CFV4e arithmetic, exception, privilege, level-4 interrupt-mask, VBR, EUSP, and startup MOVEC behavior. Sanitized Gearmulator summaries now cover a 1,000,000-instruction startup prefix and two representative `0x10` scenarios (about 560 million source instructions each); these are model-only profiles and do not compare firmware instructions with the target CPU. Manual comparison shows the source and target RAMBAR encodings differ; target ACR/CACR facilities exist despite QEMU model gaps. Reset-vector fetch, external edge-sensitive level 7, startup operand mapping, broader runtime coverage, and physical behavior remain open.
 
-- [x] Reproduce the first 100,000 executed Machinedrum startup instructions as a sanitized Gearmulator summary; the local firmware and raw traces remain private.
+- [x] Reproduce the first 1,000,000 executed Machinedrum startup instructions as a sanitized Gearmulator summary; local firmware and raw traces remain private.
 - [x] Compare selected arithmetic, stack, trap/RTE, and privilege behavior on the `m5206` and `cfv4e` QEMU CPU models.
-- [ ] Resolve reset-vector fetch and external level-7 comparisons, check adaptation mechanisms against target facilities and privilege, and extend runtime coverage.
+- [x] Profile one `0x10` engine scenario and one trigger/encoder scenario with aggregate ColdFire and descriptor-handler-range counts; raw outputs remain private.
+- [ ] Map startup register operands/effects and check adaptation mechanisms against the accepted target memory map and privilege rules; extend runtime coverage beyond these scenarios.
+- [ ] Resolve reset-vector fetch and external level-7 comparisons or preserve their explicit hardware/model limits.
 - [ ] Establish physical CPU/control-register behavior.
+
+[WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md) remains `in_review` in draft [PR #13](https://github.com/repeat98/octamachine/pull/13). Its packet-level source/target map evidence is complete, but the proposed alias and peripheral mappings have not been implemented or tested in octemu; physical decode and clock measurements remain unavailable.
+
+[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is `in_review` on pushed branch `work/wp-08-dsp-payload-inventory`; its extraction and upload-reconciliation checklist is complete, but a PR has not been opened. The [compare link](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1) is ready. The available GitHub connector returned 403, the saved CLI token is invalid, and the browser is signed out.
 
 ## Gate checklist
 
@@ -97,10 +103,12 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 and WP-05 are accepted, and WP-35's import and c10 follow-up are merged. WP-06's current report bounds the reset-fetch and external level-7 test-board gaps and maps the startup control-register encodings; runtime handler coverage and adaptation selection remain open. WP-07 can now reconcile the source/target memory and peripheral map from accepted WP-04/WP-05 evidence, followed by WP-08's DSP upload inventory. WP-35 remains Gearmulator-only prior evidence and does not replace those packet checks.
+WP-04/WP-05 and WP-35's import/c10 follow-up are accepted. WP-07's evidence is in draft PR #13; WP-08 is pushed with its packet checklist complete but needs a PR through the compare flow. WP-06 now has limited executed coverage in Gearmulator, while adaptation selection still needs startup operand/effect mapping. WP-09 must wait for WP-08 accepted evidence. WP-35 remains Gearmulator-only prior evidence and does not replace those packet checks.
 
-1. [WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md): build the source/target register and address contract from the accepted WP-04 trace, WP-05 target profile, and WP-06 startup register names.
-2. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): extend executed runtime coverage and revisit startup adaptation after WP-07 maps the register effects.
+1. [WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md): review/accept draft PR #13; its map will bound the remaining WP-06 startup register analysis.
+2. [WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md): open a draft PR from the [published branch compare](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1), then obtain review/acceptance.
+3. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): after WP-07's map is accepted, map startup register operands/effects and extend runtime profiles beyond engine `0x10`.
+4. [WP-09 — DSP feasibility](work_packets/WP-09-dsp-feasibility.md): begin after WP-08's evidence is accepted; distinguish the emulator feasibility calculations from later target-DSP measurements.
 
 Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope and explicit file ownership.
 

@@ -81,10 +81,10 @@ MMIO values, firmware bytes, or instruction-by-instruction trace. Keep the
 firmware and Gearmulator build local. The panel-readiness driver runs its cold
 and cached startup checks; the 100,000-instruction cap is reached during the
 cold run, before the later cached phase. `GEARMULATOR_MD_EXEC_SUMMARY_LIMIT`
-can be raised for a longer aggregate, but no longer profile has been reviewed
-in this packet.
+can be raised for a longer aggregate; the 1,000,000-instruction summary and
+two representative runtime scenarios are recorded in the [WP-06 report](../../../docs/reports/WP-06-coldfire.md).
 
-The source startup profile is a Gearmulator observation. It does not exercise
-the Octatrack QEMU board or prove hardware compatibility. In particular, QEMU's
-`an5206 -kernel` path starts directly at the ELF entry; reset-vector behavior
-remains unresolved.
+The startup and runtime profiles observe Gearmulator only. They do not exercise
+the Octatrack QEMU board or prove hardware compatibility. In particular,
+QEMU's `an5206 -kernel` path starts directly at the ELF entry; reset-vector
+behavior remains unresolved.
