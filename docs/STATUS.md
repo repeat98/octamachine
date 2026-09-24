@@ -80,7 +80,7 @@ No new firmware execution or hardware checkpoint is established by this profile 
 
 [WP-07 — Memory, MMIO, and clock](work_packets/WP-07-memory-and-mmio.md) is in review in draft [PR #13](https://github.com/repeat98/octamachine/pull/13) on `work/wp-07-memory-and-mmio`. Its reference report resolves the Gearmulator HI08 map and bounds SRAM/clock differences; target alias probes and physical measurements remain open. Keep the PR draft while G1 architecture evidence is incomplete.
 
-[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review on `work/wp-08-dsp-payload-inventory`. Its report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. Keep its PR draft pending review and G1 architecture evidence.
+[WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is in review on pushed branch `work/wp-08-dsp-payload-inventory`; evidence commit `eb7d041`. Its report and local verifier reconcile both private HI08 upload streams with decoded load records in two independent traces; payload values remain local. PR creation is blocked by unavailable GitHub write access; [the compare link](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1) is ready. Keep the PR draft once opened while G1 architecture evidence remains incomplete.
 
 ## Gate checklist
 
@@ -96,7 +96,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08's evidence is delivered for review; WP-06 and WP-07 remain draft G1 work, and WP-35 remains prior Gearmulator evidence rather than a substitute for packet acceptance.
+WP-04 and WP-05 are accepted; WP-35's import and c10 follow-up are merged. G0 is complete. WP-08's evidence is delivered on its pushed branch while draft PR creation awaits GitHub write access; WP-06 and WP-07 remain draft G1 work, and WP-35 remains prior Gearmulator evidence rather than a substitute for packet acceptance.
 
 1. [WP-06 — ColdFire compatibility](work_packets/WP-06-coldfire-compatibility.md): continue target control-register/privilege checks and runtime coverage while keeping reset and physical level-7 limits explicit.
 2. [WP-09 — DSP feasibility](work_packets/WP-09-dsp-feasibility.md): assess whether the source DSP images, external-memory execution, and sample footprint can fit a realizable Octatrack architecture using the WP-35 candidate ledger and WP-08 verified payload inventory.
@@ -109,7 +109,7 @@ Use the [handoff template](templates/AGENT_HANDOFF.md) with one packet's scope a
 
 | Item | Current evidence | Owner / next action |
 | --- | --- | --- |
-| Source reproduction and reference startup | WP-01 records recursive revisions and clean builds; WP-04 records repeated MD startup traces/checkpoints in Gearmulator; WP-05 records accepted unchanged OS 1.40C reaching `PTCH` and a scripted panel response in octemu | Continue WP-06 and begin WP-09; neither emulator establishes physical parity |
+| Source reproduction and reference startup | WP-01 records recursive revisions and clean builds; WP-04 records repeated MD startup traces/checkpoints in Gearmulator; WP-05 records accepted unchanged OS 1.40C reaching `PTCH` and a scripted panel response in octemu | Continue WP-06; WP-09 can prepare from WP-08 evidence once its dependency is accepted. Neither emulator establishes physical parity |
 | Exact target profile | WP-02 documents octemu's Octatrack MKII/MCF54455 profile; WP-05 verifies the OS 1.40C distribution archive pin and boots the extracted image. Physical board/carrier identity remains unavailable | Keep the hardware profile provisional; physical identification stays open for later hardware gates |
 | Octatrack panel response | measured (octemu only) | A bounded windowed run accepted PLAY and STOP; the panel screenshot shows a PLAY indicator and lit sequencer lamp. This is one scripted path, not full control coverage. See [WP-05](reports/WP-05-ot-baseline.md). | [WP-05](work_packets/WP-05-octatrack-baseline.md), [WP-18](work_packets/WP-18-panel-protocol.md), [WP-20](work_packets/WP-20-control-surface.md) |
 | Source map disagreements | [WP-07](https://github.com/repeat98/octamachine/pull/13) draft resolves the Gearmulator reference HI08 windows and NXP SRAM size; the physical board clock/decode remain unmeasured | Keep WP-07 draft until G1 evidence/review; use its source map for WP-08 without claiming physical decode |
