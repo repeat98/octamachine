@@ -1,12 +1,12 @@
 # WP-07 — Reconcile memory, MMIO, and clock contracts
 
-- Status: `in_review`
+- Status: `done`
 - Owner: Codex
 - Branch: `work/wp-07-memory-and-mmio`
 - Updated: 2026-09-24
 - Depends on: [WP-04](WP-04-machinedrum-baseline.md), [WP-05](WP-05-octatrack-baseline.md)
 - Gate: G1
-- Accepted delivery: pending review; [PR #13 ready for review](https://github.com/repeat98/octamachine/pull/13)
+- Accepted delivery: [PR #13 squash-merged as 5184aa20cada2a949354874f77c58b3e440a84eb](https://github.com/repeat98/octamachine/pull/13)
 
 ## Result
 
@@ -32,13 +32,13 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled the accepted WP-05 baseline, traced source MMIO by address/direction/width through cold and cached idle, bounded source-map and clock disagreements against pinned models and NXP manuals, documented a proposed target alias/peripheral plan, and re-audited the report against its four acceptance criteria and cited manuals.
-- Remaining: PR acceptance and physical Machinedrum/Octatrack measurements. The mapping plan has not been implemented or probed in octemu.
-- Next action: PR #13 is ready for review following maintainer action; keep WP-07 in review and unmerged while G1 architecture evidence remains incomplete. Continue WP-08 from accepted `main`.
-- Waiting on: None for this documentation packet; physical board identity is needed for the remaining hardware measurements.
-- Blockers: No physical board/schematic is available, so physical HI08 decode, the `MBAR+0x1003` signal, and the host clock cannot be verified.
-- Evidence: [WP-07 memory/MMIO report](../reports/WP-07-memory-mmio.md), WP-04 trace summary and private full traces, MCF5206E and MCF54455 primary manuals, and the pinned octemu board source. Raw firmware-dependent traces remain private.
-- Delivery: [PR #13](https://github.com/repeat98/octamachine/pull/13) is open and ready for review on `work/wp-07-memory-and-mmio`; packet evidence is complete, but no review decision is recorded, G1 remains open, and delivery is not merged.
+- Completed: All four WP-07 documentation acceptance criteria are complete. PR #13 was explicitly authorized for merge and squash-merged as 5184aa20cada2a949354874f77c58b3e440a84eb. The report stays bounded to Gearmulator observations, pinned model behavior, and NXP documentation; its target alias and peripheral plan was not implemented or probed.
+- Remaining: G1 is open. Alias coherence, code/vector/stack execution, MMIO guards, the HI08-to-HDI24 bridge, and physical clock/decode require later implementation or hardware evidence beyond this documentation packet.
+- Next action: Continue WP-06's unchecked adaptation assessment using the accepted map. Continue DSP feasibility only after WP-08's accepted delivery; PR #13's merge does not clear G1.
+- Waiting on: None for WP-07's packet criteria.
+- Blockers: Physical board identity and schematic access are unavailable, so physical HI08 decode, the MBAR+0x1003 signal, and host clock remain unverified.
+- Evidence: [WP-07 memory/MMIO report](../reports/WP-07-memory-mmio.md), WP-04 trace summary and private full traces, MCF5206E and MCF54455 primary manuals, and pinned octemu board source. Raw firmware-dependent traces remain private.
+- Delivery: [PR #13](https://github.com/repeat98/octamachine/pull/13) squash-merged as 5184aa20cada2a949354874f77c58b3e440a84eb on 2026-09-24. This closes WP-07's documentation packet; it does not establish target implementation or G1 acceptance.
 
 ## Prompt history
 
@@ -146,3 +146,23 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: maintainer review/acceptance and G1 evidence are pending. Independent WP-08 work can proceed.
 - Next action: continue WP-08 from accepted `main`; return to WP-06 startup-register analysis after the WP-07 map is accepted.
 - Delivery: this reconciliation is committed and pushed on the existing PR #13 branch.
+
+### 2026-09-24 / prompt 5 — reconcile authorized PR #13 merge
+
+- Request: Reconcile the completed WP-07 delivery after the user explicitly authorized merging all open pull requests; keep packet completion separate from G1 acceptance.
+- Starting state -> ending state: in_review -> done; all four WP-07 documentation criteria were already evidenced, and PR #13 is now squash-merged.
+- Owner / branch: Codex / work/wp-07-memory-and-mmio; merge reconciliation recorded while integrating PR #13 into the current WP-06 branch.
+- Completed:
+  - [x] Confirmed PR #13 was squash-merged as 5184aa20cada2a949354874f77c58b3e440a84eb on 2026-09-24.
+  - [x] Marked the packet done because all four documentation-scope acceptance items and its definition of done are satisfied.
+  - [x] Updated project status and the compatibility matrix to cite the accepted report and merged delivery.
+  - [x] Kept G1, physical measurements, and later alias/bridge implementation work open.
+- Remaining:
+  - [ ] Map actual source startup-register effects against the accepted map under WP-06; keep its adaptation item open until evidence supports a mechanism.
+  - [ ] Continue WP-08/WP-09 DSP feasibility without treating the WP-07 merge as proof of target execution.
+- Changed files: docs/work_packets/WP-07-memory-and-mmio.md; docs/STATUS.md; docs/COMPATIBILITY_MATRIX.md; docs/RESEARCH_LOG.md; docs/work_packets/WP-06-coldfire-compatibility.md.
+- Verification: PR #13 merge state and SHA were confirmed through GitHub. The reconciled WP-06 branch passed make check (nine reference validations, Python compilation, and 20 tests) and git diff --check.
+- Findings: PR acceptance closes the bounded documentation packet only. No alias probe, physical clock/decode measurement, or target boot was added.
+- Blockers: Physical Machinedrum/Octatrack identity and access remain unavailable.
+- Next action: Hand off the updated WP-06 branch with PRs #12 and #14 open. The next owner should verify the pushed head and required checks, then decide whether to proceed with the separately authorized merges. Keep G1 unchecked.
+- Delivery: This reconciliation is included in the current WP-06 branch update.
