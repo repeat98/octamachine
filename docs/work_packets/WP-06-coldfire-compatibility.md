@@ -31,8 +31,8 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix and two representative `0x10` Gearmulator scenarios; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, and MOVEC probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
-- Remaining: Broader runtime coverage across engines and memory behaviors; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
+- Completed: Reconciled WP-05 as accepted; profiled a sanitized 1,000,000-instruction startup prefix plus four assignment/eight-hit scenarios and six trigger/encoder scenarios across GND, TRX, EFM, E12, and P-I engine families; added independent `m5206`/`cfv4e` instruction, exception, VBR, EUSP, MOVEC, alignment, and byte-order probes; documented QEMU model gaps and reset/interrupt limits in the [WP-06 report](../reports/WP-06-coldfire.md).
+- Remaining: Broader runtime coverage beyond the five sampled engine families; atomic/cache/self-modifying-code and device-memory behavior; map the startup register operands and effects before selecting an adaptation; physical level-7 and reset-vector behavior.
 - Next action: After WP-07's memory/MMIO map is accepted, use its target map to revisit the source startup register effects and check adaptation candidates against target facilities and privilege; retain level 7 and reset-vector fetch as explicit model/hardware limits.
 - Waiting on: WP-07's map is available in draft PR #13 and awaits review/acceptance; WP-04 and WP-05 prerequisites are accepted.
 - Blockers: Physical reset, interrupt, and register behavior cannot be confirmed without the actual target hardware. The target MCF54455 manual documents RAMBAR at a different MOVEC encoding from the MCF5206E and no source MBAR encoding; exact firmware operands/effects remain unrecorded. QEMU also lacks faithful models for these paths.
@@ -123,5 +123,35 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: WP-07's memory/MMIO packet remains in draft PR #13; WP-08 is pushed but the PR flow was previously blocked by GitHub connector 403, invalid CLI token, and signed-out browser. Physical target and external level-7 stimulus remain unavailable.
 - Next action: use WP-07's reviewed map before mapping the startup operands/effects or choosing any control-register adaptation; extend bounded profiles across additional engines once this dependency is accepted. WP-08 still needs a draft PR from its compare link before WP-09 can rely on accepted evidence.
 - Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); keep it draft with the adaptation and physical gates open.
+
+### 2026-09-24 / prompt 4 — extend profiles across engine families
+
+- Request: continue WP-06 runtime coverage across representative Machinedrum engine families while preserving private firmware-derived traces.
+- Starting state → ending state: `in_review` → `in_review`; the runtime evidence broadens, while the adaptation and physical-hardware criteria remain open.
+- Owner / branch: Codex / `work/wp-06-coldfire-compatibility`, based on the pushed WP-06 branch head from prompt 3.
+- Completed:
+  - [x] Ran separate assignment/eight-hit profiles for TRX-SD (`0x11`), EFM-BD (`0x20`), and E12-BD (`0x30`); all exited 0 below the 1,000,000,000-instruction summary ceiling at 562,231,801; 562,249,453; and 562,158,592 instructions respectively.
+  - [x] Ran trace scenarios for GND-SN (`0x01`), TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD (`0x20`), E12-BD (`0x30`), and P-I-BD (`0x40`). Each exited 0 below the ceiling and the safe call-file aggregation reported 3,440–3,600 entries across two handler/return buckets per scenario.
+  - [x] Kept detailed host/link/memory traces, firmware-derived addresses, and raw call rows under `/private/tmp`; only aggregate counters are included in the report.
+  - [x] Confirmed the profiles cover five core engine families but do not identify all 44 descriptor handlers or compare the source instruction stream against the target CPU.
+  - [x] Added `alignment_endian.S` to the firmware-free probe runner; both `m5206` and `cfv4e` match on aligned/odd byte, word, and long accesses and odd-address long-store readback.
+  - [x] Tried to update the PR #12 description to reflect the new branch evidence; GitHub API returned 403 `Resource not accessible by integration`, so the PR body remains older than the branch/report.
+- Remaining:
+  - [ ] Extend coverage beyond the five sampled core engine families and test atomic instructions, cache behavior, and self-modifying code where supported by bounded probes.
+  - [ ] Establish physical and device-memory alignment/byte-order behavior.
+  - [ ] Map startup register operands/effects against WP-07's reviewed target map before selecting a patch or supervisor shim.
+  - [ ] Resolve reset-vector fetch, external edge-sensitive level 7, and physical CPU behavior with a suitable board/hardware path.
+- Changed files: `docs/reports/WP-06-coldfire.md`; this packet; `docs/STATUS.md`; `docs/COMPATIBILITY_MATRIX.md`; `docs/RESEARCH_LOG.md`; `tests/probes/wp06/alignment_endian.S`; `tests/probes/wp06/run.py`; `tests/probes/wp06/README.md`.
+- Verification:
+  - `md_profile <local OS 1.63 image> <private output> 0x11`, `0x20`, and `0x30`, each with `GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000` — all exited 0 below the cap.
+  - `md_profile <local OS 1.63 image> <private output> trace=0x01`, `trace=0x10`, `trace=0x11`, `trace=0x20`, `trace=0x30`, and `trace=0x40`, each with the same summary ceiling — all exited 0 below the cap; safe `awk` aggregation printed only unique-PC count, bucket count, and aggregate handler calls.
+  - `python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` — passed. Both QEMU CPUs returned byte `0x12`, words `0x1234`/`0x3456`, longs `0x12345678`/`0x34567800`, and odd-store readback `0xa1b2c3d4`.
+  - `make check` — passed: nine reference validations, Python compilation, 20 tests.
+  - `git diff --check` — passed.
+  - PR #12 remained open/draft at the pushed head `128730dd758cae6f430849bf96daaf0e7743afc5`. Its GitHub API description update attempt was denied with 403; no branch or PR content was rewritten.
+- Findings: one-engine source summaries exercise a long common host runtime for all tested IDs; `trace=` scenarios also enter the instrumented handler range. Each output contained two handler/return buckets, so these aggregate counts do not prove broad descriptor-handler coverage. The two QEMU models agree on the tested odd-address data accesses and big-endian values; this is not physical evidence. All firmware profiles remain Gearmulator-only.
+- Blockers: GitHub integration cannot edit PR metadata (403); the published branch and report are current but the PR body remains stale. The WP-07 map awaits review in draft PR #13; physical hardware/reset/level-7 evidence is unavailable.
+- Next action: run bounded firmware-free probes for atomic/cache behavior where supported, then return to startup register adaptation after WP-07's map is accepted. Keep the PR body limitation explicit until GitHub write access is available.
+- Delivery: enclosing commit updates draft [PR #12](https://github.com/repeat98/octamachine/pull/12); the PR description could not be synchronized due to the documented 403.
 
 2026-09-23: [WP-35](WP-35-octamad-md-import.md) linked prior evidence in the current handoff. That was not a work prompt on this packet, and it changed no status or checklist item.

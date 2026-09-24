@@ -50,10 +50,14 @@ patch was applied in a separate Gearmulator clone at the revisions above,
 after WP-04 patches `0001`/`0002`. WP-35's host-trace and DSP execution-hook
 patches were applied only for `md_profile`; the resulting `md_profile` and
 `mdPanelReadinessFirmwareTest` binaries were built locally. The startup driver
-was run with a 1,000,000-instruction summary limit. The two WP-35 profile
-scenarios were each run with a 1,000,000,000-instruction ceiling and the local
-Machinedrum OS 1.63 image. Output directories, firmware, detailed DSP/host
-traces, and address-bearing handler rows remain under `/private/tmp`.
+was run with a 1,000,000-instruction summary limit. The single-engine
+assignment/eight-hit profile ran for TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD
+(`0x20`), and E12-BD (`0x30`). The trace profile ran for GND-SN (`0x01`),
+TRX-BD (`0x10`), TRX-SD (`0x11`), EFM-BD (`0x20`), E12-BD (`0x30`), and
+P-I-BD (`0x40`). Each scenario used a 1,000,000,000-instruction counter
+ceiling and the local Machinedrum OS 1.63 image. Output directories, firmware,
+detailed DSP/host traces, and address-bearing handler rows remain under
+`/private/tmp`.
 
 The scenarios are reproducible with the local image and binaries as follows;
 all destinations must be created first. The capture directories are private
@@ -74,10 +78,15 @@ GEARMULATOR_MD_EXEC_SUMMARY=/private/tmp/wp06-exec-summary-engine10.txt \
   /path/to/md_profile /path/to/local-md-os-1.63.bin \
   /private/tmp/wp06-md-profile-engine10 0x10
 GEARMULATOR_MD_EXEC_SUMMARY=/private/tmp/wp06-exec-summary-trace10.txt \
-  GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
+GEARMULATOR_MD_EXEC_SUMMARY_LIMIT=1000000000 \
   /path/to/md_profile /path/to/local-md-os-1.63.bin \
   /private/tmp/wp06-md-profile-trace10 trace=0x10
 ```
+
+Repeat the trace invocation with `trace=0x01`, `trace=0x11`, `trace=0x20`,
+`trace=0x30`, and `trace=0x40` to run the other listed engine families. The
+single-engine profile uses the corresponding bare engine ID instead of
+`trace=<id>`.
 
 The startup readiness driver exited 0 after its cold and cached checks. Its
 summary reached the 1,000,000 instruction cap and reported 10 `MOVEC` writes
@@ -87,17 +96,25 @@ instructions in that prefix.
 
 | Gearmulator scenario | Executed instructions | Aggregate CPU summary | Result |
 | --- | ---: | --- | --- |
-| Machine `0x10`, assigned to track 1, eight trigger hits | 562,290,551 | `MOVEC`-to 24 (VBR/CACR ×6 each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each); `RTE` 139,161; `TRAP` 12; move-to-SR 1,030,050; move-from-SR 77,568; RESET 0; STOP 0; other control writes 0 | Completed below the ceiling; aggregate output only |
-| `trace=0x10`: assignment, trigger, encoder A +10, second trigger | 559,651,805 | `MOVEC`-to 24 (VBR/CACR ×6 each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each); `RTE` 137,761; `TRAP` 6; move-to-SR 1,013,716; move-from-SR 77,254; RESET 0; STOP 0; other control writes 0 | Completed below the ceiling; 3,440 descriptor-handler-range entries across two handler/return buckets |
+| Single-engine `0x10` assignment/eight hits | 562,290,551 | `RTE` 139,161; `TRAP` 12; move-to-SR 1,030,050; move-from-SR 77,568 | Completed below the ceiling; aggregate output only |
+| Single-engine `0x11`, `0x20`, `0x30` assignment/eight hits | 562,231,801; 562,249,453; 562,158,592 | `RTE` 139,231; 139,272; 139,236; `TRAP` 12 in each | All completed below the ceiling; aggregate output only |
+| `trace=0x01` (GND-SN) | 559,631,603 | `RTE` 137,933; `TRAP` 6; 3,472 handler-range entries | Completed below ceiling; two handler/return buckets |
+| `trace=0x10` (TRX-BD) | 559,651,805 | `RTE` 137,761; `TRAP` 6; 3,440 handler-range entries | Completed below ceiling; two handler/return buckets |
+| `trace=0x11` (TRX-SD) | 559,752,802 | `RTE` 137,876; `TRAP` 6; 3,584 handler-range entries | Completed below ceiling; two handler/return buckets |
+| `trace=0x20` (EFM-BD) | 559,750,509 | `RTE` 137,921; `TRAP` 6; 3,552 handler-range entries | Completed below ceiling; two handler/return buckets |
+| `trace=0x30` (E12-BD) | 559,692,448 | `RTE` 137,847; `TRAP` 6; 3,488 handler-range entries | Completed below ceiling; two handler/return buckets |
+| `trace=0x40` (P-I-BD) | 559,777,600 | `RTE` 137,918; `TRAP` 6; 3,600 handler-range entries | Completed below ceiling; two handler/return buckets |
 
-The trace counter records transitions into the source descriptor-handler PC
-range and groups them by handler and return address. Only the aggregate count
-is reported here; no address rows are published. These profiles establish
-executed behavior for two Gearmulator scenarios, including `RTE`, `TRAP`, and
-status-register operations beyond the startup prefix. They do not measure
-every engine, every executed opcode, cache/alignment behavior, or the target
-ColdFire. The handler count is instrumentation of a source address range, not
-a complete inventory of distinct firmware handlers.
+All six trace scenarios also recorded 24 `MOVEC`-to operations (VBR/CACR ×6
+each, ACR0/1 ×4 each, RAMBAR/MBAR ×2 each), around 1.014 million move-to-SR
+operations, around 77 thousand move-from-SR operations, and no RESET, STOP, or
+other counted control-register writes. The trace counter records transitions
+into the source descriptor-handler PC range and groups them by handler and
+return address. Only aggregate counts are reported; no address rows are
+published. The scenarios establish source-model execution across five core
+engine families, but do not attribute the observed handler buckets to each
+engine descriptor, measure every engine/opcode, cover cache/alignment
+behavior, or run code on the target ColdFire.
 
 ## Independent CPU-model probe
 
@@ -135,6 +152,16 @@ the timer request is pending without entering its handler, then lowers SR.I to
 AN5206 board does not expose the MCF5206E external edge-sensitive level-7
 input, so the manual's unmaskable-level-7 special case remains untested.
 
+The new firmware-free `alignment_endian.S` probe writes `0x12345678` at an
+even address, then reads a byte, aligned/odd words, aligned/odd longs, and
+round-trips `0xa1b2c3d4` through an odd-address long store. Both `m5206` and
+`cfv4e` return the expected big-endian values: byte `0x12`, words `0x1234` and
+`0x3456`, longs `0x12345678` and `0x34567800`, and odd-store readback
+`0xa1b2c3d4`. The probe catches bus/address errors and returns a distinct
+failure marker. This establishes only the pinned QEMU models' behavior for
+these synthetic RAM accesses; it does not establish physical bus timing or
+all device-memory alignment rules.
+
 ## Findings and classification
 
 | Behavior | Evidence and result | Classification |
@@ -146,7 +173,8 @@ input, so the manual's unmaskable-level-7 special case remains untested.
 | RAMBAR and MBAR | Actual MCF5206E startup writes RAMBAR at MOVEC Rc `0xC04` and MBAR at `0xC0F`, once each. The MCF54455 manual documents its single SRAM RAMBAR at Rc `0xC05`; its core register table does not list the source MBAR encoding. Separate synthetic target ELFs execute the preceding ACR writes and make QEMU abort on source Rc `0xC04` and `0xC0F`. | **Register-map mismatch plus model gap.** The target has a RAMBAR facility, but not at the source encoding. Whether the source writes can be removed or translated depends on their operands and effects, which have not been recorded publicly; WP-07 must map these writes before selecting an adaptation. |
 | Reset and vector fetch | WP-04 records the Gearmulator reset checkpoint. The MCF54455 manual specifies SSP from address `0x00000000` and PC from `0x00000004` on reset. In the pinned QEMU CPU reset path, PC is set to zero with a TODO to fetch it; `an5206 -kernel` bypasses this path and starts at the ELF entry. A `system_reset` attempt did not reach the expected vector entry. | **Unresolved in QEMU.** No reset-vector equivalence claim. |
 | Interrupt masking and priority | Synthetic level-4 timer probe: with SR.I=5, the timer request is pending and no handler runs; lowering SR.I to 3 delivers exactly one handler. Both QEMU CPU models match. Both processor manuals document the non-maskable, edge-sensitive level-7 exception. In the pinned QEMU source, interrupt acceptance uses only `SR.I < pending_level`; `m68k_set_irq_level` stores a level and clears it when lowered, without an edge latch. The Octatrack board wires modeled device sources through two INTCs and exposes no separate external level-7 input. | **Measured for level 4; level 7 is a QEMU model gap and has no board stimulus.** Hardware interrupt behavior remains unresolved. |
-| Alignment, endianness, atomic operations, cache effects, and self-modifying code | Not exercised by the startup prefix or the current probe, beyond VBR alignment. | **Unresolved.** |
+| Data alignment and byte order | New synthetic probe performs aligned and odd-address byte/word/long RAM reads and an odd-address long write. `m5206` and `cfv4e` both produce the same expected big-endian values. | **Direct in these QEMU RAM cases.** Physical behavior and device-memory accesses remain unmeasured. |
+| Atomic operations, cache effects, and self-modifying code | Not exercised by the startup prefix, the selected engine traces, or the synthetic probes. | **Unresolved.** |
 
 ### Exception and privilege details
 
@@ -204,9 +232,9 @@ boards therefore cannot reproduce the manual's external edge-latched case.
   handling in supervisor mode. No safe patch site or complete mechanism is
   selected in WP-06; architecture selection remains in WP-10.
 - **Unresolved:** reset-vector fetch, external edge-sensitive level-7 behavior,
-  representative executed runtime/engine instruction coverage, data
-  alignment/endian/atomic behavior, cache/self-modifying-code behavior, and
-  physical target behavior.
+  broad executed runtime/engine instruction coverage, atomic operations,
+  cache/self-modifying-code behavior, device-memory alignment, and physical
+  target behavior.
 
 No physical Machinedrum or Octatrack was tested. No trap patch, instruction
 relocation, or runtime control-register shim was implemented. The candidate
@@ -224,6 +252,6 @@ rules above; selecting and implementing one remains open for WP-10.
 
 ## Verification and remaining work
 
-`python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target also built and both `0x10` scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
+`python3 tests/probes/wp06/run.py --cc /opt/homebrew/bin/m68k-elf-gcc --qemu /private/tmp/octamachine-md-import/vendor/octemu/vendor/qemu/build/qemu-system-m68k` passed, including the level-4 SR.I test. The source summary patch passed a clean-apply dry run against the WP-04 Gearmulator source tree; its instrumented driver rebuilt and exited 0 with the cold/cached readiness checks. On an isolated clone at Gearmulator `8cea0524a75435122c20b669ca114c9ac6509ba2` with recursive `mc68k` `ace95b3d0a5a332db147244762dda65f9a010b9f`, the JIT `md_profile` target built and all listed engine scenarios completed below the 1,000,000,000-instruction summary ceiling. Their aggregate totals are recorded above; raw trace products remain private. `make check` passed: nine reference validations, Python script compilation, and 20 tests.
 
-WP-06 remains `in_review`. The one-million startup prefix and two `0x10` scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.
+WP-06 remains `in_review`. The one-million startup prefix and ten engine scenarios extend only Gearmulator-side coverage. External level-7 stimulus is absent from the pinned test-board interfaces; reset-vector fetch is bypassed by the ELF loader and absent from the pinned CPU reset implementation. Register adaptation still depends on mapping the source operands/effects against WP-07's reviewed memory map. No physical CPU or register behavior is established.

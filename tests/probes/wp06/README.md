@@ -31,6 +31,11 @@ firmware-free result block. A normal trap uses an eight-byte frame and `RTE`
 restores the pre-trap stack pointer. A user-mode VBR write takes a privilege
 exception.
 
+`alignment_endian.S` checks aligned and odd-address byte, word, and long RAM
+accesses, including an odd-address long store. Both CPU models return the
+expected big-endian values for the synthetic data. This is a QEMU RAM result;
+it does not establish physical or MMIO alignment behavior.
+
 `interrupt_mask.S` uses the AN5206 model's timer source at level 4. With SR.I
 set to 5, it confirms that the timer is pending while the handler count remains
 zero; lowering SR.I to 3 delivers exactly one interrupt. The `m5206` and

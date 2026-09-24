@@ -49,6 +49,15 @@ IRQ_FIELDS = (
     "timer_status_before_unmask",
     "handler_count_after_unmask",
 )
+ALIGNMENT_FIELDS = (
+    "result",
+    "byte_at_base",
+    "word_at_even_address",
+    "word_at_odd_address",
+    "long_at_even_address",
+    "long_at_odd_address",
+    "long_store_readback_at_odd_address",
+)
 
 
 class Monitor:
@@ -211,6 +220,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="wp06-") as temp_name:
         temp_dir = Path(temp_name)
         elf = temp_dir / "cpu_compat.elf"
+        alignment_elf = temp_dir / "alignment_endian.elf"
         stack_device_elf = temp_dir / "stack_eusp_device_bit.elf"
         stack_emulator_elf = temp_dir / "stack_eusp_emulator_bit.elf"
         irq_elf = temp_dir / "interrupt_mask.elf"
@@ -226,6 +236,16 @@ def main() -> int:
             str(PROBE),
         ]
         subprocess.run(build, check=True, cwd=ROOT)
+        alignment_build = [
+            args.cc,
+            "-mcpu=5206e",
+            "-nostdlib",
+            f"-Wl,-T,{LINKER_SCRIPT}",
+            "-o",
+            str(alignment_elf),
+            str(Path(__file__).with_name("alignment_endian.S")),
+        ]
+        subprocess.run(alignment_build, check=True, cwd=ROOT)
         irq_build = [
             args.cc,
             "-mcpu=5206e",
@@ -265,6 +285,10 @@ def main() -> int:
             cpu: run_cpu(args.qemu, elf, cpu)
             for cpu in ("m5206", "cfv4e")
         }
+        alignment_results = {
+            cpu: run_cpu(args.qemu, alignment_elf, cpu, ALIGNMENT_FIELDS)
+            for cpu in ("m5206", "cfv4e")
+        }
         irq_results = {
             cpu: run_cpu(args.qemu, irq_elf, cpu, IRQ_FIELDS)
             for cpu in ("m5206", "cfv4e")
@@ -282,6 +306,25 @@ def main() -> int:
         print("CPU outputs differ")
         return 1
     print("CPU outputs match")
+    print("data alignment and big-endian memory access:")
+    for cpu, values in alignment_results.items():
+        print(f"{cpu}: {values}")
+    expected_alignment = {
+        "result": SUCCESS,
+        "byte_at_base": 0x12,
+        "word_at_even_address": 0x1234,
+        "word_at_odd_address": 0x3456,
+        "long_at_even_address": 0x12345678,
+        "long_at_odd_address": 0x34567800,
+        "long_store_readback_at_odd_address": 0xA1B2C3D4,
+    }
+    if (
+        alignment_results["m5206"] != expected_alignment
+        or alignment_results["cfv4e"] != expected_alignment
+    ):
+        print("data alignment/byte-order result differed from the expected big-endian values")
+        return 1
+    print("aligned and odd-address byte/word/long operations match on both CPU models")
     print("level-4 timer interrupt with SR.I mask:")
     for cpu, values in irq_results.items():
         print(f"{cpu}: {values}")
