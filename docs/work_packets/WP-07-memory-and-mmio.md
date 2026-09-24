@@ -32,7 +32,7 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 
 ## Current handoff
 
-- Completed: Reconciled the accepted WP-05 baseline, traced source MMIO by address/direction/width through cold and cached idle, bounded source-map and clock disagreements against pinned models and NXP manuals, and documented a proposed target alias/peripheral plan.
+- Completed: Reconciled the accepted WP-05 baseline, traced source MMIO by address/direction/width through cold and cached idle, bounded source-map and clock disagreements against pinned models and NXP manuals, documented a proposed target alias/peripheral plan, and re-audited the report against its four acceptance criteria and cited manuals.
 - Remaining: PR acceptance and physical Machinedrum/Octatrack measurements. The mapping plan has not been implemented or probed in octemu.
 - Next action: Keep PR #13 in draft while G1 architecture evidence remains incomplete; continue WP-08 from accepted `main`.
 - Waiting on: None for this documentation packet; physical board identity is needed for the remaining hardware measurements.
@@ -97,3 +97,28 @@ The shared [definition of done](../PORT_PLAN.md#definition-of-done) also applies
 - Blockers: no PR review decision has been submitted; hardware identity/access is unavailable; alias and bridge probes belong to later implementation work.
 - Next action: keep PR #13 in draft pending review and G1 evidence; continue WP-08 as the next independent packet, then return to WP-06 startup mapping after the WP-07 map is accepted.
 - Delivery: this prompt's packet-history correction and PR status update are delivered by the enclosing commit on the existing draft PR #13 branch.
+
+### 2026-09-24 / prompt 3 — recheck WP-07 review state and source claims
+
+- Request: Continue the queued WP-07 review, reconcile current PR and main state, and identify any supportable report correction.
+- Starting state → ending state: `in_review` → `in_review`; the four packet evidence criteria remain complete, while PR acceptance, G1, target implementation, and physical measurements remain open.
+- Owner / branch: Codex / `work/wp-07-memory-and-mmio`, continuing from PR head `cc481624825cd7e1aa5821f24d4476ef8f8d5610`; `origin/main` remains `148494c212d2d11fd21ad58f56c44b324d4c91bb`.
+- Completed:
+  - [x] Reconciled live PR #12–14 state: all remain open draft PRs with no review decisions; PR #13 is mergeable and its scaffold and GitGuardian checks passed at the audited head.
+  - [x] Rechecked the four WP-07 acceptance items against the report. Source-map and clock claims remain bounded to Gearmulator, source documentation, or PC-side octemu modeling; no target alias execution or physical decode is claimed.
+  - [x] Cross-checked the cited NXP source claims: MCF5206E manual §5.1 specifies 8 KiB SRAM and §6.1 lists 8-, 16-, and 32-bit port sizes; MCF54455 manual §4.3.8 specifies a 64-entry full-associative Harvard TLB with 32-entry instruction and data TLBs. These are silicon documentation, not proof of board configuration or target MMU setup.
+  - [x] Ran `make check`; all nine reference validations, Python compilation, and 20 unit tests passed. `git diff --check` passed before commit.
+  - [x] Updated the packet handoff and project dispatch state to the current PR head and review status.
+- Remaining:
+  - [ ] Obtain maintainer review/acceptance; keep PR #13 in draft while G1 architecture evidence is incomplete.
+  - [ ] Implement and probe alias coherence, code copy/execute, vectors, stack, unknown MMIO, and HI08-to-HDI24 behavior under later packets.
+  - [ ] Measure physical clock, board decode, and SRAM access bounds when board identity and access are available.
+- Changed files: `docs/work_packets/WP-07-memory-and-mmio.md`; `docs/STATUS.md`.
+- Verification:
+  - `make check` — passed: nine reference repositories validated, Python scripts compiled, and 20 tests passed.
+  - PR #13 scaffold checks and GitGuardian — passed at audited head `cc481624825cd7e1aa5821f24d4476ef8f8d5610`; no review decision is present.
+  - No firmware, raw trace, source, target behavior, or hardware was changed or newly measured. Physical and emulator implementation gates remain skipped.
+- Findings: No technical correction was supported by this audit. The delivery is complete for WP-07's documentation criteria, not for G1 or the later implementation and hardware work.
+- Blockers: PR review/acceptance is pending; physical board identity/access is unavailable. These do not prevent independent WP-08 work.
+- Next action: continue WP-08 from accepted `main`; keep WP-07 draft pending review and G1 evidence, then use its reviewed map to bound remaining WP-06 startup-register analysis.
+- Delivery: this prompt's record/status reconciliation is committed and pushed on the existing draft PR #13 branch.
