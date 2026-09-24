@@ -89,6 +89,8 @@ No new firmware execution or hardware checkpoint is established by this profile 
 
 [WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md) remains `in_review` in draft [PR #13](https://github.com/repeat98/octamachine/pull/13). Its packet-level source/target map evidence is complete, but the proposed alias and peripheral mappings have not been implemented or tested in octemu; physical decode and clock measurements remain unavailable.
 
+GitHub merge attempts for PR #12 and PR #13 both returned 403 Resource not accessible by integration; neither was merged. Both remain open and in draft, with their packet criteria and G1 hold still visible.
+
 [WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md) is `in_review` on pushed branch `work/wp-08-dsp-payload-inventory`; its extraction and upload-reconciliation checklist is complete, but a PR has not been opened. The [compare link](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1) is ready. The available GitHub connector returned 403, the saved CLI token is invalid, and the browser is signed out.
 
 ## Gate checklist
@@ -105,7 +107,7 @@ Link the report and accepted revision when checking a gate. Skipped runs do not 
 
 ## Next dispatch queue
 
-WP-04/WP-05 and WP-35's import/c10 follow-up are accepted. WP-07's evidence is in draft PR #13; WP-08 is pushed with its packet checklist complete but needs a PR through the compare flow. WP-06 now has limited executed coverage in Gearmulator, while adaptation selection still needs startup operand/effect mapping. WP-09 must wait for WP-08 accepted evidence. WP-35 remains Gearmulator-only prior evidence and does not replace those packet checks.
+WP-04/WP-05 and WP-35's import/c10 follow-up are accepted. WP-07's evidence is in draft PR #13; WP-08 is pushed with its packet checklist complete but needs a PR through the compare flow. WP-06 now has limited executed coverage in Gearmulator, while adaptation selection still needs startup operand/effect mapping. WP-09 must wait for WP-08 accepted evidence. WP-35 remains Gearmulator-only prior evidence and does not replace those packet checks. The available integration can read but not merge or create pull requests; PRs #12 and #13 remain drafts and WP-08's branch remains without a PR. The local credential also cannot push to origin (403 permission denied to Aquitronic); the WP-06 update is local-only.
 
 1. [WP-07 — Memory and MMIO](work_packets/WP-07-memory-and-mmio.md): review/accept draft PR #13; its map will bound the remaining WP-06 startup register analysis.
 2. [WP-08 — DSP payload inventory](work_packets/WP-08-dsp-payload-inventory.md): open a draft PR from the [published branch compare](https://github.com/repeat98/octamachine/compare/main...work/wp-08-dsp-payload-inventory?expand=1), then obtain review/acceptance.
